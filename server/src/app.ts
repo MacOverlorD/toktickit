@@ -1,5 +1,6 @@
 import cors from 'cors'
-import express from 'express'
+import express, { type ErrorRequestHandler } from 'express'
+import prisma from './prisma.js'
 
 const app = express()
 
@@ -20,5 +21,31 @@ app.get('/api/health', (_request, response) => {
     service: 'TokTickIT API',
   })
 })
+
+app.get('/api/categories', async (_request, response, next) => {
+  try {
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    })
+
+    response.status(200).json(categories)
+  } catch (error) {
+    next(error)
+  }
+})
+
+const errorHandler: ErrorRequestHandler = (_error, _request, response, _next) => {
+  response.status(500).json({
+    error: 'Internal server error',
+  })
+}
+
+app.use(errorHandler)
 
 export default app
