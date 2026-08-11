@@ -14,4 +14,11 @@ app.get('/', (_request, response) => {
   response.json({ service: 'TokTickIT API' })
 })
 
+app.get('/api/health', (_request, response) => {
+  response.status(200).json({
+    status: 'ok',
+    service: 'TokTickIT API',
+  })
+})
+
 export default app
