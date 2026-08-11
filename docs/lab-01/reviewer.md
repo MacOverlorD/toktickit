@@ -1,34 +1,47 @@
 # Peer Review Record
 
-Complete this file when the Issue 1 Pull Request is ready for review.
+## Reviewer
 
 | Field | Details |
 | --- | --- |
 | Reviewer name | SITTHICHAI PHIROMPAN |
 | Student ID | 67070501074 |
 | GitHub username | Bank848 |
-| Reviewed PR | [TokTickIT PR #5](https://github.com/MacOverlorD/toktickit/pull/5) |
 
-## Review Notes
+## Issue 1: Project Foundation
 
-- Reviewer feedback:
+| Field | Details |
+| --- | --- |
+| Pull Request | [TokTickIT PR #5](https://github.com/MacOverlorD/toktickit/pull/5) |
+| Result | Approved and merged |
 
-Nice, clean setup for the foundation PR. Structure makes sense, strict TS on both sides, tests actually run and pass.
+### Reviewer Feedback
 
-A couple small things, not blockers:
+The reviewer confirmed that the project structure was clean, strict TypeScript was configured on both sides, tests ran successfully, no secrets were committed, and the security-related ignore rules looked correct.
 
-You've got .env.example in 3 places (root + client + server) and they're basically the same file copy-pasted. Might be simpler to just keep the two under client/ and server/ and drop the root one.
-schema.prisma is empty right now (no models), guessing that's for a later issue — just flagging in case it wasn't intentional.
-No secrets committed, .gitignore looks right, nothing security-wise jumps out. LGTM, approving.
+The reviewer also noted that `.env.example` existed at the repository root and in both applications, and asked whether the empty `schema.prisma` was intentional.
 
-- Author response:
+### Author Response
 
-Thanks for the thorough review and approval.
+The root `.env.example` is an intentional repository-level reference, while the files under `client/` and `server/` are runtime-specific templates. The empty Prisma schema was also intentional because Issue 1 only required Prisma initialization and database connectivity. The Category model, migration, and seed data belong to Issue 3.
 
-The root .env.example is intentional as a repository-level reference containing the combined environment variables for both applications. The files under client/ and server/ are runtime-specific templates used by each application.
+## Issue 2: API Health Check
 
-The empty schema.prisma is also intentional. Issue 1 only requires Prisma to be initialized and PostgreSQL connectivity to be verified. The Category model, migration, and seed data are scoped to Issue 3, so I left them out of this PR to keep the change focused.
+| Field | Details |
+| --- | --- |
+| Pull Request | [TokTickIT PR #6](https://github.com/MacOverlorD/toktickit/pull/6) |
+| Review status | Follow-up changes prepared; awaiting re-review and approval |
 
-Thanks again for checking. :)
+### Reviewer Feedback
 
-- Approval status: Approved
+- Express returns HTTP 200 by default when `.json()` is used, so the explicit `.status(200)` call is not technically required.
+- The frontend request had no timeout, which could leave the interface in the loading state indefinitely if the API accepted the connection but did not respond.
+- The frontend tests covered the loading, success, and error states.
+- The Issue 1 review record appeared in the Issue 2 PR and should be checked before merging.
+
+### Author Response
+
+- The explicit `.status(200)` is retained because HTTP 200 is part of the documented health endpoint contract and Lab 1 acceptance criteria.
+- An eight-second timeout was added with `AbortController`, together with a Vitest case proving that a timed-out request changes the interface to the offline error state.
+- The positive feedback about the three existing UI states was acknowledged.
+- The Issue 1 review evidence must remain in `docs/lab-01/reviewer.md` for the final Lab 1 submission. The file is now organized into separate Issue 1 and Issue 2 sections so the origin and status of each review are clear.

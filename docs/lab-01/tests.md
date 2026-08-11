@@ -21,5 +21,6 @@
 | UI-02 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | A pending health request displays the loading state and disables the button | Passed |
 | UI-HEALTH-01 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | A valid API response displays `System Status: Online` | Passed |
 | UI-03 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | An unavailable API displays `System Status: Offline` and a useful error | Passed |
+| UI-HEALTH-02 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | A health request that exceeds the timeout is aborted and displays the offline error state | Passed |
 
 Issue 4 will add the category API and category-list UI tests.
