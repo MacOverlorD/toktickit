@@ -1,10 +1,14 @@
 import request from 'supertest'
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
 
 afterAll(async () => {
   await prisma.$disconnect()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('GET /api/categories', () => {
@@ -18,5 +22,19 @@ describe('GET /api/categories', () => {
       { id: 3, name: 'Software' },
       { id: 4, name: 'Network' },
     ])
+  })
+
+  it('returns a JSON error when the database query fails', async () => {
+    vi.spyOn(prisma.category, 'findMany').mockRejectedValueOnce(
+      new Error('Database unavailable'),
+    )
+
+    const response = await request(app).get('/api/categories')
+
+    expect(response.status).toBe(500)
+    expect(response.headers['content-type']).toMatch(/json/)
+    expect(response.body).toEqual({
+      error: 'Internal server error',
+    })
   })
 })

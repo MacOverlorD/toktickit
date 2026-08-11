@@ -28,6 +28,7 @@
 | Test ID | Test file | Tool | Test description | Result |
 | --- | --- | --- | --- | --- |
 | API-02 | `server/tests/lab-01/categories.test.ts` | Vitest + Supertest + Prisma | `GET /api/categories` reads PostgreSQL and returns the four seeded categories in ID order | Passed |
+| API-ERROR-01 | `server/tests/lab-01/categories.test.ts` | Vitest + Supertest | A category database failure returns HTTP 500 with a safe JSON error response | Passed |
 | UI-CATEGORY-01 | `client/tests/lab-01/CategoryList.test.tsx` | Vitest | The category list displays a loading state while the API request is pending | Passed |
 | UI-CATEGORY-02 | `client/tests/lab-01/CategoryList.test.tsx` | Vitest | The UI renders category IDs and names returned by the API rather than hard-coded values | Passed |
 | UI-CATEGORY-03 | `client/tests/lab-01/CategoryList.test.tsx` | Vitest | An API failure displays a useful error and Retry loads the categories on the next request | Passed |

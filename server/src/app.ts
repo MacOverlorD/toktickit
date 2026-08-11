@@ -1,5 +1,5 @@
 import cors from 'cors'
-import express from 'express'
+import express, { type ErrorRequestHandler } from 'express'
 import prisma from './prisma.js'
 
 const app = express()
@@ -39,5 +39,13 @@ app.get('/api/categories', async (_request, response, next) => {
     next(error)
   }
 })
+
+const errorHandler: ErrorRequestHandler = (_error, _request, response, _next) => {
+  response.status(500).json({
+    error: 'Internal server error',
+  })
+}
+
+app.use(errorHandler)
 
 export default app
