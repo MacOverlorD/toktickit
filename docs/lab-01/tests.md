@@ -13,4 +13,13 @@
 | PRISMA-01 | `npx prisma validate` | Prisma | Prisma PostgreSQL schema is initialized and valid | Passed |
 | AUDIT-01 | `npm audit` in client and server | npm | Installed dependencies contain no known audit findings | Passed: 0 vulnerabilities |
 
-Issue 2 and Issue 4 will add the required health, loading, category success, and API failure tests.
+## Issue 2: API Health Check
+
+| Test ID | Test file | Tool | Test description | Result |
+| --- | --- | --- | --- | --- |
+| API-01 | `server/tests/lab-01/health.test.ts` | Vitest + Supertest | `GET /api/health` returns HTTP 200 and the expected JSON | Passed |
+| UI-02 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | A pending health request displays the loading state and disables the button | Passed |
+| UI-HEALTH-01 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | A valid API response displays `System Status: Online` | Passed |
+| UI-03 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | An unavailable API displays `System Status: Offline` and a useful error | Passed |
+
+Issue 4 will add the category API and category-list UI tests.
