@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getCategories, type Category } from './api/categories'
 import { getHealth } from './api/health'
 import CategoryList from './components/CategoryList'
 
@@ -6,12 +7,15 @@ type SystemState = 'idle' | 'loading' | 'online' | 'offline'
 
 function App() {
   const [systemState, setSystemState] = useState<SystemState>('idle')
+  const [categories, setCategories] = useState<Category[]>([])
 
   async function handleSystemCheck() {
     setSystemState('loading')
+    setCategories([])
 
     try {
-      await getHealth()
+      const [, categoryData] = await Promise.all([getHealth(), getCategories()])
+      setCategories(categoryData)
       setSystemState('online')
     } catch {
       setSystemState('offline')
@@ -81,7 +85,19 @@ function App() {
           )}
         </section>
 
-        <CategoryList />
+        {systemState !== 'idle' && (
+          <CategoryList
+            categories={categories}
+            state={
+              systemState === 'online'
+                ? 'success'
+                : systemState === 'offline'
+                  ? 'error'
+                  : 'loading'
+            }
+            onRetry={handleSystemCheck}
+          />
+        )}
       </div>
     </main>
   )

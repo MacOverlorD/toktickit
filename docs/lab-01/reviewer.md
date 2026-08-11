@@ -60,3 +60,18 @@ The reviewer noted that the seed behavior had only been verified manually and su
 ### Author Response
 
 The Lab 1 requirements do not require a dedicated automated seed test, so idempotency was verified by running the seed repeatedly and confirming that the database still contained four categories. Issue 4 adds the required automated category API test against the seeded PostgreSQL data.
+
+## Issue 4: Category List
+
+| Field | Details |
+| --- | --- |
+| Pull Request | [TokTickIT PR #8](https://github.com/MacOverlorD/toktickit/pull/8) |
+| Review status | Follow-up changes implemented; awaiting final approval |
+
+### Reviewer Feedback
+
+The reviewer confirmed that the shared API timeout helper and tests looked solid. The reviewer also noted that category query failures were passed to the default Express error handler, which returned HTML instead of a consistent JSON API error.
+
+### Author Response
+
+A final JSON error-handling middleware was added so internal failures return HTTP 500 with `{ "error": "Internal server error" }`. A Supertest case now verifies the status, content type, and safe response body. The final Check System flow was also aligned with the Lab 1 demo so health and category requests run together and either failure produces the offline state.

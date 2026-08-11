@@ -1,28 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
-import { getCategories, type Category } from '../api/categories'
+import type { Category } from '../api/categories'
 
 type CategoryState = 'loading' | 'success' | 'error'
 
-function CategoryList() {
-  const [categoryState, setCategoryState] = useState<CategoryState>('loading')
-  const [categories, setCategories] = useState<Category[]>([])
+type CategoryListProps = {
+  categories: Category[]
+  state: CategoryState
+  onRetry: () => void
+}
 
-  const loadCategories = useCallback(async () => {
-    setCategoryState('loading')
-
-    try {
-      const data = await getCategories()
-      setCategories(data)
-      setCategoryState('success')
-    } catch {
-      setCategories([])
-      setCategoryState('error')
-    }
-  }, [])
-
-  useEffect(() => {
-    void loadCategories()
-  }, [loadCategories])
+function CategoryList({ categories, state, onRetry }: CategoryListProps) {
 
   return (
     <section className="category-section" aria-labelledby="category-list-title">
@@ -36,19 +22,19 @@ function CategoryList() {
           </p>
         </div>
 
-        {categoryState === 'success' && categories.length > 0 && (
+        {state === 'success' && categories.length > 0 && (
           <span className="category-count">{categories.length} categories</span>
         )}
       </div>
 
-      {categoryState === 'loading' && (
+      {state === 'loading' && (
         <div className="category-state category-loading" role="status">
           <span className="spinner-border spinner-border-sm" aria-hidden="true" />
           <span>Loading request categories...</span>
         </div>
       )}
 
-      {categoryState === 'error' && (
+      {state === 'error' && (
         <div className="category-state category-error" role="alert">
           <div>
             <p className="fw-semibold mb-1">Categories are unavailable</p>
@@ -57,18 +43,18 @@ function CategoryList() {
           <button
             className="btn btn-outline-danger retry-button"
             type="button"
-            onClick={() => void loadCategories()}
+            onClick={onRetry}
           >
             Retry
           </button>
         </div>
       )}
 
-      {categoryState === 'success' && categories.length === 0 && (
+      {state === 'success' && categories.length === 0 && (
         <p className="category-empty mb-0">No request categories are available.</p>
       )}
 
-      {categoryState === 'success' && categories.length > 0 && (
+      {state === 'success' && categories.length > 0 && (
         <ul className="category-list" aria-label="IT request categories">
           {categories.map((category) => (
             <li className="category-item" key={category.id}>

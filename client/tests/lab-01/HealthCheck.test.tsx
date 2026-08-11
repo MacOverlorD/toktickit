@@ -33,10 +33,14 @@ describe('system health check', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check System' }))
 
     expect(screen.getByText('Loading system status...')).toBeInTheDocument()
+    expect(screen.getByText('Loading request categories...')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Checking...' })).toBeDisabled()
   })
 
   it('shows Online after a valid health response', async () => {
+    vi.mocked(getCategories).mockResolvedValue([
+      { id: 41, name: 'Identity Services' },
+    ])
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -51,6 +55,8 @@ describe('system health check', () => {
 
     expect(await screen.findByText('Online')).toBeInTheDocument()
     expect(screen.getByText('Connected to TokTickIT API.')).toBeInTheDocument()
+    expect(screen.getByText('Identity Services')).toBeInTheDocument()
+    expect(getCategories).toHaveBeenCalledOnce()
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3000/api/health',
       expect.objectContaining({ signal: expect.anything() }),
@@ -64,9 +70,28 @@ describe('system health check', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check System' }))
 
     expect(await screen.findByText('Offline')).toBeInTheDocument()
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Unable to connect to TokTickIT API.',
+    expect(screen.getByText('Unable to connect to TokTickIT API.')).toBeInTheDocument()
+  })
+
+  it('shows Offline when the category database request fails', async () => {
+    vi.mocked(getCategories).mockRejectedValue(new Error('Database unavailable'))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          status: 'ok',
+          service: 'TokTickIT API',
+        }),
+      }),
     )
+
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Check System' }))
+
+    expect(await screen.findByText('Offline')).toBeInTheDocument()
+    expect(screen.getByText('Unable to connect to TokTickIT API.')).toBeInTheDocument()
+    expect(screen.getByText('Categories are unavailable')).toBeInTheDocument()
   })
 
   it('shows a useful error when the API request times out', async () => {
@@ -88,8 +113,6 @@ describe('system health check', () => {
     })
 
     expect(screen.getByText('Offline')).toBeInTheDocument()
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Unable to connect to TokTickIT API.',
-    )
+    expect(screen.getByText('Unable to connect to TokTickIT API.')).toBeInTheDocument()
   })
 })

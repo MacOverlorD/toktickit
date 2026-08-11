@@ -16,5 +16,7 @@ describe('App', () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { name: 'TokTickIT' })).toBeInTheDocument()
+    expect(screen.queryByText('Supported request categories')).not.toBeInTheDocument()
+    expect(getCategories).not.toHaveBeenCalled()
   })
 })
