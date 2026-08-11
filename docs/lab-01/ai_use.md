@@ -12,6 +12,7 @@ I used OpenAI Codex, a GPT-5 based coding agent, to help interpret the Lab 1 doc
 | Implement foundation | Implement Issue 1 according to the requirements. | The first implementation established both applications, tests, Prisma, and documentation, but database reachability still needed separate proof. |
 | Audit against Labsheet | Use grill-with-docs to check whether Issue 1 is complete and correct against the Labsheet. | A strict requirement-by-requirement audit found missing PostgreSQL evidence, GitHub workflow gaps, and duplicate test execution. |
 | Correct the audit findings | Fix everything correctly, leaving only commit and push for me. | The follow-up improved the test layout, isolated the database to localhost, proved Prisma connectivity, and made the evidence more reproducible. |
+| Implement the health check | Read the Issue 2 requirements with grill-with-docs, then implement the API health check and its UI behavior. | Defining idle, loading, online, and offline states before coding made the API contract and tests explicit. |
 
 ## Reflection
 

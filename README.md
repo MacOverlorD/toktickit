@@ -4,7 +4,7 @@ TokTickIT is a full-stack starter project for CPE334 Lab 1. The repository conta
 
 ## Prerequisites
 
-- Node.js 22 or later
+- Node.js 22.12 or later
 - npm 10 or later
 - PostgreSQL
 
@@ -61,6 +61,19 @@ npm run dev --prefix client
 ```
 
 The client runs at `http://localhost:5173` and the API at `http://localhost:3000`.
+
+## API
+
+### Health check
+
+`GET /api/health`
+
+```json
+{
+  "status": "ok",
+  "service": "TokTickIT API"
+}
+```
 
 ## Verification
 
