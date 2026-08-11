@@ -1,11 +1,21 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
+import { getCategories } from '../../src/api/categories'
 import { HEALTH_REQUEST_TIMEOUT_MS } from '../../src/api/health'
+
+vi.mock('../../src/api/categories', () => ({
+  getCategories: vi.fn(),
+}))
+
+beforeEach(() => {
+  vi.mocked(getCategories).mockResolvedValue([])
+})
 
 afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  vi.clearAllMocks()
 })
 
 describe('system health check', () => {
@@ -22,7 +32,7 @@ describe('system health check', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'Check System' }))
 
-    expect(screen.getByRole('status')).toHaveTextContent('Loading system status...')
+    expect(screen.getByText('Loading system status...')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Checking...' })).toBeDisabled()
   })
 

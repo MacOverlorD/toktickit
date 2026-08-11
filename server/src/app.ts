@@ -1,5 +1,6 @@
 import cors from 'cors'
 import express from 'express'
+import prisma from './prisma.js'
 
 const app = express()
 
@@ -19,6 +20,24 @@ app.get('/api/health', (_request, response) => {
     status: 'ok',
     service: 'TokTickIT API',
   })
+})
+
+app.get('/api/categories', async (_request, response, next) => {
+  try {
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    })
+
+    response.status(200).json(categories)
+  } catch (error) {
+    next(error)
+  }
 })
 
 export default app

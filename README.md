@@ -51,6 +51,13 @@ toktickit/
    npm install --prefix server
    ```
 
+4. Apply the database migration and seed the request categories:
+
+   ```powershell
+   npm run prisma:migrate --prefix server
+   npm run prisma:seed --prefix server
+   ```
+
 ## Development
 
 Run the API and client in separate terminals:
@@ -75,6 +82,19 @@ The client runs at `http://localhost:5173` and the API at `http://localhost:3000
 }
 ```
 
+### Request categories
+
+`GET /api/categories`
+
+```json
+[
+  { "id": 1, "name": "Account and Access" },
+  { "id": 2, "name": "Hardware" },
+  { "id": 3, "name": "Software" },
+  { "id": 4, "name": "Network" }
+]
+```
+
 ## Verification
 
 ```powershell
@@ -84,4 +104,5 @@ npm test --prefix client
 npm run build --prefix server
 npm test --prefix server
 npm run prisma:generate --prefix server
+npm run prisma:seed --prefix server
 ```

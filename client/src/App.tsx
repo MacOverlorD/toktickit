@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getHealth } from './api/health'
+import CategoryList from './components/CategoryList'
 
 type SystemState = 'idle' | 'loading' | 'online' | 'offline'
 
@@ -79,6 +80,8 @@ function App() {
             </div>
           )}
         </section>
+
+        <CategoryList />
       </div>
     </main>
   )
