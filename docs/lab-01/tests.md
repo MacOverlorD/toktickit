@@ -33,3 +33,21 @@
 | UI-CATEGORY-01 | `client/tests/lab-01/CategoryList.test.tsx` | Vitest | The category list displays a loading state while the API request is pending | Passed |
 | UI-CATEGORY-02 | `client/tests/lab-01/HealthCheck.test.tsx` | Vitest | Check System displays category IDs and names returned by the category API rather than hard-coded values | Passed |
 | UI-CATEGORY-03 | `client/tests/lab-01/CategoryList.test.tsx` | Vitest | A category failure displays a useful error and Retry requests another system check | Passed |
+
+## Final Pre-Integration Verification
+
+Verified on the completed `lab1-staging` code before opening the final Pull Request to `main`:
+
+| Command or check | Result |
+| --- | --- |
+| `npx prisma validate` | Passed |
+| `npx prisma migrate status` | Passed: database schema is up to date |
+| `npm run prisma:seed` executed twice | Passed: database still contains exactly 4 categories |
+| `npm test --prefix server` | Passed: 3 test files, 4 tests |
+| `npm run build --prefix server` followed by `node dist/server.js` | Passed: production server started successfully |
+| `GET /api/health` against the built server | Passed: HTTP 200 with the expected JSON |
+| `GET /api/categories` against the built server | Passed: HTTP 200 with the four seeded categories in ID order |
+| `npm run typecheck --prefix client` | Passed |
+| `npm test --prefix client` | Passed: 3 test files, 9 tests |
+| `npm run build --prefix client` | Passed |
+| `npm audit` in client and server | Passed: 0 vulnerabilities |

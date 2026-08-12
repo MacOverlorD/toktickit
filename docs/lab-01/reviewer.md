@@ -66,7 +66,7 @@ The Lab 1 requirements do not require a dedicated automated seed test, so idempo
 | Field | Details |
 | --- | --- |
 | Pull Request | [TokTickIT PR #8](https://github.com/MacOverlorD/toktickit/pull/8) |
-| Review status | Follow-up changes implemented; awaiting final approval |
+| Review status | Approved and merged |
 
 ### Reviewer Feedback
 
@@ -75,3 +75,23 @@ The reviewer confirmed that the shared API timeout helper and tests looked solid
 ### Author Response
 
 A final JSON error-handling middleware was added so internal failures return HTTP 500 with `{ "error": "Internal server error" }`. A Supertest case now verifies the status, content type, and safe response body. The final Check System flow was also aligned with the Lab 1 demo so health and category requests run together and either failure produces the offline state.
+
+## Reciprocal Peer Review
+
+| Field | Details |
+| --- | --- |
+| Student reviewed | Titihinan Sobking |
+| GitHub username | Ohmmykung09 |
+| Reviewed Pull Request | [Ohmmykung09 TokTickIT PR #5](https://github.com/Ohmmykung09/toktickit/pull/5) |
+| Current status | Changes requested; awaiting the author's update and response |
+
+### Review Feedback Given
+
+The project foundation was well structured and its existing builds and tests passed. I requested changes for two blocking findings:
+
+- The server build generated `dist/src/server.js`, while `npm start` expected `dist/server.js`, so the built backend could not start.
+- Prisma Client generation did not prove PostgreSQL reachability, so the setup needed a real documented database connection check and updated test evidence.
+
+### Partner Response
+
+Pending. After the author updates the PR and responds, I will verify the latest commit and submit the final review decision.
