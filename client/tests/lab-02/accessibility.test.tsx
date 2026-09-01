@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import App from '../../src/App'
 
@@ -30,13 +30,15 @@ describe('application shell accessibility', () => {
     expect(screen.getByRole('heading', { name: 'My Tickets' })).toBeInTheDocument()
   })
 
-  it('exposes and updates mobile navigation state', () => {
+  it('opens the mobile menu and closes it after route navigation', async () => {
     render(<App />)
 
     const menuButton = screen.getByRole('button', { name: 'Open navigation' })
+    const navigationContent = document.getElementById('primary-navigation')
 
     expect(menuButton).toHaveAttribute('aria-expanded', 'false')
     expect(menuButton).toHaveAttribute('aria-controls', 'primary-navigation')
+    expect(navigationContent).not.toHaveClass('is-open')
 
     fireEvent.click(menuButton)
 
@@ -44,6 +46,18 @@ describe('application shell accessibility', () => {
       'aria-expanded',
       'true',
     )
+    expect(navigationContent).toHaveClass('is-open')
+
+    fireEvent.click(screen.getByRole('link', { name: 'Create Ticket' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Open navigation' })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      )
+    })
+    expect(navigationContent).not.toHaveClass('is-open')
+    expect(screen.getByRole('heading', { name: 'Create Ticket' })).toBeInTheDocument()
   })
 
   it('navigates with semantic links and updates the active page', () => {
