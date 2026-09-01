@@ -42,6 +42,7 @@ No required test may remain deferred at release.
 | UNIT-02 | Ticket Number UTC format, random suffix, pattern, and invalid-date handling | `server/tests/lab-02/ticket-identity.unit.test.ts` | Passing (Issue #12) |
 | UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Planned |
 | UNIT-04 | Ticket-list allowlisted query parsing, defaults, and invalid parameters | `server/tests/lab-02/ticket-query.unit.test.ts` | Planned |
+| UNIT-05 | Requester email trimming, lowercasing, and idempotent normalization | `server/tests/lab-02/requester-email.unit.test.ts` | Passing (Issue #12 review fix) |
 
 ### API and database integration tests
 
@@ -66,6 +67,7 @@ No required test may remain deferred at release.
 | DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-03 | Same-key replay, changed-payload conflict, concurrent submit, and Ticket Number collision retry/exhaustion | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
+| DB-04 | Requester email canonical database constraint and case-insensitive identity uniqueness | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12 review fix) |
 
 ### UI component and style tests
 
@@ -128,7 +130,7 @@ No required test may remain deferred at release.
 | AC-20 | API-16, UI-01, UI-03, UI-08, UI-09, UI-13 |
 | AC-21 | RESP-01, RESP-02, RESP-03, VIS-01 |
 | AC-22 | A11Y-01, STYLE-01, STYLE-02, RESP-01-RESP-03 |
-| AC-23 | DB-01, DB-02 |
+| AC-23 | DB-01, DB-02, DB-04 |
 | AC-24 | All required test IDs plus final command output and visual checklist |
 
 Every AC maps to automated evidence. VIS-01 additionally supplies the required

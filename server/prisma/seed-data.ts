@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
+import { normalizeRequesterEmail } from '../src/requesters/requester-email.js'
 
 export const categorySeeds = [
   { name: 'Account and Access', displayOrder: 1 },
@@ -55,13 +56,18 @@ export async function seedDatabase(prisma: PrismaClient) {
   }
 
   for (const requester of requesterSeeds) {
+    const email = normalizeRequesterEmail(requester.email)
+
     await prisma.requester.upsert({
-      where: { email: requester.email },
+      where: { email },
       update: {
         name: requester.name,
         isActive: requester.isActive,
       },
-      create: requester,
+      create: {
+        ...requester,
+        email,
+      },
     })
   }
 }

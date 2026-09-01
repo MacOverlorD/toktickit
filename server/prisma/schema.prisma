@@ -20,6 +20,7 @@ model Category {
 model Requester {
   id                  Int          @id @default(autoincrement())
   name                String       @db.VarChar(120)
+  /// Canonical lowercase storage is enforced by a database check constraint.
   email               String       @unique @db.VarChar(254)
   isActive            Boolean      @default(true)
   createdAt           DateTime     @default(now())

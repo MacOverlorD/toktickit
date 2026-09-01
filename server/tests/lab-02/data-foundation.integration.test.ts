@@ -8,6 +8,7 @@ import {
   seedDatabase,
 } from '../../prisma/seed-data.js'
 import prisma from '../../src/prisma.js'
+import { normalizeRequesterEmail } from '../../src/requesters/requester-email.js'
 import {
   createTicketWithIdentity,
   IdempotencyKeyReuseError,
@@ -118,6 +119,43 @@ describe('Lab 2 seed data', () => {
     expect(requesters).toHaveLength(requesterSeeds.length)
     expect(requesters.filter(({ isActive }) => isActive)).toHaveLength(4)
     expect(requesters.filter(({ isActive }) => !isActive)).toHaveLength(1)
+    expect(requesters.every(({ email }) => email === normalizeRequesterEmail(email))).toBe(
+      true,
+    )
+  })
+
+  it('enforces one canonical lowercase Requester email identity', async () => {
+    const mixedCaseEmail = `Issue12.${randomUUID()}@Example.Test`
+    const canonicalEmail = normalizeRequesterEmail(mixedCaseEmail)
+
+    await expect(
+      prisma.requester.create({
+        data: {
+          name: 'Non-canonical Requester',
+          email: mixedCaseEmail,
+        },
+      }),
+    ).rejects.toThrow(/Requester_email_canonical_check/)
+
+    const requester = await prisma.requester.create({
+      data: {
+        name: 'Canonical Requester',
+        email: canonicalEmail,
+      },
+    })
+
+    try {
+      await expect(
+        prisma.requester.create({
+          data: {
+            name: 'Duplicate Canonical Requester',
+            email: normalizeRequesterEmail(`  ${mixedCaseEmail}  `),
+          },
+        }),
+      ).rejects.toMatchObject({ code: 'P2002' })
+    } finally {
+      await prisma.requester.delete({ where: { id: requester.id } })
+    }
   })
 })
 
