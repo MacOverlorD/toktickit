@@ -13,14 +13,14 @@ PR cannot update itself after merge.
 | Role | Name | GitHub username |
 |---|---|---|
 | Student/author | MacOverlorD | [@MacOverlorD](https://github.com/MacOverlorD) |
-| Primary peer reviewer | Pending | Pending |
+| Primary peer reviewer | TauForge | [@TauForge](https://github.com/TauForge) |
 | Additional reviewer(s) | Pending | Pending |
 
 ## 2. Pull Requests Authored for Lab 2
 
 | Issue | Branch | PR to `lab2-staging` | Reviewer | Review received | Author response/change | Approval | Merge commit |
 |---|---|---|---|---|---|---|---|
-| #11 Engineering contract | `feature/2-01-engineering-contract` | Pending | Pending | Pending | Pending | Pending | Pending |
+| #11 Engineering contract | `feature/2-01-engineering-contract` | [#20](https://github.com/MacOverlorD/toktickit/pull/20) | [@TauForge](https://github.com/TauForge) | Requested a concrete idempotency/Ticket Number example | Added the example in `c2ab898` and [requested re-review](https://github.com/MacOverlorD/toktickit/pull/20#issuecomment-5492954836) | Pending re-review | Pending |
 | #12 Data foundation | `feature/2-02-data-foundation` | Pending | Pending | Pending | Pending | Pending | Pending |
 | #13 UI foundation | `feature/2-03-ui-foundation` | Pending | Pending | Pending | Pending | Pending | Pending |
 | #14 Requester context | `feature/2-04-requester-context` | Pending | Pending | Pending | Pending | Pending | Pending |
@@ -38,7 +38,7 @@ identify a real engineering tradeoff.
 
 | Date | PR/thread link | Reviewer | Comment summary | Agreed? | Response and resulting change | Verification |
 |---|---|---|---|---|---|---|
-| Pending | Pending | Pending | Pending | Pending | Pending | Pending |
+| 2026-09-01 | [PR #20 review](https://github.com/MacOverlorD/toktickit/pull/20#pullrequestreview-5077121977) | [@TauForge](https://github.com/TauForge) | Add a short example clarifying idempotent Ticket creation and Ticket Number generation. | Yes | Added first-create, same-key replay, changed-payload conflict, and number-collision behavior in `specification.md`; replied with commit `c2ab898`. | Documentation diff reviewed; awaiting reviewer approval |
 
 ## 4. Reviews Given to Classmates
 
