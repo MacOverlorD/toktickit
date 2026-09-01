@@ -192,6 +192,19 @@ The sprint converts the stakeholder request into these engineering decisions:
   identity. Ownership foreign keys use a Requester record that can later be
   associated with a real user without changing Ticket ownership.
 
+### Ticket identity and idempotency example
+
+Requester 7 submits a valid normalized payload with
+`Idempotency-Key: 6f5723c2-e520-4ef3-ab0d-999a48ef2679`. The backend generates,
+for example,
+`TKT-20260901-A1B2C3D4`, persists one Ticket, and returns `201` with
+`replayed: false`. If a timeout causes the client to retry the same requester,
+key, and normalized payload, the backend returns that same Ticket Number with
+`200` and `replayed: true`; it does not create another row. Reusing the key with
+a changed Summary, Description, reference, or priority returns `409`. A genuine
+new create intent uses a new key. If the generated Ticket Number already exists,
+the backend generates another suffix and retries as defined by BR-01.
+
 ## 6. UI Specification Summary
 
 The complete contract is in [ui-spec.md](./ui-spec.md).
