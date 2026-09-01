@@ -1,6 +1,6 @@
 # Lab 2 Test Plan and Results
 
-Status: Planned before implementation  
+Status: Implementation in progress
 Contract: [specification.md](./specification.md)  
 API: [api-spec.md](./api-spec.md)  
 UI: [ui-spec.md](./ui-spec.md)
@@ -86,9 +86,9 @@ No required test may remain deferred at release.
 | UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Planned |
-| STYLE-01 | Zen Green token values and editable/read-only/invalid/focus conventions | `client/tests/lab-02/zen-green.style.test.tsx` | Planned |
-| STYLE-02 | Button hierarchy, busy dimensions, badge non-color labels, active navigation | `client/tests/lab-02/zen-green.style.test.tsx` | Planned |
-| A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` | Planned |
+| STYLE-01 | Zen Green token values and editable/read-only/invalid/focus conventions | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
+| STYLE-02 | Button hierarchy, busy dimensions, badge non-color labels, active navigation | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
+| A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` | Passing for shared shell/components (Issue #13); feature dialogs remain planned |
 
 ### Responsive, visual, and E2E tests
 
@@ -205,7 +205,7 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
 | API/integration | Pending | Pending | Pending | Planned |
-| UI component/style/accessibility | Pending | Pending | Pending | Planned |
+| UI component/style/accessibility | `npm test --prefix client` | 24 passed, 0 failed | 2026-09-01 / Issue #13 working tree | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |
