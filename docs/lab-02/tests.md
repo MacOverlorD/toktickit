@@ -39,7 +39,7 @@ No required test may remain deferred at release.
 | ID | Scenario | Actual test-file path | Status |
 |---|---|---|---|
 | UNIT-01 | Ticket input trimming, lengths, enums, and unknown-field rejection | `server/tests/lab-02/ticket-validation.unit.test.ts` | Planned |
-| UNIT-02 | Ticket Number format/collision retry and idempotency payload fingerprint | `server/tests/lab-02/ticket-identity.unit.test.ts` | Planned |
+| UNIT-02 | Ticket Number UTC format, random suffix, pattern, and invalid-date handling | `server/tests/lab-02/ticket-identity.unit.test.ts` | Passing (Issue #12) |
 | UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Planned |
 | UNIT-04 | Ticket-list allowlisted query parsing, defaults, and invalid parameters | `server/tests/lab-02/ticket-query.unit.test.ts` | Planned |
 
@@ -63,8 +63,9 @@ No required test may remain deferred at release.
 | API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/error-contract.api.test.ts` | Planned |
-| DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Planned |
-| DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Planned |
+| DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
+| DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
+| DB-03 | Same-key replay, changed-payload conflict, concurrent submit, and Ticket Number collision retry/exhaustion | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 
 ### UI component and style tests
 
@@ -110,8 +111,8 @@ No required test may remain deferred at release.
 | AC-03 | API-02, UI-02, UI-06, E2E-01, E2E-03 |
 | AC-04 | API-03, UI-03, STYLE-01, E2E-02 |
 | AC-05 | UNIT-01, API-05, UI-04, E2E-02 |
-| AC-06 | UNIT-02, API-04, UI-05, E2E-02 |
-| AC-07 | UNIT-02, API-06, UI-05, E2E-02 |
+| AC-06 | UNIT-02, DB-03, API-04, UI-05, E2E-02 |
+| AC-07 | DB-03, API-06, UI-05, E2E-02 |
 | AC-08 | API-16, UI-05, E2E-02 |
 | AC-09 | API-07, UI-06, E2E-03 |
 | AC-10 | UNIT-04, API-08, API-09, UI-07, E2E-03 |
