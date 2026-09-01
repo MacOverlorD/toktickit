@@ -12,7 +12,7 @@ TokTickIT is a full-stack IT service desk project for CPE334. The repository con
 
 ```text
 toktickit/
-|-- client/             React, TypeScript, Vite, Bootstrap
+|-- client/             React, TypeScript, Vite, React Router, Bootstrap
 |-- server/             Express, TypeScript, Prisma
 |   |-- prisma/
 |   |-- src/
