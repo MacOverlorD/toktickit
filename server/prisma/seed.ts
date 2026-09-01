@@ -1,27 +1,11 @@
 import { PrismaClient } from '@prisma/client'
+import { seedDatabase } from './seed-data.js'
 
 const prisma = new PrismaClient()
 
-const categoryNames = [
-  'Account and Access',
-  'Hardware',
-  'Software',
-  'Network',
-] as const
-
-async function main() {
-  for (const name of categoryNames) {
-    await prisma.category.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    })
-  }
-}
-
-main()
+seedDatabase(prisma)
   .catch((error: unknown) => {
-    console.error('Failed to seed request categories.', error)
+    console.error('Failed to seed Lab 2 reference data.', error)
     process.exitCode = 1
   })
   .finally(async () => {

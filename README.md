@@ -1,6 +1,6 @@
 # TokTickIT
 
-TokTickIT is a full-stack starter project for CPE334 Lab 1. The repository contains a React client and an Express API backed by PostgreSQL through Prisma.
+TokTickIT is a full-stack IT service desk project for CPE334. The repository contains a React client and an Express API backed by PostgreSQL through Prisma. Lab 2 requester-ticketing features are being integrated through the `lab2-staging` workflow.
 
 ## Prerequisites
 
@@ -16,8 +16,12 @@ toktickit/
 |-- server/             Express, TypeScript, Prisma
 |   |-- prisma/
 |   |-- src/
-|   `-- tests/lab-01/
-`-- docs/lab-01/        Lab notes and evidence
+|   `-- tests/
+|       |-- lab-01/
+|       `-- lab-02/
+`-- docs/
+    |-- lab-01/
+    `-- lab-02/         Engineering contract and evidence
 ```
 
 ## Setup
@@ -51,12 +55,14 @@ toktickit/
    npm install --prefix server
    ```
 
-4. Apply the database migration and seed the request categories:
+4. Apply all database migrations and seed the Lab 2 reference data:
 
    ```powershell
    npm run prisma:migrate --prefix server
    npm run prisma:seed --prefix server
    ```
+
+   The repeatable seed maintains the four required Categories, seven Related Systems, four active Development Requesters, and one inactive Development Requester without creating duplicates.
 
 ## Development
 

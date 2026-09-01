@@ -191,6 +191,9 @@ The sprint converts the stakeholder request into these engineering decisions:
 - **BR-30:** Lab 3 may replace the development header with an authenticated
   identity. Ownership foreign keys use a Requester record that can later be
   associated with a real user without changing Ticket ownership.
+- **BR-31:** Requester email is a canonical natural key. Every write trims and
+  lowercases it before persistence, and PostgreSQL rejects non-canonical values.
+  The unique constraint therefore treats casing variants as one identity.
 
 ### Ticket identity and idempotency example
 
