@@ -1,17 +1,28 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
+import { getDevelopmentRequesters } from '../../src/api/development-requesters'
+import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
+
+vi.mock('../../src/api/development-requesters', () => ({
+  getDevelopmentRequesters: vi.fn(),
+}))
 
 beforeEach(() => {
   window.history.replaceState({}, '', '/tickets')
+  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
+  vi.mocked(getDevelopmentRequesters).mockResolvedValue([
+    { id: 1, name: 'Anan Wong', email: 'anan.wong@example.test' },
+  ])
 })
 
 afterEach(() => {
+  sessionStorage.clear()
   window.history.replaceState({}, '', '/')
 })
 
 describe('application shell accessibility', () => {
-  it('provides landmarks, skip navigation, identity, and active-page state', () => {
+  it('provides landmarks, skip navigation, identity, and active-page state', async () => {
     render(<App />)
 
     expect(screen.getByRole('link', { name: 'Skip to main content' })).toHaveAttribute(
@@ -22,7 +33,7 @@ describe('application shell accessibility', () => {
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content')
     expect(screen.getByLabelText('TokTickIT home')).toBeInTheDocument()
     expect(screen.getByText('Lab 2 testing user')).toBeInTheDocument()
-    expect(screen.getByText('Not selected')).toBeInTheDocument()
+    expect(await screen.findByText('Anan Wong')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'My Tickets' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -32,6 +43,8 @@ describe('application shell accessibility', () => {
 
   it('opens the mobile menu and closes it after route navigation', async () => {
     render(<App />)
+
+    await screen.findByRole('heading', { name: 'My Tickets' })
 
     const menuButton = screen.getByRole('button', { name: 'Open navigation' })
     const navigationContent = document.getElementById('primary-navigation')
@@ -60,8 +73,10 @@ describe('application shell accessibility', () => {
     expect(screen.getByRole('heading', { name: 'Create Ticket' })).toBeInTheDocument()
   })
 
-  it('navigates with semantic links and updates the active page', () => {
+  it('navigates with semantic links and updates the active page', async () => {
     render(<App />)
+
+    await screen.findByRole('heading', { name: 'My Tickets' })
 
     fireEvent.click(screen.getByRole('link', { name: 'Create Ticket' }))
 
