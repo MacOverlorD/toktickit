@@ -50,10 +50,10 @@ No required test may remain deferred at release.
 |---|---|---|---|
 | API-01 | Active requesters only, deterministic order, empty and DB-failure responses | `server/tests/lab-02/requesters.api.test.ts` | Passing (Issue #14) |
 | API-02 | Missing/malformed/inactive context and requester-switch isolation | `server/tests/lab-02/requester-context.api.test.ts` | Passing (Issue #14) |
-| API-03 | Active Category/Related System retrieval and inactive-reference rejection | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-04 | Valid create persists backend owner, number/date/status and normalized values | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-05 | Required/length/enum/reference/unknown-property failures create no Ticket | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-06 | Same idempotency key replay versus changed-payload conflict | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
+| API-03 | Active Category/Related System retrieval and inactive-reference rejection | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-04 | Valid create persists backend owner, number/date/status and normalized values | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-05 | Required/length/enum/reference/unknown-property failures create no Ticket | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-06 | Same idempotency key replay versus changed-payload conflict | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
 | API-07 | Owner-only list and cross-requester isolation | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
 | API-08 | Search and exact filters combine correctly and remain owner scoped | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
 | API-09 | Sort/page metadata, deterministic ties, beyond-last page, invalid query | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
@@ -75,9 +75,9 @@ No required test may remain deferred at release.
 |---|---|---|---|
 | UI-01 | Selector loading, active options, disabled Continue, empty, failure, Retry | `client/tests/lab-02/RequesterSelection.test.tsx` | Passing (Issue #14) |
 | UI-02 | Session restoration, testing-only label, shell identity, switch and stale context | `client/tests/lab-02/RequesterContext.test.tsx` | Passing (Issue #14) |
-| UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
-| UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
-| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
+| UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
+| UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
+| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Passing for ticket creation; upload retry remains Issue #18 |
 | UI-06 | Owner list table/card data and requester switch clears old content | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
 | UI-07 | Search/filter/sort/page controls produce documented API query/reset page | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
 | UI-08 | Loading, empty, no-results/Clear Filters, failure/Retry states | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
@@ -205,8 +205,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
-| API/integration | `npm test --prefix server -- tests/lab-02/requesters.api.test.ts tests/lab-02/requester-context.api.test.ts` | 16 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 37 passed, 0 failed | 2026-09-02 / Issue #14 review fix | Passing for implemented scope |
+| API/integration | `npm test --prefix server` | 39 passed, 0 failed | 2026-09-03 / Issue #15 working tree | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 47 passed, 0 failed | 2026-09-03 / Issue #15 working tree | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |

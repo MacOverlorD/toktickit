@@ -115,9 +115,28 @@ X-Development-Requester-Id: 1
 
 The client stores only that numeric ID in tab-scoped `sessionStorage` under
 `toktickit.devRequesterId` and revalidates it before showing ticket routes.
-The exported server middleware is intentionally mounted when requester-owned
-ticket and attachment routers are introduced in the later Lab 2 Issues; public
-reference endpoints remain unauthenticated by design.
+The server requester-context middleware is mounted on `POST /api/tickets` and
+must also be mounted on every requester-owned ticket and attachment endpoint
+introduced in later Lab 2 Issues. Public reference endpoints remain
+unauthenticated by design.
+
+### Related Systems
+
+`GET /api/related-systems` returns active Related Systems ordered by
+`displayOrder` and then ID. `GET /api/categories` follows the same active-only
+ordering contract.
+
+### Create Ticket
+
+`POST /api/tickets` requires the requester header above and one UUID
+`Idempotency-Key` header. The JSON body accepts only `categoryId`,
+`relatedSystemId`, `summary`, `requestedPriority`, and `description`.
+Requester ownership, Ticket Number, creation date, and initial `NEW` status are
+assigned by the server.
+
+Repeating the same normalized intent with the same requester and key returns
+the original Ticket without creating a duplicate. Attachment selection is
+validated by the client in Issue #15; file persistence belongs to Issue #18.
 
 ## Verification
 

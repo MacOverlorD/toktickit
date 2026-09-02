@@ -11,7 +11,11 @@ function navigationClass({ isActive }: { isActive: boolean }) {
 function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
-  const { contextVersion, selectedRequester } = useRequester()
+  const {
+    contextVersion,
+    hasUnsavedTicketDraft,
+    selectedRequester,
+  } = useRequester()
 
   useEffect(() => {
     setMenuOpen(false)
@@ -49,7 +53,7 @@ function AppShell() {
             id={'primary-navigation'}
           >
             <nav className={'app-navigation'} aria-label={'Primary navigation'}>
-              <NavLink className={navigationClass} to={'/tickets'}>
+              <NavLink className={navigationClass} to={'/tickets'} end>
                 <List aria-hidden={'true'} />
                 <span>My Tickets</span>
               </NavLink>
@@ -75,6 +79,16 @@ function AppShell() {
                     ? `Change Development Requester. Current requester: ${selectedRequester.name}`
                     : 'Select Development Requester'
                 }
+                onClick={(event) => {
+                  if (
+                    hasUnsavedTicketDraft &&
+                    !window.confirm(
+                      'Discard this unsaved ticket and change requester?',
+                    )
+                  ) {
+                    event.preventDefault()
+                  }
+                }}
               >
                 {selectedRequester ? 'Change requester' : 'Select requester'}
               </Link>

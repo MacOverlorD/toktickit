@@ -21,7 +21,9 @@ interface RequesterContextValue {
   selectedRequester: DevelopmentRequester | null
   loadStatus: RequesterLoadStatus
   contextVersion: number
+  hasUnsavedTicketDraft: boolean
   refreshRequesters: () => Promise<DevelopmentRequester[]>
+  setUnsavedTicketDraft: (hasDraft: boolean) => void
   validateAndSelectRequester: (requesterId: number) => Promise<SelectionResult>
 }
 
@@ -77,6 +79,7 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
     initialStoredRequesterId === null ? 'idle' : 'loading',
   )
   const [contextVersion, setContextVersion] = useState(0)
+  const [hasUnsavedTicketDraft, setUnsavedTicketDraft] = useState(false)
 
   const applyRequesterList = useCallback((requesterList: DevelopmentRequester[]) => {
     setRequesters(requesterList)
@@ -129,6 +132,7 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
 
       setSelectedRequester(requester)
       setLoadStatus('ready')
+      setUnsavedTicketDraft(false)
       setContextVersion((version) => version + 1)
       return 'selected'
     },
@@ -147,11 +151,14 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
       selectedRequester,
       loadStatus,
       contextVersion,
+      hasUnsavedTicketDraft,
       refreshRequesters,
+      setUnsavedTicketDraft,
       validateAndSelectRequester,
     }),
     [
       contextVersion,
+      hasUnsavedTicketDraft,
       loadStatus,
       refreshRequesters,
       requesters,
