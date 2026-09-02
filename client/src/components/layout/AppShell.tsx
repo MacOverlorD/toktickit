@@ -1,6 +1,7 @@
 import { List, Menu, TicketPlus, UserRound, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useRequester } from '../../requesters/RequesterContext'
 import { zenGreenCssProperties } from '../../styles/tokens'
 
 function navigationClass({ isActive }: { isActive: boolean }) {
@@ -10,6 +11,7 @@ function navigationClass({ isActive }: { isActive: boolean }) {
 function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const { contextVersion, selectedRequester } = useRequester()
 
   useEffect(() => {
     setMenuOpen(false)
@@ -61,17 +63,27 @@ function AppShell() {
               <UserRound aria-hidden={'true'} />
               <span className={'requester-copy'}>
                 <span className={'requester-label'}>Lab 2 testing user</span>
-                <span className={'requester-name'}>Not selected</span>
+                <span className={'requester-name'}>
+                  {selectedRequester?.name ?? 'Not selected'}
+                </span>
               </span>
-              <Link className={'requester-action'} to={'/select-requester'}>
-                Select requester
+              <Link
+                className={'requester-action'}
+                to={'/select-requester'}
+                aria-label={
+                  selectedRequester
+                    ? `Change Development Requester. Current requester: ${selectedRequester.name}`
+                    : 'Select Development Requester'
+                }
+              >
+                {selectedRequester ? 'Change requester' : 'Select requester'}
               </Link>
             </div>
           </div>
         </div>
       </header>
 
-      <main id={'main-content'} tabIndex={-1}>
+      <main id={'main-content'} tabIndex={-1} key={contextVersion}>
         <Outlet />
       </main>
     </div>

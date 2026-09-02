@@ -1,7 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
+import ProtectedRequesterRoute from './components/routing/ProtectedRequesterRoute'
+import RequesterSelectionPage from './pages/RequesterSelectionPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
 import SystemCheckPage from './pages/SystemCheckPage'
+import { RequesterProvider } from './requesters/RequesterContext'
 
 export function AppRoutes() {
   return (
@@ -10,40 +13,37 @@ export function AppRoutes() {
         <Route index element={<SystemCheckPage />} />
         <Route
           path={'select-requester'}
-          element={
-            <RouteFoundationPage
-              title={'Select Development Requester'}
-              description={'Choose the testing identity for this browser tab.'}
-            />
-          }
+          element={<RequesterSelectionPage />}
         />
-        <Route
-          path={'tickets'}
-          element={
-            <RouteFoundationPage
-              title={'My Tickets'}
-              description={'Requester-owned IT support tickets.'}
-            />
-          }
-        />
-        <Route
-          path={'tickets/new'}
-          element={
-            <RouteFoundationPage
-              title={'Create Ticket'}
-              description={'Submit a new IT support request.'}
-            />
-          }
-        />
-        <Route
-          path={'tickets/:ticketNumber'}
-          element={
-            <RouteFoundationPage
-              title={'Ticket Detail'}
-              description={'Read-only requester ticket information.'}
-            />
-          }
-        />
+        <Route element={<ProtectedRequesterRoute />}>
+          <Route
+            path={'tickets'}
+            element={
+              <RouteFoundationPage
+                title={'My Tickets'}
+                description={'Requester-owned IT support tickets.'}
+              />
+            }
+          />
+          <Route
+            path={'tickets/new'}
+            element={
+              <RouteFoundationPage
+                title={'Create Ticket'}
+                description={'Submit a new IT support request.'}
+              />
+            }
+          />
+          <Route
+            path={'tickets/:ticketNumber'}
+            element={
+              <RouteFoundationPage
+                title={'Ticket Detail'}
+                description={'Read-only requester ticket information.'}
+              />
+            }
+          />
+        </Route>
         <Route
           path={'*'}
           element={
@@ -61,7 +61,9 @@ export function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <RequesterProvider>
+        <AppRoutes />
+      </RequesterProvider>
     </BrowserRouter>
   )
 }

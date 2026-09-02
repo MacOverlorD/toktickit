@@ -56,6 +56,30 @@ textarea {
   letter-spacing: 0;
 }
 
+.select-field {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 9px 38px 9px 12px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.select-field:hover:not(:disabled) {
+  border-color: #8da198;
+}
+
+.select-field.is-invalid {
+  border-color: var(--color-error);
+}
+
+.select-field:disabled {
+  color: var(--color-text-muted);
+  background: var(--color-readonly);
+  cursor: not-allowed;
+}
+
 a {
   color: var(--color-secondary);
 }
@@ -268,6 +292,24 @@ a {
 
 .page-container-narrow {
   max-width: 880px;
+}
+
+.requester-selection-page {
+  max-width: 760px;
+}
+
+.requester-selection-form {
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.form-actions {
+  display: flex;
+  margin-top: 24px;
+  align-items: center;
+  gap: 12px;
 }
 
 .page-header {
@@ -897,8 +939,13 @@ a {
   }
 
   .check-button,
-  .retry-button {
+  .retry-button,
+  .requester-selection-form .app-button {
     width: 100%;
+  }
+
+  .requester-selection-form {
+    padding: 18px;
   }
 
   .feedback-state {

@@ -101,6 +101,21 @@ The client runs at `http://localhost:5173` and the API at `http://localhost:3000
 ]
 ```
 
+### Development Requesters
+
+`GET /api/development-requesters` returns only active Lab 2 testing identities in
+stable name order. This selector is a development mechanism, not authentication.
+
+Ticket and attachment endpoints use the selected numeric ID in the following
+header and validate that the Requester still exists and is active:
+
+```http
+X-Development-Requester-Id: 1
+```
+
+The client stores only that numeric ID in tab-scoped `sessionStorage` under
+`toktickit.devRequesterId` and revalidates it before showing ticket routes.
+
 ## Verification
 
 ```powershell

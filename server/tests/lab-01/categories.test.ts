@@ -34,7 +34,10 @@ describe('GET /api/categories', () => {
     expect(response.status).toBe(500)
     expect(response.headers['content-type']).toMatch(/json/)
     expect(response.body).toEqual({
-      error: 'Internal server error',
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Something went wrong. Please try again.',
+      },
     })
   })
 })

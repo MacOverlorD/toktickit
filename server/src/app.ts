@@ -1,12 +1,19 @@
 import cors from 'cors'
-import express, { type ErrorRequestHandler } from 'express'
+import express from 'express'
+import { errorHandler } from './errors/error-handler.js'
 import prisma from './prisma.js'
+import { listDevelopmentRequesters } from './requesters/development-requesters.js'
 
 const app = express()
 
 app.use(
   cors({
     origin: process.env.CLIENT_URL ?? 'http://localhost:5173',
+    allowedHeaders: [
+      'Content-Type',
+      'X-Development-Requester-Id',
+      'Idempotency-Key',
+    ],
   }),
 )
 app.use(express.json())
@@ -21,6 +28,8 @@ app.get('/api/health', (_request, response) => {
     service: 'TokTickIT API',
   })
 })
+
+app.get('/api/development-requesters', listDevelopmentRequesters)
 
 app.get('/api/categories', async (_request, response, next) => {
   try {
@@ -39,12 +48,6 @@ app.get('/api/categories', async (_request, response, next) => {
     next(error)
   }
 })
-
-const errorHandler: ErrorRequestHandler = (_error, _request, response, _next) => {
-  response.status(500).json({
-    error: 'Internal server error',
-  })
-}
 
 app.use(errorHandler)
 

@@ -48,8 +48,8 @@ No required test may remain deferred at release.
 
 | ID | Scenario | Actual test-file path | Status |
 |---|---|---|---|
-| API-01 | Active requesters only, deterministic order, empty and DB-failure responses | `server/tests/lab-02/requesters.api.test.ts` | Planned |
-| API-02 | Missing/malformed/inactive context and requester-switch isolation | `server/tests/lab-02/requester-context.api.test.ts` | Planned |
+| API-01 | Active requesters only, deterministic order, empty and DB-failure responses | `server/tests/lab-02/requesters.api.test.ts` | Passing (Issue #14) |
+| API-02 | Missing/malformed/inactive context and requester-switch isolation | `server/tests/lab-02/requester-context.api.test.ts` | Passing (Issue #14) |
 | API-03 | Active Category/Related System retrieval and inactive-reference rejection | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
 | API-04 | Valid create persists backend owner, number/date/status and normalized values | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
 | API-05 | Required/length/enum/reference/unknown-property failures create no Ticket | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
@@ -73,8 +73,8 @@ No required test may remain deferred at release.
 
 | ID | Scenario | Actual test-file path | Status |
 |---|---|---|---|
-| UI-01 | Selector loading, active options, disabled Continue, empty, failure, Retry | `client/tests/lab-02/RequesterSelection.test.tsx` | Planned |
-| UI-02 | Session restoration, testing-only label, shell identity, switch and stale context | `client/tests/lab-02/RequesterContext.test.tsx` | Planned |
+| UI-01 | Selector loading, active options, disabled Continue, empty, failure, Retry | `client/tests/lab-02/RequesterSelection.test.tsx` | Passing (Issue #14) |
+| UI-02 | Session restoration, testing-only label, shell identity, switch and stale context | `client/tests/lab-02/RequesterContext.test.tsx` | Passing (Issue #14) |
 | UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
 | UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
 | UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
@@ -204,8 +204,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
-| API/integration | Pending | Pending | Pending | Planned |
-| UI component/style/accessibility | `npm test --prefix client` | 24 passed, 0 failed | 2026-09-01 / Issue #13 working tree | Passing for implemented scope |
+| API/integration | `npm test --prefix server -- tests/lab-02/requesters.api.test.ts tests/lab-02/requester-context.api.test.ts` | 16 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 34 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |
