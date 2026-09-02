@@ -22,8 +22,10 @@ interface RequesterContextValue {
   loadStatus: RequesterLoadStatus
   contextVersion: number
   refreshRequesters: () => Promise<DevelopmentRequester[]>
-  validateAndSelectRequester: (requesterId: number) => Promise<boolean>
+  validateAndSelectRequester: (requesterId: number) => Promise<SelectionResult>
 }
+
+export type SelectionResult = 'selected' | 'inactive' | 'storage-error'
 
 const RequesterContext = createContext<RequesterContextValue | null>(null)
 
@@ -113,16 +115,22 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
       const requester = requesterList.find(({ id }) => id === requesterId) ?? null
 
       setRequesters(requesterList)
-      if (!requester || !storeRequesterId(requester.id)) {
-        if (!requester) removeStoredRequesterId()
+      if (!requester) {
+        removeStoredRequesterId()
         setSelectedRequester(null)
-        return false
+        return 'inactive'
+      }
+
+      if (!storeRequesterId(requester.id)) {
+        removeStoredRequesterId()
+        setSelectedRequester(null)
+        return 'storage-error'
       }
 
       setSelectedRequester(requester)
       setLoadStatus('ready')
       setContextVersion((version) => version + 1)
-      return true
+      return 'selected'
     },
     [],
   )

@@ -41,11 +41,13 @@ function RequesterSelectionPage() {
     setSelectionError(null)
 
     try {
-      const isValid = await validateAndSelectRequester(parsedRequesterId)
-      if (!isValid) {
+      const selectionResult = await validateAndSelectRequester(parsedRequesterId)
+      if (selectionResult !== 'selected') {
         setRequesterId('')
         setSelectionError(
-          'That Development Requester is no longer active. Select another requester.',
+          selectionResult === 'inactive'
+            ? 'That Development Requester is no longer active. Select another requester.'
+            : 'This browser could not save the requester selection. Check storage permissions and try again.',
         )
         return
       }

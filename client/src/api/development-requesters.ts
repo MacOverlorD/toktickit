@@ -32,5 +32,5 @@ export async function getDevelopmentRequesters() {
     throw new Error('The Development Requester response is invalid.')
   }
 
-  return body
+  return body.map(({ id, name, email }) => ({ id, name, email }))
 }

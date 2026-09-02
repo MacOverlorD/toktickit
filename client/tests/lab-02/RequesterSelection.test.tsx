@@ -110,4 +110,24 @@ describe('Development Requester selection', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled()
     expect(sessionStorage.getItem(DEVELOPMENT_REQUESTER_STORAGE_KEY)).toBeNull()
   })
+
+  it('clears the stored value and reports a persistence failure when storage rejects writes', async () => {
+    vi.mocked(getDevelopmentRequesters).mockResolvedValue(requesters)
+    sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage disabled', 'QuotaExceededError')
+    })
+
+    render(<App />)
+
+    const select = await screen.findByRole('combobox', {
+      name: /Development Requester/,
+    })
+    fireEvent.change(select, { target: { value: '2' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+
+    expect(await screen.findByText(/could not save the requester selection/)).toBeInTheDocument()
+    expect(sessionStorage.getItem(DEVELOPMENT_REQUESTER_STORAGE_KEY)).toBeNull()
+    setItem.mockRestore()
+  })
 })

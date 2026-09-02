@@ -4,6 +4,9 @@ import prisma from '../prisma.js'
 
 export const DEVELOPMENT_REQUESTER_HEADER = 'x-development-requester-id'
 
+// Mount this middleware on every requester-owned ticket and attachment router
+// when those routes are introduced in the following Lab 2 implementation Issues.
+
 const invalidRequesterContext = () =>
   new ApiError(
     400,

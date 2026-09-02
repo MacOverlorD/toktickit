@@ -115,6 +115,9 @@ X-Development-Requester-Id: 1
 
 The client stores only that numeric ID in tab-scoped `sessionStorage` under
 `toktickit.devRequesterId` and revalidates it before showing ticket routes.
+The exported server middleware is intentionally mounted when requester-owned
+ticket and attachment routers are introduced in the later Lab 2 Issues; public
+reference endpoints remain unauthenticated by design.
 
 ## Verification
 
