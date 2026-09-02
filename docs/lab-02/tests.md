@@ -86,6 +86,7 @@ No required test may remain deferred at release.
 | UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Planned |
+| UI-14 | Development Requester response is validated and mapped to the public shape | `client/tests/lab-02/development-requesters.test.ts` | Passing (Issue #14) |
 | STYLE-01 | Zen Green token values and editable/read-only/invalid/focus conventions | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
 | STYLE-02 | Button hierarchy, busy dimensions, badge non-color labels, active navigation | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
 | A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` | Passing for shared shell/components (Issue #13); feature dialogs remain planned |
@@ -205,7 +206,7 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
 | API/integration | `npm test --prefix server -- tests/lab-02/requesters.api.test.ts tests/lab-02/requester-context.api.test.ts` | 16 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 34 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 37 passed, 0 failed | 2026-09-02 / Issue #14 review fix | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |
