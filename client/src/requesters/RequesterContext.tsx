@@ -21,7 +21,11 @@ interface RequesterContextValue {
   selectedRequester: DevelopmentRequester | null
   loadStatus: RequesterLoadStatus
   contextVersion: number
+  hasUnsavedTicketDraft: boolean
+  isTicketSubmitting: boolean
+  confirmTicketNavigation: () => boolean
   refreshRequesters: () => Promise<DevelopmentRequester[]>
+  setTicketDraftState: (hasDraft: boolean, isSubmitting: boolean) => void
   validateAndSelectRequester: (requesterId: number) => Promise<SelectionResult>
 }
 
@@ -77,6 +81,22 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
     initialStoredRequesterId === null ? 'idle' : 'loading',
   )
   const [contextVersion, setContextVersion] = useState(0)
+  const [hasUnsavedTicketDraft, setUnsavedTicketDraft] = useState(false)
+  const [isTicketSubmitting, setTicketSubmitting] = useState(false)
+
+  const setTicketDraftState = useCallback(
+    (hasDraft: boolean, isSubmitting: boolean) => {
+      setUnsavedTicketDraft(hasDraft)
+      setTicketSubmitting(isSubmitting)
+    },
+    [],
+  )
+
+  const confirmTicketNavigation = useCallback(() => {
+    if (isTicketSubmitting) return false
+    if (!hasUnsavedTicketDraft) return true
+    return window.confirm('Discard this unsaved ticket and leave this page?')
+  }, [hasUnsavedTicketDraft, isTicketSubmitting])
 
   const applyRequesterList = useCallback((requesterList: DevelopmentRequester[]) => {
     setRequesters(requesterList)
@@ -129,10 +149,11 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
 
       setSelectedRequester(requester)
       setLoadStatus('ready')
+      setTicketDraftState(false, false)
       setContextVersion((version) => version + 1)
       return 'selected'
     },
-    [],
+    [setTicketDraftState],
   )
 
   useEffect(() => {
@@ -147,15 +168,23 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
       selectedRequester,
       loadStatus,
       contextVersion,
+      hasUnsavedTicketDraft,
+      isTicketSubmitting,
+      confirmTicketNavigation,
       refreshRequesters,
+      setTicketDraftState,
       validateAndSelectRequester,
     }),
     [
+      confirmTicketNavigation,
       contextVersion,
+      hasUnsavedTicketDraft,
+      isTicketSubmitting,
       loadStatus,
       refreshRequesters,
       requesters,
       selectedRequester,
+      setTicketDraftState,
       validateAndSelectRequester,
     ],
   )

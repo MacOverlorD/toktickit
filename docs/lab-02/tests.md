@@ -50,10 +50,10 @@ No required test may remain deferred at release.
 |---|---|---|---|
 | API-01 | Active requesters only, deterministic order, empty and DB-failure responses | `server/tests/lab-02/requesters.api.test.ts` | Passing (Issue #14) |
 | API-02 | Missing/malformed/inactive context and requester-switch isolation | `server/tests/lab-02/requester-context.api.test.ts` | Passing (Issue #14) |
-| API-03 | Active Category/Related System retrieval and inactive-reference rejection | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-04 | Valid create persists backend owner, number/date/status and normalized values | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-05 | Required/length/enum/reference/unknown-property failures create no Ticket | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-06 | Same idempotency key replay versus changed-payload conflict | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
+| API-03 | Active Category/Related System retrieval and inactive-reference rejection | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-04 | Valid create persists backend owner, number/date/status and normalized values | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-05 | Required/length/enum/reference/unknown-property failures create no Ticket | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
+| API-06 | Same idempotency key replay versus changed-payload conflict | `server/tests/lab-02/create-ticket.api.test.ts` | Passing (Issue #15) |
 | API-07 | Owner-only list and cross-requester isolation | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
 | API-08 | Search and exact filters combine correctly and remain owner scoped | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
 | API-09 | Sort/page metadata, deterministic ties, beyond-last page, invalid query | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
@@ -63,7 +63,7 @@ No required test may remain deferred at release.
 | API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/error-contract.api.test.ts` | Planned |
+| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/create-ticket.api.test.ts` and `server/tests/lab-02/error-contract.api.test.ts` | Passing for malformed JSON (Issue #15); remaining final error cases planned |
 | DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-03 | Same-key replay, changed-payload conflict, concurrent submit, and Ticket Number collision retry/exhaustion | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
@@ -75,9 +75,9 @@ No required test may remain deferred at release.
 |---|---|---|---|
 | UI-01 | Selector loading, active options, disabled Continue, empty, failure, Retry | `client/tests/lab-02/RequesterSelection.test.tsx` | Passing (Issue #14) |
 | UI-02 | Session restoration, testing-only label, shell identity, switch and stale context | `client/tests/lab-02/RequesterContext.test.tsx` | Passing (Issue #14) |
-| UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
-| UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
-| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Planned |
+| UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
+| UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
+| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Passing for ticket creation; upload retry remains Issue #18 |
 | UI-06 | Owner list table/card data and requester switch clears old content | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
 | UI-07 | Search/filter/sort/page controls produce documented API query/reset page | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
 | UI-08 | Loading, empty, no-results/Clear Filters, failure/Retry states | `client/tests/lab-02/MyTickets.test.tsx` | Planned |
@@ -87,6 +87,7 @@ No required test may remain deferred at release.
 | UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Planned |
 | UI-14 | Development Requester response is validated and mapped to the public shape | `client/tests/lab-02/development-requesters.test.ts` | Passing (Issue #14) |
+| UI-15 | Create API client validates context headers and safe field-error response shapes | `client/tests/lab-02/tickets-api.test.ts` | Passing (Issue #15 review fix) |
 | STYLE-01 | Zen Green token values and editable/read-only/invalid/focus conventions | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
 | STYLE-02 | Button hierarchy, busy dimensions, badge non-color labels, active navigation | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
 | A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` | Passing for shared shell/components (Issue #13); feature dialogs remain planned |
@@ -116,7 +117,7 @@ No required test may remain deferred at release.
 | AC-05 | UNIT-01, API-05, UI-04, E2E-02 |
 | AC-06 | UNIT-02, DB-03, API-04, UI-05, E2E-02 |
 | AC-07 | DB-03, API-06, UI-05, E2E-02 |
-| AC-08 | API-16, UI-05, E2E-02 |
+| AC-08 | API-16, UI-05, UI-15, E2E-02 |
 | AC-09 | API-07, UI-06, E2E-03 |
 | AC-10 | UNIT-04, API-08, API-09, UI-07, E2E-03 |
 | AC-11 | API-09, UI-08, E2E-03 |
@@ -205,8 +206,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
-| API/integration | `npm test --prefix server -- tests/lab-02/requesters.api.test.ts tests/lab-02/requester-context.api.test.ts` | 16 passed, 0 failed | 2026-09-02 / Issue #14 working tree | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 37 passed, 0 failed | 2026-09-02 / Issue #14 review fix | Passing for implemented scope |
+| API/integration | `npm test --prefix server` | 41 passed, 0 failed | 2026-09-03 / Issue #15 review fix | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 54 passed, 0 failed | 2026-09-03 / Issue #15 review fix | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |

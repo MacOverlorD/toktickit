@@ -531,6 +531,111 @@ a {
   font-weight: 600;
 }
 
+.app-button.is-disabled,
+a[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.create-ticket-form {
+  width: min(100%, var(--form-width));
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.create-ticket-form fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.ticket-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 24px;
+}
+
+.form-span-full {
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.ticket-description {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.file-field {
+  height: auto;
+  min-height: var(--control-height);
+  padding: 7px;
+}
+
+.file-field::file-selector-button {
+  min-height: 32px;
+  margin-right: 12px;
+  color: var(--color-primary);
+  background: var(--color-pale-green);
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.attachment-selection-list {
+  padding: 0;
+  margin: 14px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+}
+
+.attachment-selection-list li {
+  display: flex;
+  min-width: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.attachment-selection-list li.is-invalid {
+  color: var(--color-error);
+}
+
+.attachment-details {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.attachment-details span {
+  font-size: 0.875rem;
+}
+
+.submit-error {
+  padding: 12px 14px;
+  margin: 20px 0 0;
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-left: 4px solid var(--color-error);
+}
+
 .icon-control {
   position: relative;
   display: inline-flex;
@@ -853,6 +958,22 @@ a {
 }
 
 @media (max-width: 767px) {
+  .create-ticket-form {
+    padding: 18px;
+  }
+
+  .ticket-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .create-ticket-form .form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .create-ticket-form .form-actions .app-button {
+    width: 100%;
+  }
   .topbar-inner {
     position: relative;
     width: 100%;

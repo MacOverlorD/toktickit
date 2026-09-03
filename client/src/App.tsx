@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import ProtectedRequesterRoute from './components/routing/ProtectedRequesterRoute'
+import CreateTicketPage from './pages/CreateTicketPage'
 import RequesterSelectionPage from './pages/RequesterSelectionPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
 import SystemCheckPage from './pages/SystemCheckPage'
@@ -27,12 +28,7 @@ export function AppRoutes() {
           />
           <Route
             path={'tickets/new'}
-            element={
-              <RouteFoundationPage
-                title={'Create Ticket'}
-                description={'Submit a new IT support request.'}
-              />
-            }
+            element={<CreateTicketPage />}
           />
           <Route
             path={'tickets/:ticketNumber'}

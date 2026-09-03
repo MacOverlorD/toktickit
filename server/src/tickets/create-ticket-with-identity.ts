@@ -68,6 +68,14 @@ async function findIdempotentTicket(
   })
 }
 
+export async function resolveExistingTicketIntent(
+  prisma: PrismaClient,
+  input: NormalizedTicketCreation,
+): Promise<TicketCreationResult | null> {
+  const existingTicket = await findIdempotentTicket(prisma, input)
+  return existingTicket ? resolveReplay(existingTicket, input) : null
+}
+
 function resolveReplay(
   existingTicket: Ticket,
   input: NormalizedTicketCreation,
@@ -94,11 +102,8 @@ export async function createTicketWithIdentity(
   input: NormalizedTicketCreation,
   generateNumber: TicketNumberGenerator = generateTicketNumber,
 ): Promise<TicketCreationResult> {
-  const existingTicket = await findIdempotentTicket(prisma, input)
-
-  if (existingTicket) {
-    return resolveReplay(existingTicket, input)
-  }
+  const existingResult = await resolveExistingTicketIntent(prisma, input)
+  if (existingResult) return existingResult
 
   for (let attempt = 0; attempt < MAX_TICKET_NUMBER_ATTEMPTS; attempt += 1) {
     try {

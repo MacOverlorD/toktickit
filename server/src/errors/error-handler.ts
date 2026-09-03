@@ -7,6 +7,24 @@ export const errorHandler: ErrorRequestHandler = (
   response,
   _next,
 ) => {
+  if (
+    error instanceof SyntaxError &&
+    typeof error === 'object' &&
+    error !== null &&
+    'type' in error &&
+    error.type === 'entity.parse.failed'
+  ) {
+    response.status(400).json(
+      new ApiError(
+        400,
+        'VALIDATION_ERROR',
+        'Provide a valid JSON request body.',
+        { body: 'Provide valid JSON.' },
+      ).toResponseBody(),
+    )
+    return
+  }
+
   if (error instanceof ApiError) {
     response.status(error.status).json(error.toResponseBody())
     return

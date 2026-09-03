@@ -1,8 +1,10 @@
 import cors from 'cors'
 import express from 'express'
 import { errorHandler } from './errors/error-handler.js'
-import prisma from './prisma.js'
+import { listCategories, listRelatedSystems } from './references/reference-data.js'
 import { listDevelopmentRequesters } from './requesters/development-requesters.js'
+import { requireDevelopmentRequester } from './requesters/requester-context.js'
+import { createTicket } from './tickets/create-ticket.js'
 
 const app = express()
 
@@ -31,23 +33,9 @@ app.get('/api/health', (_request, response) => {
 
 app.get('/api/development-requesters', listDevelopmentRequesters)
 
-app.get('/api/categories', async (_request, response, next) => {
-  try {
-    const categories = await prisma.category.findMany({
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: {
-        id: 'asc',
-      },
-    })
-
-    response.status(200).json(categories)
-  } catch (error) {
-    next(error)
-  }
-})
+app.get('/api/categories', listCategories)
+app.get('/api/related-systems', listRelatedSystems)
+app.post('/api/tickets', requireDevelopmentRequester, createTicket)
 
 app.use(errorHandler)
 
