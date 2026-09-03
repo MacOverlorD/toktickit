@@ -115,7 +115,8 @@ X-Development-Requester-Id: 1
 
 The client stores only that numeric ID in tab-scoped `sessionStorage` under
 `toktickit.devRequesterId` and revalidates it before showing ticket routes.
-The server requester-context middleware is mounted on `POST /api/tickets` and
+The server requester-context middleware is mounted on `GET /api/tickets` and
+`POST /api/tickets` and
 must also be mounted on every requester-owned ticket and attachment endpoint
 introduced in later Lab 2 Issues. Public reference endpoints remain
 unauthenticated by design.
@@ -137,6 +138,19 @@ assigned by the server.
 Repeating the same normalized intent with the same requester and key returns
 the original Ticket without creating a duplicate. Attachment selection is
 validated by the client in Issue #15; file persistence belongs to Issue #18.
+
+### My Tickets
+
+`GET /api/tickets` requires the requester header and returns only tickets owned
+by that active requester. It supports case-insensitive `search` across Ticket
+Number, Summary, and Description; exact `categoryId`, `relatedSystemId`,
+`status`, and `priority` filters; allowlisted `sortBy`/`sortOrder` values; and
+1-based `page` pagination with `pageSize` 10, 20, or 50. Invalid, unknown,
+repeated, or empty-present query values return safe JSON `400 INVALID_QUERY`.
+
+The My Tickets screen presents a table at desktop width and flat ticket items at
+tablet/mobile widths. It provides separate empty and no-results states, Retry,
+Clear Filters, requester switching, and links to create or open a ticket.
 
 ## Verification
 

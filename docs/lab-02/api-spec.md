@@ -280,6 +280,12 @@ Results use the requested primary sort and `id` in the same direction as a
 deterministic secondary sort. A page beyond `totalPages` succeeds with empty
 `items` and reports the requested page plus accurate totals.
 
+Each `items[]` entry contains `ticketNumber`, ISO `createdAt`, `summary`,
+`requestedPriority`, `status`, Category `{ id, name }`, Related System
+`{ id, name }`, and non-negative `attachmentCount`. The attachment count includes
+active attachments only (`removedAt is null`). Reference names remain available
+for historical tickets even if those records later become inactive.
+
 ## 8. Ticket Detail
 
 ### `GET /api/tickets/:ticketNumber`

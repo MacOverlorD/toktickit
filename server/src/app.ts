@@ -5,6 +5,7 @@ import { listCategories, listRelatedSystems } from './references/reference-data.
 import { listDevelopmentRequesters } from './requesters/development-requesters.js'
 import { requireDevelopmentRequester } from './requesters/requester-context.js'
 import { createTicket } from './tickets/create-ticket.js'
+import { listTickets } from './tickets/list-tickets.js'
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.get('/api/development-requesters', listDevelopmentRequesters)
 
 app.get('/api/categories', listCategories)
 app.get('/api/related-systems', listRelatedSystems)
+app.get('/api/tickets', requireDevelopmentRequester, listTickets)
 app.post('/api/tickets', requireDevelopmentRequester, createTicket)
 
 app.use(errorHandler)
