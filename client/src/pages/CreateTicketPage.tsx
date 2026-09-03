@@ -96,7 +96,11 @@ function createSubmissionKey() {
 }
 
 function CreateTicketPage() {
-  const { selectedRequester, setUnsavedTicketDraft } = useRequester()
+  const {
+    confirmTicketNavigation,
+    selectedRequester,
+    setTicketDraftState,
+  } = useRequester()
   const [categories, setCategories] = useState<Category[]>([])
   const [relatedSystems, setRelatedSystems] = useState<RelatedSystem[]>([])
   const [loadState, setLoadState] = useState<LoadState>('loading')
@@ -160,9 +164,9 @@ function CreateTicketPage() {
       attachments.length > 0)
 
   useEffect(() => {
-    setUnsavedTicketDraft(hasDraft)
-    return () => setUnsavedTicketDraft(false)
-  }, [hasDraft, setUnsavedTicketDraft])
+    setTicketDraftState(hasDraft, submitting)
+    return () => setTicketDraftState(false, false)
+  }, [hasDraft, setTicketDraftState, submitting])
 
   function focusFirstError(errors: FieldErrors) {
     const firstField = fieldOrder.find((field) => errors[field])
@@ -510,7 +514,17 @@ function CreateTicketPage() {
           >
             Create Ticket
           </AppButton>
-          <Link className={'app-button app-button-secondary'} to={'/tickets'}>
+          <Link
+            className={
+              'app-button app-button-secondary' +
+              (submitting ? ' is-disabled' : '')
+            }
+            to={'/tickets'}
+            aria-disabled={submitting || undefined}
+            onClick={(event) => {
+              if (!confirmTicketNavigation()) event.preventDefault()
+            }}
+          >
             Cancel
           </Link>
         </div>

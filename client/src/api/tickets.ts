@@ -38,6 +38,33 @@ export class TicketApiError extends Error {
   }
 }
 
+const ticketFieldNames = new Set([
+  'categoryId',
+  'relatedSystemId',
+  'summary',
+  'requestedPriority',
+  'description',
+])
+
+function parseFieldErrors(value: unknown): Record<string, string> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {}
+  }
+
+  const entries = Object.entries(value)
+  if (
+    !entries.every(
+      ([field, message]) =>
+        ticketFieldNames.has(field) &&
+        typeof message === 'string' &&
+        message.trim().length > 0,
+    )
+  ) {
+    return {}
+  }
+  return Object.fromEntries(entries)
+}
+
 function isCreateTicketResult(value: unknown): value is CreateTicketResult {
   if (typeof value !== 'object' || value === null) return false
   const result = value as Record<string, unknown>
@@ -76,9 +103,7 @@ export async function createTicket(
         throw new TicketApiError(
           typeof details.code === 'string' ? details.code : undefined,
           typeof details.message === 'string' ? details.message : undefined,
-          typeof details.fieldErrors === 'object' && details.fieldErrors !== null
-            ? (details.fieldErrors as Record<string, string>)
-            : undefined,
+          parseFieldErrors(details.fieldErrors),
         )
       }
     }

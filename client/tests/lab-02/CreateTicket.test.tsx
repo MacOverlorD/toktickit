@@ -226,7 +226,7 @@ describe('Create Ticket screen', () => {
       screen.getByRole('link', { name: /Change Development Requester/ }),
     )
     expect(confirm).toHaveBeenCalledWith(
-      'Discard this unsaved ticket and change requester?',
+      'Discard this unsaved ticket and leave this page?',
     )
     expect(window.location.pathname).toBe('/tickets/new')
 
@@ -238,6 +238,35 @@ describe('Create Ticket screen', () => {
       await screen.findByRole('heading', {
         name: 'Select Development Requester',
       }),
+    ).toBeInTheDocument()
+  })
+
+  it('blocks Cancel and My Tickets navigation while creation is pending', async () => {
+    let resolveCreate: (value: typeof created) => void
+    vi.mocked(createTicket).mockReturnValue(
+      new Promise((resolve) => {
+        resolveCreate = resolve
+      }),
+    )
+    const confirm = vi.spyOn(window, 'confirm')
+    await renderReadyForm()
+    fillValidForm()
+    fireEvent.click(screen.getByRole('button', { name: 'Create Ticket' }))
+
+    await screen.findByRole('button', { name: 'Creating ticket...' })
+    const cancelLink = screen.getByRole('link', { name: 'Cancel' })
+    const myTicketsLink = screen.getByRole('link', { name: 'My Tickets' })
+    expect(cancelLink).toHaveAttribute('aria-disabled', 'true')
+    expect(myTicketsLink).toHaveAttribute('aria-disabled', 'true')
+
+    fireEvent.click(cancelLink)
+    fireEvent.click(myTicketsLink)
+
+    expect(window.location.pathname).toBe('/tickets/new')
+    expect(confirm).not.toHaveBeenCalled()
+    resolveCreate!(created)
+    expect(
+      await screen.findByRole('heading', { name: 'Ticket created' }),
     ).toBeInTheDocument()
   })
 

@@ -247,4 +247,78 @@ describe('Issue 15 reference data and ticket creation API', () => {
       prisma.ticket.count({ where: { submissionKey: key } }),
     ).resolves.toBe(1)
   })
+
+  it('replays an existing intent before validating references that later became inactive', async () => {
+    const key = newKey()
+    const temporaryCategory = await prisma.category.create({
+      data: {
+        name: 'Replay Category ' + randomUUID(),
+        displayOrder: 9_998,
+      },
+    })
+    const temporarySystem = await prisma.relatedSystem.create({
+      data: {
+        name: 'Replay System ' + randomUUID(),
+        displayOrder: 9_998,
+      },
+    })
+    const body = {
+      ...validBody(),
+      categoryId: temporaryCategory.id,
+      relatedSystemId: temporarySystem.id,
+    }
+
+    try {
+      const first = await createRequest(key).send(body)
+      expect(first.status).toBe(201)
+
+      await Promise.all([
+        prisma.category.update({
+          where: { id: temporaryCategory.id },
+          data: { isActive: false },
+        }),
+        prisma.relatedSystem.update({
+          where: { id: temporarySystem.id },
+          data: { isActive: false },
+        }),
+      ])
+
+      const replay = await createRequest(key).send(body)
+      const conflict = await createRequest(key).send({
+        ...body,
+        summary: 'A different valid summary',
+      })
+
+      expect(replay.status).toBe(200)
+      expect(replay.body).toEqual({ data: first.body.data, replayed: true })
+      expect(conflict.status).toBe(409)
+      expect(conflict.body.error.code).toBe('IDEMPOTENCY_KEY_REUSED')
+    } finally {
+      await prisma.ticket.deleteMany({ where: { submissionKey: key } })
+      await prisma.category.delete({ where: { id: temporaryCategory.id } })
+      await prisma.relatedSystem.delete({ where: { id: temporarySystem.id } })
+    }
+  })
+
+  it('returns safe JSON validation feedback for a malformed JSON body', async () => {
+    const key = newKey()
+    const response = await request(app)
+      .post('/api/tickets')
+      .set('X-Development-Requester-Id', String(requesterId))
+      .set('Idempotency-Key', key)
+      .set('Content-Type', 'application/json')
+      .send('{categoryId:')
+
+    expect(response.status).toBe(400)
+    expect(response.headers['content-type']).toMatch(/json/)
+    expect(response.body).toEqual({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Provide a valid JSON request body.',
+        fieldErrors: {
+          body: 'Provide valid JSON.',
+        },
+      },
+    })
+  })
 })

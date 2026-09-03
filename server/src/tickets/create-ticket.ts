@@ -5,6 +5,7 @@ import prisma from '../prisma.js'
 import {
   createTicketWithIdentity,
   IdempotencyKeyReuseError,
+  resolveExistingTicketIntent,
   TicketNumberGenerationError,
 } from './create-ticket-with-identity.js'
 
@@ -134,6 +135,33 @@ export const createTicket: RequestHandler = async (request, response, next) => {
       throw invalidRequest(fieldErrors)
     }
 
+    const requester = response.locals.developmentRequester as { id: number }
+    const normalizedInput = {
+      requesterId: requester.id,
+      categoryId,
+      relatedSystemId,
+      summary,
+      requestedPriority: priority as RequestedPriority,
+      description,
+      submissionKey,
+    }
+    const existingResult = await resolveExistingTicketIntent(
+      prisma,
+      normalizedInput,
+    )
+    if (existingResult) {
+      response.status(200).json({
+        data: {
+          ticketNumber: existingResult.ticket.ticketNumber,
+          ticketDate: existingResult.ticket.createdAt.toISOString(),
+          status: existingResult.ticket.status,
+          requesterId: existingResult.ticket.requesterId,
+        },
+        replayed: true,
+      })
+      return
+    }
+
     const [category, relatedSystem] = await Promise.all([
       prisma.category.findFirst({
         where: { id: categoryId, isActive: true },
@@ -150,16 +178,7 @@ export const createTicket: RequestHandler = async (request, response, next) => {
     }
     if (Object.keys(fieldErrors).length > 0) throw invalidRequest(fieldErrors)
 
-    const requester = response.locals.developmentRequester as { id: number }
-    const result = await createTicketWithIdentity(prisma, {
-      requesterId: requester.id,
-      categoryId,
-      relatedSystemId,
-      summary,
-      requestedPriority: priority as RequestedPriority,
-      description,
-      submissionKey,
-    })
+    const result = await createTicketWithIdentity(prisma, normalizedInput)
 
     response.status(result.replayed ? 200 : 201).json({
       data: {

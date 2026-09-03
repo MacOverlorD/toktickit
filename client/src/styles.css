@@ -531,6 +531,12 @@ a {
   font-weight: 600;
 }
 
+.app-button.is-disabled,
+a[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

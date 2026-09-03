@@ -1,5 +1,5 @@
 import { List, Menu, TicketPlus, UserRound, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type MouseEvent } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useRequester } from '../../requesters/RequesterContext'
 import { zenGreenCssProperties } from '../../styles/tokens'
@@ -13,9 +13,14 @@ function AppShell() {
   const location = useLocation()
   const {
     contextVersion,
-    hasUnsavedTicketDraft,
+    confirmTicketNavigation,
+    isTicketSubmitting,
     selectedRequester,
   } = useRequester()
+
+  function guardTicketNavigation(event: MouseEvent<HTMLAnchorElement>) {
+    if (!confirmTicketNavigation()) event.preventDefault()
+  }
 
   useEffect(() => {
     setMenuOpen(false)
@@ -28,7 +33,13 @@ function AppShell() {
       </a>
       <header className={'app-topbar'}>
         <div className={'topbar-inner'}>
-          <Link className={'brand-link'} to={'/'} aria-label={'TokTickIT home'}>
+          <Link
+            className={'brand-link'}
+            to={'/'}
+            aria-label={'TokTickIT home'}
+            aria-disabled={isTicketSubmitting || undefined}
+            onClick={guardTicketNavigation}
+          >
             <span className={'brand-mark'} aria-hidden={'true'}>T</span>
             <span>
               <span className={'brand-name'}>TokTickIT</span>
@@ -53,7 +64,13 @@ function AppShell() {
             id={'primary-navigation'}
           >
             <nav className={'app-navigation'} aria-label={'Primary navigation'}>
-              <NavLink className={navigationClass} to={'/tickets'} end>
+              <NavLink
+                className={navigationClass}
+                to={'/tickets'}
+                end
+                aria-disabled={isTicketSubmitting || undefined}
+                onClick={guardTicketNavigation}
+              >
                 <List aria-hidden={'true'} />
                 <span>My Tickets</span>
               </NavLink>
@@ -79,16 +96,8 @@ function AppShell() {
                     ? `Change Development Requester. Current requester: ${selectedRequester.name}`
                     : 'Select Development Requester'
                 }
-                onClick={(event) => {
-                  if (
-                    hasUnsavedTicketDraft &&
-                    !window.confirm(
-                      'Discard this unsaved ticket and change requester?',
-                    )
-                  ) {
-                    event.preventDefault()
-                  }
-                }}
+                aria-disabled={isTicketSubmitting || undefined}
+                onClick={guardTicketNavigation}
               >
                 {selectedRequester ? 'Change requester' : 'Select requester'}
               </Link>
