@@ -11,6 +11,7 @@ import {
 import { Link } from 'react-router-dom'
 import { getCategories, type Category } from '../api/categories'
 import { getRelatedSystems, type RelatedSystem } from '../api/related-systems'
+import { uploadAttachment } from '../api/attachments'
 import {
   createTicket,
   TicketApiError,
@@ -34,6 +35,7 @@ import {
 } from '../tickets/attachment-selection'
 
 type LoadState = 'loading' | 'ready' | 'error'
+type SubmitPhase = 'idle' | 'creating' | 'uploading'
 type FieldErrors = Record<string, string>
 
 interface SelectedAttachment {
@@ -114,7 +116,10 @@ function CreateTicketPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitError, setSubmitError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [submitPhase, setSubmitPhase] = useState<SubmitPhase>('idle')
   const [createdTicket, setCreatedTicket] = useState<CreatedTicket | null>(null)
+  const [failedUploads, setFailedUploads] = useState<File[]>([])
+  const [uploadedCount, setUploadedCount] = useState(0)
   const submissionRef = useRef<{ fingerprint: string; key: string } | null>(null)
   const submissionLock = useRef(false)
 
@@ -224,6 +229,11 @@ function CreateTicketPage() {
       focusFirstError(errors)
       return
     }
+    if (attachments.some((attachment) => attachment.error)) {
+      setAttachmentMessage('Remove invalid attachments before creating the ticket.')
+      document.getElementById('attachments')?.focus()
+      return
+    }
 
     const input = {
       categoryId: Number(categoryId),
@@ -239,12 +249,30 @@ function CreateTicketPage() {
 
     submissionLock.current = true
     setSubmitting(true)
+    setSubmitPhase('creating')
     try {
       const result = await createTicket(
         input,
         selectedRequester.id,
         submissionRef.current.key,
       )
+      const failures: File[] = []
+      let completed = 0
+      if (attachments.length > 0) setSubmitPhase('uploading')
+      for (const attachment of attachments) {
+        try {
+          await uploadAttachment(
+            result.data.ticketNumber,
+            selectedRequester.id,
+            attachment.file,
+          )
+          completed += 1
+        } catch {
+          failures.push(attachment.file)
+        }
+      }
+      setUploadedCount(completed)
+      setFailedUploads(failures)
       setCreatedTicket(result.data)
     } catch (error) {
       if (
@@ -260,7 +288,26 @@ function CreateTicketPage() {
     } finally {
       submissionLock.current = false
       setSubmitting(false)
+      setSubmitPhase('idle')
     }
+  }
+
+  async function retryUploads() {
+    if (!createdTicket || !selectedRequester || failedUploads.length === 0) return
+    setSubmitting(true)
+    const remaining: File[] = []
+    let completed = uploadedCount
+    for (const file of failedUploads) {
+      try {
+        await uploadAttachment(createdTicket.ticketNumber, selectedRequester.id, file)
+        completed += 1
+      } catch {
+        remaining.push(file)
+      }
+    }
+    setUploadedCount(completed)
+    setFailedUploads(remaining)
+    setSubmitting(false)
   }
 
   if (createdTicket) {
@@ -286,6 +333,34 @@ function CreateTicketPage() {
             </Link>
           }
         />
+        {attachments.length > 0 && (
+          <section
+            className={`post-create-upload ${failedUploads.length > 0 ? 'has-error' : 'is-success'}`}
+            aria-live={'polite'}
+          >
+            <h2>Attachments</h2>
+            <p>
+              {uploadedCount} of {attachments.length} uploaded.
+              {failedUploads.length > 0 && ' The ticket remains valid.'}
+            </p>
+            {failedUploads.length > 0 && (
+              <AppButton
+                variant={'secondary'}
+                busy={submitting}
+                busyLabel={'Retrying uploads...'}
+                onClick={() => void retryUploads()}
+              >
+                Retry failed uploads
+              </AppButton>
+            )}
+          </section>
+        )}
+        <Link
+          className={'app-button app-button-secondary post-create-detail-link'}
+          to={'/tickets/' + createdTicket.ticketNumber}
+        >
+          Open Ticket
+        </Link>
       </div>
     )
   }
@@ -508,7 +583,7 @@ function CreateTicketPage() {
           <AppButton
             type={'submit'}
             busy={submitting}
-            busyLabel={'Creating ticket...'}
+            busyLabel={submitPhase === 'uploading' ? 'Uploading attachments...' : 'Creating ticket...'}
             disabled={!referencesAvailable}
             icon={<Send />}
           >

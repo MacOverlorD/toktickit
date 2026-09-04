@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
+import { uploadAttachment } from '../../src/api/attachments'
 import { getCategories } from '../../src/api/categories'
 import { getDevelopmentRequesters } from '../../src/api/development-requesters'
 import { getRelatedSystems } from '../../src/api/related-systems'
@@ -8,6 +9,7 @@ import { createTicket, TicketApiError } from '../../src/api/tickets'
 import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
 
 vi.mock('../../src/api/categories', () => ({ getCategories: vi.fn() }))
+vi.mock('../../src/api/attachments', () => ({ uploadAttachment: vi.fn() }))
 vi.mock('../../src/api/development-requesters', () => ({
   getDevelopmentRequesters: vi.fn(),
 }))
@@ -49,6 +51,11 @@ beforeEach(() => {
     { id: 8, name: 'Email' },
   ])
   vi.mocked(createTicket).mockResolvedValue(created)
+  vi.mocked(uploadAttachment).mockResolvedValue({
+    id: 1, originalName: 'evidence.pdf', mimeType: 'application/pdf',
+    sizeBytes: 3, createdAt: '2026-09-02T10:01:00.000Z',
+    isRemoved: false, removedAt: null, removalReason: null,
+  })
 })
 
 async function renderReadyForm() {
@@ -315,5 +322,33 @@ describe('Create Ticket screen', () => {
       target: { files: [files[0]] },
     })
     expect(screen.getByText('A duplicate file selection was ignored.')).toBeInTheDocument()
+  })
+
+  it('keeps the created ticket and retries only failed attachment uploads', async () => {
+    vi.mocked(uploadAttachment)
+      .mockRejectedValueOnce(new Error('storage unavailable'))
+      .mockResolvedValueOnce({
+        id: 2, originalName: 'evidence.pdf', mimeType: 'application/pdf',
+        sizeBytes: 3, createdAt: '2026-09-02T10:02:00.000Z',
+        isRemoved: false, removedAt: null, removalReason: null,
+      })
+    await renderReadyForm()
+    fillValidForm()
+    const file = new File(['pdf'], 'evidence.pdf', { type: 'application/pdf' })
+    fireEvent.change(screen.getByLabelText('Attachments (optional)'), {
+      target: { files: [file] },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Create Ticket' }))
+
+    expect(await screen.findByRole('heading', { name: 'Ticket created' })).toBeInTheDocument()
+    expect(screen.getByText('0 of 1 uploaded. The ticket remains valid.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open Ticket' })).toHaveAttribute(
+      'href',
+      '/tickets/' + created.data.ticketNumber,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Retry failed uploads' }))
+    expect(await screen.findByText('1 of 1 uploaded.')).toBeInTheDocument()
+    expect(uploadAttachment).toHaveBeenCalledTimes(2)
+    expect(createTicket).toHaveBeenCalledTimes(1)
   })
 })

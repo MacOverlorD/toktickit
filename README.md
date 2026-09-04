@@ -35,6 +35,10 @@ toktickit/
 
 2. Update `DATABASE_URL` in `server/.env` for your PostgreSQL installation.
 
+   `UPLOAD_DIR` controls private attachment storage and defaults to `uploads`
+   relative to the server process. Keep this directory outside any static web
+   root; it is ignored by Git.
+
    A local PostgreSQL container can be started with:
 
    ```powershell
@@ -164,6 +168,26 @@ The Ticket Detail screen groups Request, Classification, Requester, and
 Attachments information. It preserves description line breaks, distinguishes
 active and removed attachments, provides explicit loading/not-found/failure
 states with Retry, and clears prior detail when the requester changes.
+
+### Attachments
+
+Owned Ticket attachment endpoints support listing, single-file multipart
+upload, protected inline/download content, and soft removal:
+
+```text
+GET    /api/tickets/:ticketNumber/attachments
+POST   /api/tickets/:ticketNumber/attachments
+GET    /api/tickets/:ticketNumber/attachments/:attachmentId/content
+DELETE /api/tickets/:ticketNumber/attachments/:attachmentId
+```
+
+Uploads accept the `file` field and allow JPEG, PNG, WEBP, or PDF files up to
+5 MiB, with at most five active attachments per Ticket. The server verifies
+the file signature, MIME type, and extension; uses randomized private stored
+names; and compensates partial storage/database failures. Removal requires a
+5-250 character reason and retains metadata while blocking later content
+access. All endpoints require the active requester context and enforce Ticket
+ownership.
 
 ## Verification
 

@@ -1,5 +1,13 @@
 import cors from 'cors'
 import express from 'express'
+import {
+  getAttachmentContent,
+  listAttachments,
+  parseAttachmentUpload,
+  requireOwnedAttachmentTicket,
+  removeAttachment,
+  uploadAttachment,
+} from './attachments/attachment-handlers.js'
 import { errorHandler } from './errors/error-handler.js'
 import { listCategories, listRelatedSystems } from './references/reference-data.js'
 import { listDevelopmentRequesters } from './requesters/development-requesters.js'
@@ -43,6 +51,24 @@ app.get(
   '/api/tickets/:ticketNumber',
   requireDevelopmentRequester,
   getTicketDetail,
+)
+app.get('/api/tickets/:ticketNumber/attachments', requireDevelopmentRequester, listAttachments)
+app.post(
+  '/api/tickets/:ticketNumber/attachments',
+  requireDevelopmentRequester,
+  requireOwnedAttachmentTicket,
+  parseAttachmentUpload,
+  uploadAttachment,
+)
+app.get(
+  '/api/tickets/:ticketNumber/attachments/:attachmentId/content',
+  requireDevelopmentRequester,
+  getAttachmentContent,
+)
+app.delete(
+  '/api/tickets/:ticketNumber/attachments/:attachmentId',
+  requireDevelopmentRequester,
+  removeAttachment,
 )
 
 app.use(errorHandler)
