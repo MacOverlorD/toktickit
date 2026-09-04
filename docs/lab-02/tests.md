@@ -57,7 +57,7 @@ No required test may remain deferred at release.
 | API-07 | Owner-only list and cross-requester isolation | `server/tests/lab-02/my-tickets.api.test.ts` | Passing (Issue #16) |
 | API-08 | Search and exact filters combine correctly and remain owner scoped | `server/tests/lab-02/my-tickets.api.test.ts` | Passing (Issue #16) |
 | API-09 | Sort/page metadata, deterministic ties, beyond-last page, invalid query | `server/tests/lab-02/my-tickets.api.test.ts` | Passing (Issue #16) |
-| API-10 | Owned detail with metadata; malformed, missing, and cross-owner safe not found | `server/tests/lab-02/ticket-detail.api.test.ts` | Planned |
+| API-10 | Owned detail with metadata; malformed, missing, and cross-owner safe not found | `server/tests/lab-02/ticket-detail.api.test.ts` | Passing (Issue #17) |
 | API-11 | Valid upload writes safe file/metadata and returns no internal storage data | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-12 | Missing/multiple/empty/type mismatch/unsupported/oversized/sixth upload failures | `server/tests/lab-02/attachments.api.test.ts` | Planned |
 | API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Planned |
@@ -81,7 +81,7 @@ No required test may remain deferred at release.
 | UI-06 | Owner list table/card data and requester switch clears old content | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
 | UI-07 | Search/filter/sort/page controls produce documented API query/reset page | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
 | UI-08 | Loading, empty, no-results/Clear Filters, failure/Retry states | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
-| UI-09 | Owned detail, read-only fields, attachments, loading/not-found/failure/back | `client/tests/lab-02/RequesterTicketDetail.test.tsx` | Planned |
+| UI-09 | Owned detail, read-only fields, attachments, loading/not-found/failure/back | `client/tests/lab-02/RequesterTicketDetail.test.tsx` and `client/tests/lab-02/ticket-detail-api.test.ts` | Passing (Issue #17) |
 | UI-10 | Attachment queue active/uploading/invalid/failed states and five-file limit | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
 | UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
@@ -206,8 +206,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
-| API/integration | `npm test --prefix server` | 75 passed, 0 failed | 2026-09-04 / Issue #16 review fix | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 64 passed, 0 failed | 2026-09-04 / Issue #16 review fix | Passing for implemented scope |
+| API/integration | `npm test --prefix server` | 81 passed, 0 failed | 2026-09-04 / Issue #17 | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 76 passed, 0 failed | 2026-09-04 / Issue #17 | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |
