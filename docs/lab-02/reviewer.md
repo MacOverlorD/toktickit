@@ -27,7 +27,7 @@ PR cannot update itself after merge.
 | #15 Create Ticket | `feature/2-05-create-ticket` | [#24](https://github.com/MacOverlorD/toktickit/pull/24) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested four correctness fixes](https://github.com/MacOverlorD/toktickit/pull/24#pullrequestreview-5102433024) | Addressed in `59367af`; [replied to all review threads](https://github.com/MacOverlorD/toktickit/pull/24#discussion_r3926527665) | [Approved](https://github.com/MacOverlorD/toktickit/pull/24#pullrequestreview-5104625811) | `ff77f2e` |
 | #16 My Tickets | `feature/2-06-my-tickets` | [#25](https://github.com/MacOverlorD/toktickit/pull/25) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested four correctness fixes](https://github.com/MacOverlorD/toktickit/pull/25#pullrequestreview-5111374036) | Addressed in `0329a47`; responses posted to all review threads | [Approved](https://github.com/MacOverlorD/toktickit/pull/25#pullrequestreview-5111804134) | `86f49e5` |
 | #17 Ticket Detail | `feature/2-07-ticket-detail` | [#26](https://github.com/MacOverlorD/toktickit/pull/26) | [@Ohmmykung09](https://github.com/Ohmmykung09) | No changes requested | No code change required | [Approved](https://github.com/MacOverlorD/toktickit/pull/26#pullrequestreview-5112711158) | `5fea7ba` |
-| #18 Attachments | `feature/2-08-attachments` | [#27](https://github.com/MacOverlorD/toktickit/pull/27) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested three correctness/test fixes](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115432140) | Addressed in `a4a937f`; replied to all review threads | Pending re-review | Pending |
+| #18 Attachments | `feature/2-08-attachments` | [#27](https://github.com/MacOverlorD/toktickit/pull/27) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested three correctness/test fixes](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115432140) | Addressed in `a4a937f`; replied to all review threads | [Approved after re-review](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115723000) | `70ad83f` |
 | #19 E2E/release readiness | `feature/2-09-e2e-release` | Pending | Pending | Pending | Pending | Pending | Pending |
 | Release | `lab2-staging` | Pending PR to `main` | Pending | Pending | Pending | Pending | Pending |
 
@@ -60,6 +60,7 @@ identify a real engineering tradeoff.
 | 2026-09-04 | [PR #27 preview thread](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3935894072) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Preserve user activation for protected previews, handle blocked windows, and avoid revoking the Blob URL too early. | Yes | Opened a secured placeholder synchronously, navigate it after fetch, close it on failure, report blocked pop-ups, delayed URL revocation, and added three regressions in `a4a937f`; [replied](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3936009462). | Full client suite passed: 89 tests |
 | 2026-09-04 | [PR #27 JSON-limit thread](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3935897843) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Map body-parser `entity.too.large` failures to the documented safe JSON `413 PAYLOAD_TOO_LARGE` contract. | Yes | Added the global error mapping and oversized DELETE-body regression in `a4a937f`; [replied](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3936009751). | Full server suite passed: 101 tests |
 | 2026-09-04 | [PR #27 compensation thread](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3935908235) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Explicitly test cleanup when metadata persistence fails after the file reaches final storage. | Yes | Injected a Prisma transaction failure and verified no metadata, final file, or temporary file remains in `a4a937f`; [replied](https://github.com/MacOverlorD/toktickit/pull/27#discussion_r3936009965). | Full server suite passed: 101 tests |
+| 2026-09-04 | [PR #27 approval](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115723000) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Confirmed all attachment review requests were addressed and found no new blocking issue. | Yes | No further code change was requested. | Approved and merged as `70ad83f` |
 
 ## 4. Reviews Given to Classmates
 
@@ -69,11 +70,11 @@ identify a real engineering tradeoff.
 
 ## 5. Approval and Workflow Checklist
 
-- [ ] Every Issue was implemented on its documented feature branch.
-- [ ] Every feature PR targeted `lab2-staging`, not `main`.
-- [ ] Every feature PR received peer review and approval before merge.
-- [ ] Substantive comments received and responses are linked above.
-- [ ] Requested changes were verified by tests or a documented manual check.
+- [x] Every Issue completed so far was implemented on its documented feature branch.
+- [x] Every completed feature PR targeted `lab2-staging`, not `main`.
+- [ ] Every feature PR received peer review and approval before merge (Issue #19 pending).
+- [x] Substantive comments received so far and responses are linked above.
+- [x] Requested changes were verified by tests or a documented manual check.
 - [ ] Reviews given to classmates contain actionable engineering feedback.
 - [ ] Final integration tests passed on `lab2-staging`.
 - [ ] One release PR merged `lab2-staging` into `main`.

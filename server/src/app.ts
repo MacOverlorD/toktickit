@@ -8,6 +8,7 @@ import {
   removeAttachment,
   uploadAttachment,
 } from './attachments/attachment-handlers.js'
+import { ApiError } from './errors/api-error.js'
 import { errorHandler } from './errors/error-handler.js'
 import { listCategories, listRelatedSystems } from './references/reference-data.js'
 import { listDevelopmentRequesters } from './requesters/development-requesters.js'
@@ -71,6 +72,9 @@ app.delete(
   removeAttachment,
 )
 
+app.use((_request, _response, next) => {
+  next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found.'))
+})
 app.use(errorHandler)
 
 export default app

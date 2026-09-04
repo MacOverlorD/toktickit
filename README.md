@@ -55,8 +55,10 @@ toktickit/
 3. Install dependencies:
 
    ```powershell
+   npm install
    npm install --prefix client
    npm install --prefix server
+   npx playwright install chromium
    ```
 
 4. Apply all database migrations and seed the Lab 2 reference data:
@@ -192,11 +194,19 @@ ownership.
 ## Verification
 
 ```powershell
-npm run build --prefix client
-npm run typecheck --prefix client
-npm test --prefix client
-npm run build --prefix server
-npm test --prefix server
+npm run build
+npm test
 npm run prisma:generate --prefix server
 npm run prisma:seed --prefix server
 ```
+
+The root `npm test` command runs server tests, client tests, and the complete
+Chromium E2E suite. Playwright starts isolated services at
+`http://localhost:5174` (client) and `http://localhost:3100` (API), using
+`client/.env.e2e` so normal development ports can remain independent.
+
+E2E tests use `DATABASE_URL` from `server/.env`, create records whose summaries
+start with `[E2E]`, and delete only those records plus their test attachments
+before and after the suite. They do not reset or truncate the development
+database. Screenshots are written to `artifacts/lab-02/screenshots/`; the local
+HTML report is written to `artifacts/lab-02/playwright-report/index.html`.

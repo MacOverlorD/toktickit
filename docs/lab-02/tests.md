@@ -1,6 +1,6 @@
 # Lab 2 Test Plan and Results
 
-Status: Implementation in progress
+Status: Release-readiness implementation complete; peer review pending
 Contract: [specification.md](./specification.md)  
 API: [api-spec.md](./api-spec.md)  
 UI: [ui-spec.md](./ui-spec.md)
@@ -38,7 +38,7 @@ No required test may remain deferred at release.
 
 | ID | Scenario | Actual test-file path | Status |
 |---|---|---|---|
-| UNIT-01 | Ticket input trimming, lengths, enums, and unknown-field rejection | `server/tests/lab-02/ticket-validation.unit.test.ts` | Planned |
+| UNIT-01 | Ticket input trimming, lengths, enums, and unknown-field rejection | `server/tests/lab-02/ticket-validation.unit.test.ts` | Passing (Issue #19) |
 | UNIT-02 | Ticket Number UTC format, random suffix, pattern, and invalid-date handling | `server/tests/lab-02/ticket-identity.unit.test.ts` | Passing (Issue #12) |
 | UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Passing (Issue #18) |
 | UNIT-04 | Ticket-list allowlisted query parsing, defaults, and invalid parameters | `server/tests/lab-02/ticket-query.unit.test.ts` | Passing (Issue #16) |
@@ -63,7 +63,7 @@ No required test may remain deferred at release.
 | API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
 | API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
 | API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
-| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/create-ticket.api.test.ts` and `server/tests/lab-02/attachments.api.test.ts` | Passing for malformed/oversized JSON and attachment parser/storage failures; remaining final error cases planned |
+| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/error-contract.api.test.ts`, `create-ticket.api.test.ts`, and `attachments.api.test.ts` | Passing (Issue #19) |
 | DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-03 | Same-key replay, changed-payload conflict, concurrent submit, and Ticket Number collision retry/exhaustion | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
@@ -85,26 +85,26 @@ No required test may remain deferred at release.
 | UI-10 | Attachment queue active/uploading/invalid/failed states and five-file limit | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
 | UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
 | UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
-| UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Planned |
+| UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Passing (Issue #19) |
 | UI-14 | Development Requester response is validated and mapped to the public shape | `client/tests/lab-02/development-requesters.test.ts` | Passing (Issue #14) |
 | UI-15 | Create API client validates context headers and safe field-error response shapes | `client/tests/lab-02/tickets-api.test.ts` | Passing (Issue #15 review fix) |
 | STYLE-01 | Zen Green token values and editable/read-only/invalid/focus conventions | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
 | STYLE-02 | Button hierarchy, busy dimensions, badge non-color labels, active navigation | `client/tests/lab-02/zen-green.style.test.tsx` | Passing (Issue #13) |
-| A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` | Passing for shared shell/components (Issue #13); feature dialogs remain planned |
+| A11Y-01 | Labels, headings, landmarks, dialog semantics, keyboard focus, accessible names | `client/tests/lab-02/accessibility.test.tsx` and `AttachmentSection.test.tsx` | Passing (Issues #13 and #18) |
 
 ### Responsive, visual, and E2E tests
 
 | ID | Scenario | Actual test-file path | Status |
 |---|---|---|---|
-| RESP-01 | Create Ticket at 1280x800, 834x1112, and 390x844; no overflow/overlap | `e2e/lab-02/responsive-layout.spec.ts` | Planned |
-| RESP-02 | My Tickets desktop table and tablet/mobile cards, controls and long values | `e2e/lab-02/responsive-layout.spec.ts` | Planned |
-| RESP-03 | Ticket Detail/attachments/dialog fit and remain operable at all viewports | `e2e/lab-02/responsive-layout.spec.ts` | Planned |
-| VIS-01 | Required Create Ticket, My Tickets, and Detail screenshots match UI checklist | `e2e/lab-02/visual-evidence.spec.ts` | Planned |
-| E2E-01 | Select/restore/change requester and recover from requester API failure | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-02 | Create invalid then valid Ticket, preserve failure draft, official DB values | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-03 | Find created Ticket using search/filter/sort/page; B cannot list A's Ticket | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-04 | Open owned detail; B direct URL sees safe not found | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-05 | Upload, preview/download, remove with reason, metadata retained/content blocked | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
+| RESP-01 | Create Ticket at 1280x800, 834x1112, and 390x844; no overflow/overlap | `e2e/lab-02/responsive-layout.spec.ts` | Passing (Issue #19) |
+| RESP-02 | My Tickets desktop table and tablet/mobile cards, controls and long values | `e2e/lab-02/responsive-layout.spec.ts` | Passing (Issue #19) |
+| RESP-03 | Ticket Detail/attachments/dialog fit and remain operable at all viewports | `e2e/lab-02/responsive-layout.spec.ts` | Passing (Issue #19) |
+| VIS-01 | Required Create Ticket, My Tickets, and Detail screenshots match UI checklist | `e2e/lab-02/visual-evidence.spec.ts` | Passing (Issue #19) |
+| E2E-01 | Select/restore/change requester and recover from requester API failure | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
+| E2E-02 | Create invalid then valid Ticket, preserve failure draft, official DB values | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
+| E2E-03 | Find created Ticket using search/filter/sort/page; B cannot list A's Ticket | `e2e/lab-02/requester-ticket-flow.spec.ts` and `visual-evidence.spec.ts` | Passing (Issue #19) |
+| E2E-04 | Open owned detail; B direct URL sees safe not found | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
+| E2E-05 | Upload, preview/download, remove with reason, metadata retained/content blocked | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
 
 ## 3. Acceptance-Criterion Traceability
 
@@ -140,20 +140,20 @@ human-reviewed screenshot evidence; it is not the sole proof for any behavior.
 
 ## 4. Responsive and Visual Checklist
 
-The source checklist and exact screenshot paths are in `ui-spec.md`. During Issue
-09, replace Pending with Pass/Fail and add links below.
+The source checklist and exact screenshot paths are in `ui-spec.md`. The
+Issue #19 run used deterministic test data and the final integrated behavior.
 
 | Item | Desktop 1280x800 | Tablet 834x1112 | Mobile 390x844 | Evidence |
 |---|---|---|---|---|
-| Zen Green palette/hierarchy | Pending | Pending | Pending | Pending |
-| Editable versus read-only fields | Pending | Pending | Pending | Pending |
-| Field-level validation placement | Pending | Pending | Pending | Pending |
-| Button hierarchy and stable busy state | Pending | Pending | Pending | Pending |
-| No clipping or incoherent overlap | Pending | Pending | Pending | Pending |
-| No unintended horizontal overflow | Pending | Pending | Pending | Pending |
-| Table/card responsive representation | Pending | Pending | Pending | Pending |
-| Attachment states/dialog layout | Pending | Pending | Pending | Pending |
-| Keyboard focus and non-color indicators | Pending | Pending | Pending | Pending |
+| Zen Green palette/hierarchy | Pass | Pass | Pass | [Create success](../../artifacts/lab-02/screenshots/create-ticket/desktop-success.png), [tablet detail](../../artifacts/lab-02/screenshots/ticket-detail/tablet-detail.png), [mobile list](../../artifacts/lab-02/screenshots/my-tickets/mobile-list.png) |
+| Editable versus read-only fields | Pass | Pass | Pass | [Create initial](../../artifacts/lab-02/screenshots/create-ticket/desktop-initial.png), [detail views](../../artifacts/lab-02/screenshots/ticket-detail/) |
+| Field-level validation placement | Pass | Pass | Pass | [Create validation](../../artifacts/lab-02/screenshots/create-ticket/desktop-validation.png), RESP-01 |
+| Button hierarchy and stable busy state | Pass | Pass | Pass | [Submitting](../../artifacts/lab-02/screenshots/create-ticket/desktop-submitting.png), responsive suite |
+| No clipping or incoherent overlap | Pass | Pass | Pass | RESP-01 to RESP-03 and all [screenshots](../../artifacts/lab-02/screenshots/) |
+| No unintended horizontal overflow | Pass | Pass | Pass | Bounding-box and page-width assertions in `responsive-layout.spec.ts` |
+| Table/card responsive representation | Pass | Pass | Pass | [Desktop](../../artifacts/lab-02/screenshots/my-tickets/desktop-list.png), [tablet](../../artifacts/lab-02/screenshots/my-tickets/tablet-list.png), [mobile](../../artifacts/lab-02/screenshots/my-tickets/mobile-list.png) |
+| Attachment states/dialog layout | Pass | Pass | Pass | [Detail views](../../artifacts/lab-02/screenshots/ticket-detail/), RESP-03 |
+| Keyboard focus and non-color indicators | Pass | Pass | Pass | A11Y-01, UI-12, badges and labeled icon actions in visual evidence |
 
 Playwright overflow assertion for every page root:
 
@@ -193,24 +193,20 @@ cd ..
 npx playwright test e2e/lab-02
 ```
 
-The final implementation shall add documented root/E2E scripts so a clean test
-database, server, client, and Playwright run can be started reproducibly. Exact
-environment variables and database reset strategy must be recorded in README
-before release.
+Root/E2E scripts, environment variables, isolated E2E ports, and the scoped
+`[E2E]` cleanup strategy are documented in README.
 
 ## 6. Final Results
 
-Issue #11 defines planned tests only; implementation test results must not be
-fabricated. Update this table in each implementation PR and finalize on `main`.
+These results were produced from the Issue #19 working tree on 2026-09-05.
 
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
-| Unit | `npm test --prefix server -- tests/lab-02/attachment-policy.unit.test.ts` | 10 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for attachment scope |
-| API/integration and server regression | `npm test --prefix server` | 101 passed, 0 failed | 2026-09-04 / Issue #18 review fix | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 89 passed, 0 failed | 2026-09-04 / Issue #18 review fix | Passing for implemented scope |
-| Responsive | Pending | Pending | Pending | Planned |
-| Visual | Pending | Pending | Pending | Planned |
-| E2E | Pending | Pending | Pending | Planned |
+| Unit, API/integration, server regression | `npm test --prefix server` | 111 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
+| UI component/style/accessibility | `npm test --prefix client` | 95 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
+| Responsive | `npx playwright test e2e/lab-02/responsive-layout.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
+| Visual | `npx playwright test e2e/lab-02/visual-evidence.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / Issue #19 | Passing; 18 screenshots inspected |
+| E2E complete suite | `npx playwright test` | 7 passed, 0 failed | 2026-09-05 / Issue #19 | Passing; [HTML report](../../artifacts/lab-02/playwright-report/index.html) |
 
 ## 7. Known Limitations or Deferred Tests
 
