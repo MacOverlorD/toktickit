@@ -152,6 +152,19 @@ The My Tickets screen presents a table at desktop width and flat ticket items at
 tablet/mobile widths. It provides separate empty and no-results states, Retry,
 Clear Filters, requester switching, and links to create or open a ticket.
 
+### Ticket Detail
+
+`GET /api/tickets/:ticketNumber` requires the requester header and returns only
+an owned ticket. Missing and cross-owner tickets use the same safe
+`404 RESOURCE_NOT_FOUND` response. The allowlisted response contains the
+read-only requester-facing fields plus active and removed attachment metadata;
+stored filenames, paths, internal notes, and staff-only data are excluded.
+
+The Ticket Detail screen groups Request, Classification, Requester, and
+Attachments information. It preserves description line breaks, distinguishes
+active and removed attachments, provides explicit loading/not-found/failure
+states with Retry, and clears prior detail when the requester changes.
+
 ## Verification
 
 ```powershell

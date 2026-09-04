@@ -113,13 +113,13 @@ Stored filename and server path are never returned.
   "createdAt": "2026-09-01T08:30:00.000Z",
   "category": { "id": 2, "name": "Hardware" },
   "relatedSystem": { "id": 7, "name": "Corporate Laptop" },
-  "activeAttachmentCount": 1
+  "attachmentCount": 1
 }
 ```
 
 ### Ticket detail
 
-Ticket detail extends the summary with:
+Ticket detail uses this allowlisted response:
 
 ```json
 {
@@ -132,11 +132,24 @@ Ticket detail extends the summary with:
   "requestedPriority": "MEDIUM",
   "description": "Battery capacity drops from full to empty in one hour.",
   "status": "NEW",
-  "createdAt": "2026-09-01T08:30:00.000Z",
-  "updatedAt": "2026-09-01T08:30:00.000Z",
-  "attachments": []
+  "attachments": [
+    {
+      "id": 7,
+      "originalName": "battery-report.pdf",
+      "mimeType": "application/pdf",
+      "sizeBytes": 184221,
+      "createdAt": "2026-09-01T08:31:00.000Z",
+      "isRemoved": false,
+      "removedAt": null,
+      "removalReason": null
+    }
+  ]
 }
 ```
+
+The response is an allowlisted read-only representation. It does not contain
+database foreign keys, stored filenames/paths, uploader/remover IDs, comments,
+internal notes, or staff-only data.
 
 ## 5. Reference Endpoints
 

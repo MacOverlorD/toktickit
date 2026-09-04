@@ -4,6 +4,7 @@ import ProtectedRequesterRoute from './components/routing/ProtectedRequesterRout
 import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import RequesterSelectionPage from './pages/RequesterSelectionPage'
+import RequesterTicketDetailPage from './pages/RequesterTicketDetailPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
 import SystemCheckPage from './pages/SystemCheckPage'
 import { RequesterProvider } from './requesters/RequesterContext'
@@ -28,12 +29,7 @@ export function AppRoutes() {
           />
           <Route
             path={'tickets/:ticketNumber'}
-            element={
-              <RouteFoundationPage
-                title={'Ticket Detail'}
-                description={'Read-only requester ticket information.'}
-              />
-            }
+            element={<RequesterTicketDetailPage />}
           />
         </Route>
         <Route
