@@ -1,17 +1,13 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
-import { getCategories } from '../../src/api/categories'
 import { getDevelopmentRequesters } from '../../src/api/development-requesters'
-import { getRelatedSystems } from '../../src/api/related-systems'
 import { getMyTickets, type TicketListResult } from '../../src/api/tickets'
 import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
 
-vi.mock('../../src/api/categories', () => ({ getCategories: vi.fn() }))
 vi.mock('../../src/api/development-requesters', () => ({
   getDevelopmentRequesters: vi.fn(),
 }))
-vi.mock('../../src/api/related-systems', () => ({ getRelatedSystems: vi.fn() }))
 vi.mock('../../src/api/tickets', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../src/api/tickets')>()
   return { ...original, getMyTickets: vi.fn() }
@@ -52,6 +48,18 @@ function listResult(overrides: Partial<TicketListResult> = {}): TicketListResult
       sortBy: 'createdAt',
       sortOrder: 'desc',
     },
+    filterOptions: {
+      categories: [
+        { id: 1, name: 'Hardware', isActive: true },
+        { id: 4, name: 'Network', isActive: true },
+        { id: 9, name: 'Retired Category', isActive: false },
+      ],
+      relatedSystems: [
+        { id: 3, name: 'VPN', isActive: true },
+        { id: 7, name: 'Printer', isActive: true },
+        { id: 10, name: 'Retired System', isActive: false },
+      ],
+    },
     ...overrides,
   }
 }
@@ -60,14 +68,6 @@ beforeEach(() => {
   sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
   window.history.replaceState({}, '', '/tickets')
   vi.mocked(getDevelopmentRequesters).mockResolvedValue(requesters)
-  vi.mocked(getCategories).mockResolvedValue([
-    { id: 1, name: 'Hardware' },
-    { id: 4, name: 'Network' },
-  ])
-  vi.mocked(getRelatedSystems).mockResolvedValue([
-    { id: 3, name: 'VPN' },
-    { id: 7, name: 'Printer' },
-  ])
   vi.mocked(getMyTickets).mockResolvedValue(listResult())
 })
 
@@ -102,6 +102,10 @@ describe('My Tickets', () => {
     expect(screen.getAllByLabelText('Requested priority: High')).toHaveLength(2)
     expect(screen.getAllByRole('link', { name: `Open ticket ${ticket.ticketNumber}` }))
       .toHaveLength(2)
+    expect(screen.getByRole('option', { name: 'Retired Category (historical)' }))
+      .toHaveValue('9')
+    expect(screen.getByRole('option', { name: 'Retired System (historical)' }))
+      .toHaveValue('10')
     expect(getMyTickets).toHaveBeenCalledWith(
       expect.objectContaining({ page: 1, pageSize: 10, sortBy: 'createdAt' }),
       1,
@@ -209,7 +213,7 @@ describe('My Tickets', () => {
     ))
   })
 
-  it('shows a safe failure, preserves controls, and retries', async () => {
+  it('shows a safe list/filter-metadata failure, preserves controls, and retries', async () => {
     vi.mocked(getMyTickets)
       .mockRejectedValueOnce(new Error('database hostname leaked'))
       .mockResolvedValueOnce(listResult())
@@ -222,6 +226,36 @@ describe('My Tickets', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
     expect(await screen.findByText('1 tickets')).toBeInTheDocument()
     expect(getMyTickets).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not let a stale Retry overwrite a newer filtered result', async () => {
+    let resolveRetry!: (value: TicketListResult) => void
+    const newerTicket = {
+      ...ticket,
+      ticketNumber: 'TKT-20260904-AAAABBBB',
+      summary: 'Current filtered result',
+    }
+    vi.mocked(getMyTickets)
+      .mockRejectedValueOnce(new Error('temporary failure'))
+      .mockReturnValueOnce(new Promise((resolve) => {
+        resolveRetry = resolve
+      }))
+      .mockResolvedValueOnce(listResult({ items: [newerTicket] }))
+    render(<App />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry' }))
+    await waitFor(() => expect(getMyTickets).toHaveBeenCalledTimes(2))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Status' }), {
+      target: { value: 'NEW' },
+    })
+
+    expect(await screen.findAllByText('Current filtered result')).toHaveLength(2)
+    await act(async () => {
+      resolveRetry(listResult())
+      await Promise.resolve()
+    })
+    expect(screen.getAllByText('Current filtered result')).toHaveLength(2)
+    expect(screen.queryByText(ticket.summary)).not.toBeInTheDocument()
   })
 
   it('removes the prior requester data and reloads for the newly selected requester', async () => {

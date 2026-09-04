@@ -28,7 +28,14 @@ export const listTickets: RequestHandler = async (request, response, next) => {
       { id: query.sortOrder },
     ]
 
-    const [totalItems, tickets] = await prisma.$transaction([
+    const referenceWhere = {
+      OR: [
+        { isActive: true },
+        { tickets: { some: { requesterId: requester.id } } },
+      ],
+    }
+    const [totalItems, tickets, categories, relatedSystems] =
+      await prisma.$transaction([
       prisma.ticket.count({ where }),
       prisma.ticket.findMany({
         where,
@@ -47,6 +54,16 @@ export const listTickets: RequestHandler = async (request, response, next) => {
             select: { attachments: { where: { removedAt: null } } },
           },
         },
+      }),
+      prisma.category.findMany({
+        where: referenceWhere,
+        orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }],
+        select: { id: true, name: true, isActive: true },
+      }),
+      prisma.relatedSystem.findMany({
+        where: referenceWhere,
+        orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }],
+        select: { id: true, name: true, isActive: true },
       }),
     ])
     const totalPages = Math.ceil(totalItems / query.pageSize)
@@ -73,6 +90,10 @@ export const listTickets: RequestHandler = async (request, response, next) => {
         priority: query.priority,
         sortBy: query.sortBy,
         sortOrder: query.sortOrder,
+      },
+      filterOptions: {
+        categories,
+        relatedSystems,
       },
     })
   } catch (error) {

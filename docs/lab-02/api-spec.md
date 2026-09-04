@@ -238,13 +238,13 @@ Requires requester context. Every query is owner-scoped before search/filter.
 | Query | Type/default | Contract |
 |---|---|---|
 | `search` | optional string | Trimmed 1-100 chars; case-insensitive contains on Ticket Number, Summary, or Description |
-| `categoryId` | optional positive integer | Exact Category ID |
-| `relatedSystemId` | optional positive integer | Exact Related System ID |
+| `categoryId` | optional positive integer | Exact Category ID within PostgreSQL `Int` range |
+| `relatedSystemId` | optional positive integer | Exact Related System ID within PostgreSQL `Int` range |
 | `status` | optional enum | Lab 2 accepts `NEW` |
 | `priority` | optional enum | `LOW`, `MEDIUM`, `HIGH`, `URGENT` |
 | `sortBy` | `createdAt` | `createdAt`, `ticketNumber`, `summary`, `requestedPriority` |
 | `sortOrder` | `desc` | `asc` or `desc` |
-| `page` | `1` | Positive 1-based integer |
+| `page` | `1` | Positive 1-based integer whose calculated offset remains within PostgreSQL `Int` range |
 | `pageSize` | `10` | Exactly 10, 20, or 50 |
 
 Unknown, repeated, malformed, empty-present, or non-allowlisted query parameters
@@ -272,6 +272,10 @@ Response `200`:
     "priority": null,
     "sortBy": "createdAt",
     "sortOrder": "desc"
+  },
+  filterOptions: {
+    categories: [],
+    relatedSystems: []
   }
 }
 ```
@@ -285,6 +289,12 @@ Each `items[]` entry contains `ticketNumber`, ISO `createdAt`, `summary`,
 `{ id, name }`, and non-negative `attachmentCount`. The attachment count includes
 active attachments only (`removedAt is null`). Reference names remain available
 for historical tickets even if those records later become inactive.
+
+`filterOptions` is loaded in the same owner-scoped request as the list. It
+contains every active reference plus inactive references used by at least one
+Ticket owned by the selected requester. Each option contains `id`, `name`, and
+`isActive`. A requester never receives an inactive historical option used only
+by another requester.
 
 ## 8. Ticket Detail
 

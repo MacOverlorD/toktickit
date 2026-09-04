@@ -206,8 +206,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | Pending | Pending | Pending | Planned |
-| API/integration | `npm test --prefix server` | 68 passed, 0 failed | 2026-09-04 / Issue #16 | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 63 passed, 0 failed | 2026-09-04 / Issue #16 | Passing for implemented scope |
+| API/integration | `npm test --prefix server` | 75 passed, 0 failed | 2026-09-04 / Issue #16 review fix | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 64 passed, 0 failed | 2026-09-04 / Issue #16 review fix | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |

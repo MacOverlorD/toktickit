@@ -43,6 +43,16 @@ export interface TicketListQuery {
   pageSize: TicketPageSize
 }
 
+export interface AppliedTicketListQuery {
+  search: string | null
+  categoryId: number | null
+  relatedSystemId: number | null
+  status: TicketStatus | null
+  priority: RequestedPriority | null
+  sortBy: TicketSortField
+  sortOrder: TicketSortOrder
+}
+
 export interface TicketListItem {
   ticketNumber: string
   createdAt: string
@@ -52,6 +62,12 @@ export interface TicketListItem {
   category: { id: number; name: string }
   relatedSystem: { id: number; name: string }
   attachmentCount: number
+}
+
+export interface TicketFilterReference {
+  id: number
+  name: string
+  isActive: boolean
 }
 
 export interface TicketListResult {
@@ -64,7 +80,11 @@ export interface TicketListResult {
     hasPreviousPage: boolean
     hasNextPage: boolean
   }
-  query: Omit<TicketListQuery, 'page' | 'pageSize'> & { search: string | null }
+  query: AppliedTicketListQuery
+  filterOptions: {
+    categories: TicketFilterReference[]
+    relatedSystems: TicketFilterReference[]
+  }
 }
 
 export class TicketApiError extends Error {
@@ -147,6 +167,11 @@ function isReference(value: unknown) {
   )
 }
 
+function isFilterReference(value: unknown): value is TicketFilterReference {
+  return isReference(value) &&
+    typeof (value as Record<string, unknown>).isActive === 'boolean'
+}
+
 function isTicketListItem(value: unknown): value is TicketListItem {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
   const item = value as Record<string, unknown>
@@ -174,11 +199,15 @@ function isTicketListResult(value: unknown): value is TicketListResult {
     Array.isArray(result.pagination) ||
     typeof result.query !== 'object' ||
     result.query === null ||
-    Array.isArray(result.query)
+    Array.isArray(result.query) ||
+    typeof result.filterOptions !== 'object' ||
+    result.filterOptions === null ||
+    Array.isArray(result.filterOptions)
   ) return false
 
   const pagination = result.pagination as Record<string, unknown>
   const query = result.query as Record<string, unknown>
+  const filterOptions = result.filterOptions as Record<string, unknown>
   return (
     isPositiveInteger(pagination.page) &&
     pageSizes.has(pagination.pageSize) &&
@@ -194,7 +223,11 @@ function isTicketListResult(value: unknown): value is TicketListResult {
     (query.status === null || query.status === 'NEW') &&
     (query.priority === null || priorities.has(query.priority)) &&
     sortFields.has(query.sortBy) &&
-    (query.sortOrder === 'asc' || query.sortOrder === 'desc')
+    (query.sortOrder === 'asc' || query.sortOrder === 'desc') &&
+    Array.isArray(filterOptions.categories) &&
+    filterOptions.categories.every(isFilterReference) &&
+    Array.isArray(filterOptions.relatedSystems) &&
+    filterOptions.relatedSystems.every(isFilterReference)
   )
 }
 

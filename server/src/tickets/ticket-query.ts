@@ -35,6 +35,7 @@ const ALLOWED_QUERY_KEYS = new Set([
   'pageSize',
 ])
 const PRIORITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+const DATABASE_INT_MAX = 2_147_483_647
 
 function invalidQuery() {
   return new ApiError(
@@ -51,11 +52,15 @@ function optionalValue(query: Record<string, unknown>, key: string) {
   return value
 }
 
-function positiveInteger(value: string | null, fallback: number | null) {
+function positiveInteger(
+  value: string | null,
+  fallback: number | null,
+  maximum = Number.MAX_SAFE_INTEGER,
+) {
   if (value === null) return fallback
   if (!/^[1-9]\d*$/.test(value)) throw invalidQuery()
   const parsed = Number(value)
-  if (!Number.isSafeInteger(parsed)) throw invalidQuery()
+  if (!Number.isSafeInteger(parsed) || parsed > maximum) throw invalidQuery()
   return parsed
 }
 
@@ -72,10 +77,15 @@ export function parseTicketListQuery(
     throw invalidQuery()
   }
 
-  const categoryId = positiveInteger(optionalValue(query, 'categoryId'), null)
+  const categoryId = positiveInteger(
+    optionalValue(query, 'categoryId'),
+    null,
+    DATABASE_INT_MAX,
+  )
   const relatedSystemId = positiveInteger(
     optionalValue(query, 'relatedSystemId'),
     null,
+    DATABASE_INT_MAX,
   )
   const status = optionalValue(query, 'status')
   if (status !== null && status !== 'NEW') throw invalidQuery()
@@ -99,6 +109,7 @@ export function parseTicketListQuery(
   ) {
     throw invalidQuery()
   }
+  if ((page - 1) * pageSize > DATABASE_INT_MAX) throw invalidQuery()
 
   return {
     search,

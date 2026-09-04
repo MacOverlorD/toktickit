@@ -6,6 +6,7 @@ import {
   TicketApiError,
   type CreateTicketInput,
   type TicketListQuery,
+  type TicketListResult,
 } from '../../src/api/tickets'
 
 vi.mock('../../src/api/request', () => ({
@@ -32,7 +33,7 @@ const listQuery: TicketListQuery = {
   pageSize: 20,
 }
 
-function validListResponse() {
+function validListResponse(): TicketListResult {
   return {
     items: [
       {
@@ -62,6 +63,15 @@ function validListResponse() {
       priority: 'HIGH',
       sortBy: 'summary',
       sortOrder: 'asc',
+    },
+    filterOptions: {
+      categories: [
+        { id: 2, name: 'Network', isActive: true },
+        { id: 9, name: 'Legacy Service', isActive: false },
+      ],
+      relatedSystems: [
+        { id: 7, name: 'VPN', isActive: true },
+      ],
     },
   }
 }

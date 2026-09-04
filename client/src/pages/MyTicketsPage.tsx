@@ -7,10 +7,8 @@ import {
   Search,
   X,
 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { getCategories, type Category } from '../api/categories'
-import { getRelatedSystems, type RelatedSystem } from '../api/related-systems'
 import {
   getMyTickets,
   type RequestedPriority,
@@ -148,43 +146,8 @@ function MyTicketsPage() {
   const [searchDraft, setSearchDraft] = useState('')
   const [result, setResult] = useState<TicketListResult | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('loading')
-  const [categories, setCategories] = useState<Category[]>([])
-  const [relatedSystems, setRelatedSystems] = useState<RelatedSystem[]>([])
-  const [referencesReady, setReferencesReady] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
-
-  const loadReferences = useCallback(async () => {
-    setReferencesReady(false)
-    try {
-      const [categoryItems, systemItems] = await Promise.all([
-        getCategories(),
-        getRelatedSystems(),
-      ])
-      setCategories(categoryItems)
-      setRelatedSystems(systemItems)
-    } catch {
-      setCategories([])
-      setRelatedSystems([])
-    } finally {
-      setReferencesReady(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    void loadReferences()
-  }, [loadReferences])
-
-  const loadTickets = useCallback(async () => {
-    if (!selectedRequester) return
-    setLoadState('loading')
-    try {
-      const nextResult = await getMyTickets(query, selectedRequester.id)
-      setResult(nextResult)
-      setLoadState('ready')
-    } catch {
-      setLoadState('error')
-    }
-  }, [query, selectedRequester])
+  const [retryVersion, setRetryVersion] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -202,7 +165,7 @@ function MyTicketsPage() {
     return () => {
       active = false
     }
-  }, [query, selectedRequester])
+  }, [query, retryVersion, selectedRequester])
 
   const activeFilterCount = useMemo(
     () =>
@@ -297,14 +260,15 @@ function MyTicketsPage() {
             <select
               className={'select-field'}
               value={query.categoryId ?? ''}
-              disabled={!referencesReady}
               onChange={(event) => updateQuery({
                 categoryId: event.target.value ? Number(event.target.value) : null,
               })}
             >
               <option value={''}>All categories</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
+              {(result?.filterOptions.categories ?? []).map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}{category.isActive ? '' : ' (historical)'}
+                </option>
               ))}
             </select>
           </label>
@@ -313,14 +277,15 @@ function MyTicketsPage() {
             <select
               className={'select-field'}
               value={query.relatedSystemId ?? ''}
-              disabled={!referencesReady}
               onChange={(event) => updateQuery({
                 relatedSystemId: event.target.value ? Number(event.target.value) : null,
               })}
             >
               <option value={''}>All systems</option>
-              {relatedSystems.map((system) => (
-                <option key={system.id} value={system.id}>{system.name}</option>
+              {(result?.filterOptions.relatedSystems ?? []).map((system) => (
+                <option key={system.id} value={system.id}>
+                  {system.name}{system.isActive ? '' : ' (historical)'}
+                </option>
               ))}
             </select>
           </label>
@@ -406,7 +371,14 @@ function MyTicketsPage() {
             variant={'error'}
             title={'Tickets unavailable'}
             message={'The ticket list could not be loaded. Try again.'}
-            action={<AppButton variant={'secondary'} onClick={() => void loadTickets()}>Retry</AppButton>}
+            action={
+              <AppButton
+                variant={'secondary'}
+                onClick={() => setRetryVersion((version) => version + 1)}
+              >
+                Retry
+              </AppButton>
+            }
           />
         )}
         {loadState === 'ready' && result && result.items.length === 0 && !isFiltered && (

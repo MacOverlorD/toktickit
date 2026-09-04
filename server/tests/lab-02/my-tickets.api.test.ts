@@ -10,6 +10,8 @@ let categoryAId: number
 let categoryBId: number
 let systemAId: number
 let systemBId: number
+let historicalCategoryId: number
+let historicalSystemId: number
 const marker = randomUUID().slice(0, 8)
 const ownedTicketNumbers: string[] = []
 
@@ -71,6 +73,34 @@ beforeAll(async () => {
   requesterAId = requesterA.id
   requesterBId = requesterB.id
 
+  const [historicalCategory, historicalSystem] = await prisma.$transaction(
+    async (transaction) => {
+      const category = await transaction.category.create({
+        data: {
+          name: `Historical Category ${marker}`,
+          displayOrder: 9_998,
+        },
+      })
+      const system = await transaction.relatedSystem.create({
+        data: {
+          name: `Historical System ${marker}`,
+          displayOrder: 9_998,
+        },
+      })
+      await transaction.category.update({
+        where: { id: category.id },
+        data: { isActive: false },
+      })
+      await transaction.relatedSystem.update({
+        where: { id: system.id },
+        data: { isActive: false },
+      })
+      return [category, system] as const
+    },
+  )
+  historicalCategoryId = historicalCategory.id
+  historicalSystemId = historicalSystem.id
+
   const tiedDate = new Date('2099-01-01T12:00:00.000Z')
   for (let index = 1; index <= 12; index += 1) {
     const number = ticketNumber(index)
@@ -80,8 +110,14 @@ beforeAll(async () => {
         ticketNumber: number,
         submissionKey: randomUUID(),
         requesterId: requesterAId,
-        categoryId: index % 2 === 0 ? categoryBId : categoryAId,
-        relatedSystemId: index % 2 === 0 ? systemBId : systemAId,
+        categoryId:
+          index === 12
+            ? historicalCategoryId
+            : index % 2 === 0 ? categoryBId : categoryAId,
+        relatedSystemId:
+          index === 12
+            ? historicalSystemId
+            : index % 2 === 0 ? systemBId : systemAId,
         summary: index <= 3 ? `Deterministic ${marker}` : `Owned item ${index}`,
         requestedPriority: index % 2 === 0 ? 'HIGH' : 'LOW',
         description:
@@ -114,6 +150,8 @@ afterAll(async () => {
   await prisma.requester.deleteMany({
     where: { id: { in: [requesterAId, requesterBId] } },
   })
+  await prisma.category.delete({ where: { id: historicalCategoryId } })
+  await prisma.relatedSystem.delete({ where: { id: historicalSystemId } })
   await prisma.$disconnect()
 })
 
@@ -142,6 +180,16 @@ describe('Issue 16 My Tickets API', () => {
       priority: null,
       sortBy: 'createdAt',
       sortOrder: 'desc',
+    })
+    expect(response.body.filterOptions.categories).toContainEqual({
+      id: historicalCategoryId,
+      name: `Historical Category ${marker}`,
+      isActive: false,
+    })
+    expect(response.body.filterOptions.relatedSystems).toContainEqual({
+      id: historicalSystemId,
+      name: `Historical System ${marker}`,
+      isActive: false,
     })
     expect(response.body.items[0]).toEqual({
       ticketNumber: expect.any(String),
@@ -180,7 +228,7 @@ describe('Issue 16 My Tickets API', () => {
     })
 
     expect(response.status).toBe(200)
-    expect(response.body.items).toHaveLength(6)
+    expect(response.body.items).toHaveLength(5)
     expect(response.body.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -190,6 +238,32 @@ describe('Issue 16 My Tickets API', () => {
           status: 'NEW',
         }),
       ]),
+    )
+  })
+
+  it('keeps deactivated references available and filterable for historical tickets', async () => {
+    const response = await listAs(requesterAId).query({
+      categoryId: historicalCategoryId,
+      relatedSystemId: historicalSystemId,
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.body.items).toHaveLength(1)
+    expect(response.body.items[0]).toEqual(
+      expect.objectContaining({
+        ticketNumber: ownedTicketNumbers[11],
+        category: expect.objectContaining({ id: historicalCategoryId }),
+        relatedSystem: expect.objectContaining({ id: historicalSystemId }),
+      }),
+    )
+
+    const otherOwnerResponse = await listAs(requesterBId)
+    expect(otherOwnerResponse.status).toBe(200)
+    expect(otherOwnerResponse.body.filterOptions.categories).not.toContainEqual(
+      expect.objectContaining({ id: historicalCategoryId }),
+    )
+    expect(otherOwnerResponse.body.filterOptions.relatedSystems).not.toContainEqual(
+      expect.objectContaining({ id: historicalSystemId }),
     )
   })
 
@@ -231,6 +305,9 @@ describe('Issue 16 My Tickets API', () => {
     { search: '' },
     { page: 0 },
     { pageSize: 25 },
+    { categoryId: '2147483648' },
+    { relatedSystemId: '2147483648' },
+    { page: '42949674', pageSize: 50 },
     { sortBy: 'requesterId' },
     { priority: 'CRITICAL' },
   ])('returns safe JSON 400 for invalid query %#', async (query) => {

@@ -56,13 +56,16 @@ describe('Issue 16 ticket-list query parsing', () => {
     { search: 'x'.repeat(101) },
     { search: ['first', 'second'] },
     { categoryId: '0' },
+    { categoryId: '2147483648' },
     { relatedSystemId: '1.5' },
+    { relatedSystemId: '2147483648' },
     { status: 'CLOSED' },
     { priority: 'CRITICAL' },
     { sortBy: 'requesterId' },
     { sortOrder: 'sideways' },
     { page: '-1' },
     { pageSize: '25' },
+    { page: '42949674', pageSize: '50' },
   ])('rejects invalid query %#', (query) => {
     expectInvalid(query)
   })
