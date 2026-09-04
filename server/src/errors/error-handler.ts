@@ -8,6 +8,22 @@ export const errorHandler: ErrorRequestHandler = (
   response,
   _next,
 ) => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'type' in error &&
+    error.type === 'entity.too.large'
+  ) {
+    response.status(413).json(
+      new ApiError(
+        413,
+        'PAYLOAD_TOO_LARGE',
+        'The JSON request body is too large.',
+      ).toResponseBody(),
+    )
+    return
+  }
+
   if (error instanceof multer.MulterError) {
     const tooLarge = error.code === 'LIMIT_FILE_SIZE'
     response.status(tooLarge ? 413 : 400).json({

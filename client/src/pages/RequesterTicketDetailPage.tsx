@@ -195,6 +195,15 @@ function TicketDetailContent({
     attachment: TicketAttachmentMetadata,
     disposition: 'inline' | 'attachment',
   ) {
+    const previewWindow = disposition === 'inline'
+      ? window.open('about:blank', '_blank')
+      : null
+    if (disposition === 'inline' && !previewWindow) {
+      setActionError('The preview was blocked. Allow pop-ups for this site and try again.')
+      return
+    }
+    if (previewWindow) previewWindow.opener = null
+
     setBusy(true)
     setActionError('')
     try {
@@ -205,16 +214,17 @@ function TicketDetailContent({
         disposition,
       )
       const url = URL.createObjectURL(blob)
-      if (disposition === 'inline') {
-        window.open(url, '_blank', 'noopener,noreferrer')
+      if (previewWindow) {
+        previewWindow.location.replace(url)
       } else {
         const link = document.createElement('a')
         link.href = url
         link.download = attachment.originalName
         link.click()
       }
-      window.setTimeout(() => URL.revokeObjectURL(url), 1_000)
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch {
+      previewWindow?.close()
       setActionError('Attachment content is unavailable. Refresh and try again.')
     } finally {
       setBusy(false)

@@ -3,7 +3,7 @@ import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import request from 'supertest'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
 
@@ -202,6 +202,39 @@ describe('Issue 18 attachment lifecycle API', () => {
     expect(response.status).toBe(500)
     expect(response.body.error.code).toBe('ATTACHMENT_UPLOAD_FAILED')
     expect(await prisma.attachment.count({ where: { ticketId } })).toBe(before)
+  })
+
+  it('removes final and temporary files when the metadata transaction fails', async () => {
+    const filesBefore = await readdir(uploadDirectory)
+    const metadataBefore = await prisma.attachment.count({ where: { ticketId } })
+    const transaction = vi.spyOn(prisma, '$transaction')
+      .mockRejectedValueOnce(new Error('injected metadata failure'))
+    let response: Awaited<ReturnType<typeof api>>
+    try {
+      response = await api('post', `/api/tickets/${ticketNumber}/attachments`)
+        .attach('file', pdf, { filename: 'metadata-failure.pdf', contentType: 'application/pdf' })
+    } finally {
+      transaction.mockRestore()
+    }
+
+    expect(response!.status).toBe(500)
+    expect(response!.body.error.code).toBe('ATTACHMENT_UPLOAD_FAILED')
+    expect(await prisma.attachment.count({ where: { ticketId } })).toBe(metadataBefore)
+    expect(await readdir(uploadDirectory)).toEqual(filesBefore)
+  })
+
+  it('maps an oversized JSON removal body to the safe 413 contract', async () => {
+    const response = await api(
+      'delete',
+      `/api/tickets/${ticketNumber}/attachments/${attachmentId}`,
+    ).send({ reason: 'x'.repeat(110 * 1024) })
+    expect(response.status).toBe(413)
+    expect(response.body).toEqual({
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'The JSON request body is too large.',
+      },
+    })
   })
 
   it('validates reason, soft-removes once, retains metadata, and blocks content', async () => {

@@ -63,7 +63,7 @@ No required test may remain deferred at release.
 | API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
 | API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
 | API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
-| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/create-ticket.api.test.ts` and `server/tests/lab-02/error-contract.api.test.ts` | Passing for malformed JSON (Issue #15); remaining final error cases planned |
+| API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/create-ticket.api.test.ts` and `server/tests/lab-02/attachments.api.test.ts` | Passing for malformed/oversized JSON and attachment parser/storage failures; remaining final error cases planned |
 | DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-03 | Same-key replay, changed-payload conflict, concurrent submit, and Ticket Number collision retry/exhaustion | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
@@ -206,8 +206,8 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
 | Unit | `npm test --prefix server -- tests/lab-02/attachment-policy.unit.test.ts` | 10 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for attachment scope |
-| API/integration and server regression | `npm test --prefix server` | 99 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 87 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for implemented scope |
+| API/integration and server regression | `npm test --prefix server` | 101 passed, 0 failed | 2026-09-04 / Issue #18 review fix | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 89 passed, 0 failed | 2026-09-04 / Issue #18 review fix | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |

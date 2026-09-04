@@ -38,6 +38,13 @@ const detail: TicketDetail = {
   requestedPriority: 'MEDIUM', description: 'Attachment lifecycle test.',
   status: 'NEW', attachments: [active, removed],
 }
+const navigatePreview = vi.fn()
+const closePreview = vi.fn()
+const previewWindow = {
+  opener: window,
+  location: { replace: navigatePreview },
+  close: closePreview,
+} as unknown as Window
 
 beforeEach(() => {
   sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
@@ -45,7 +52,7 @@ beforeEach(() => {
   vi.mocked(getDevelopmentRequesters).mockResolvedValue([requester])
   vi.mocked(getTicketDetail).mockResolvedValue(detail)
   vi.mocked(getAttachmentContent).mockResolvedValue(new Blob(['pdf']))
-  vi.stubGlobal('open', vi.fn())
+  vi.stubGlobal('open', vi.fn(() => previewWindow))
   Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:test') })
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
 })
@@ -94,7 +101,26 @@ describe('Ticket Detail attachment section', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview evidence.pdf' }))
     await waitFor(() => expect(getAttachmentContent).toHaveBeenCalledWith(number, 11, 1, 'inline'))
-    expect(window.open).toHaveBeenCalledWith('blob:test', '_blank', 'noopener,noreferrer')
+    expect(window.open).toHaveBeenCalledWith('about:blank', '_blank')
+    expect(navigatePreview).toHaveBeenCalledWith('blob:test')
+  })
+
+  it('reports a blocked preview without requesting protected content', async () => {
+    vi.mocked(window.open).mockReturnValue(null)
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Preview evidence.pdf' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('The preview was blocked')
+    expect(getAttachmentContent).not.toHaveBeenCalled()
+  })
+
+  it('closes the placeholder window when protected preview loading fails', async () => {
+    vi.mocked(getAttachmentContent).mockRejectedValue(new Error('content unavailable'))
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Preview evidence.pdf' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Attachment content is unavailable')
+    expect(closePreview).toHaveBeenCalledOnce()
   })
 
   it('requires a reason, soft-removes metadata, and hides content actions', async () => {
