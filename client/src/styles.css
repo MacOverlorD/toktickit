@@ -1184,6 +1184,103 @@ a[aria-disabled='true'] {
   margin: 0;
 }
 
+.attachment-toolbar {
+  display: flex;
+  margin-bottom: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.attachment-toolbar > span {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.attachment-toolbar .app-button {
+  cursor: pointer;
+}
+
+.attachment-actions {
+  display: flex;
+  grid-column: 2 / -1;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.attachment-action-error,
+.attachment-action-success,
+.post-create-upload {
+  padding: 10px 12px;
+  border-left: 4px solid;
+  border-radius: 4px;
+}
+
+.attachment-action-error,
+.post-create-upload.has-error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+}
+
+.attachment-action-success,
+.post-create-upload.is-success {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border-color: var(--color-success);
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  padding: 20px;
+  background: rgb(0 0 0 / 48%);
+  place-items: center;
+}
+
+.removal-dialog {
+  width: min(100%, 520px);
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 24%);
+}
+
+.removal-dialog h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.removal-dialog p {
+  overflow-wrap: anywhere;
+}
+
+.removal-dialog textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.post-create-upload {
+  margin-top: 18px;
+}
+
+.post-create-upload h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.post-create-upload p {
+  margin: 6px 0 10px;
+}
+
+.post-create-detail-link {
+  margin-top: 18px;
+}
+
 .attachment-state {
   padding: 3px 7px;
   border: 1px solid currentColor;
@@ -1423,6 +1520,20 @@ a[aria-disabled='true'] {
 
   .detail-attachment-row {
     grid-template-columns: 24px minmax(0, 1fr);
+  }
+
+  .attachment-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .removal-dialog .form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .removal-dialog .app-button {
+    width: 100%;
   }
 
   .attachment-state {

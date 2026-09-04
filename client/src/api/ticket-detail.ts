@@ -61,7 +61,7 @@ function parseRequester(value: unknown) {
   return { id: Number(value.id), name: value.name, email: value.email }
 }
 
-function parseAttachment(value: unknown): TicketAttachmentMetadata | null {
+export function parseAttachmentMetadata(value: unknown): TicketAttachmentMetadata | null {
   if (!isRecord(value) || !isPositiveInteger(value.id) ||
     typeof value.originalName !== 'string' || value.originalName.length === 0 ||
     typeof value.mimeType !== 'string' || value.mimeType.length === 0 ||
@@ -101,7 +101,7 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
   const requester = parseRequester(value.requester)
   const category = parseReference(value.category)
   const relatedSystem = parseReference(value.relatedSystem)
-  const attachments = value.attachments.map(parseAttachment)
+  const attachments = value.attachments.map(parseAttachmentMetadata)
   if (!requester || !category || !relatedSystem || attachments.includes(null)) {
     return null
   }

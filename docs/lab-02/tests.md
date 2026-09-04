@@ -40,7 +40,7 @@ No required test may remain deferred at release.
 |---|---|---|---|
 | UNIT-01 | Ticket input trimming, lengths, enums, and unknown-field rejection | `server/tests/lab-02/ticket-validation.unit.test.ts` | Planned |
 | UNIT-02 | Ticket Number UTC format, random suffix, pattern, and invalid-date handling | `server/tests/lab-02/ticket-identity.unit.test.ts` | Passing (Issue #12) |
-| UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Planned |
+| UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Passing (Issue #18) |
 | UNIT-04 | Ticket-list allowlisted query parsing, defaults, and invalid parameters | `server/tests/lab-02/ticket-query.unit.test.ts` | Passing (Issue #16) |
 | UNIT-05 | Requester email trimming, lowercasing, and idempotent normalization | `server/tests/lab-02/requester-email.unit.test.ts` | Passing (Issue #12 review fix) |
 
@@ -58,11 +58,11 @@ No required test may remain deferred at release.
 | API-08 | Search and exact filters combine correctly and remain owner scoped | `server/tests/lab-02/my-tickets.api.test.ts` | Passing (Issue #16) |
 | API-09 | Sort/page metadata, deterministic ties, beyond-last page, invalid query | `server/tests/lab-02/my-tickets.api.test.ts` | Passing (Issue #16) |
 | API-10 | Owned detail with metadata; malformed, missing, and cross-owner safe not found | `server/tests/lab-02/ticket-detail.api.test.ts` | Passing (Issue #17) |
-| API-11 | Valid upload writes safe file/metadata and returns no internal storage data | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-12 | Missing/multiple/empty/type mismatch/unsupported/oversized/sixth upload failures | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Planned |
+| API-11 | Valid upload writes safe file/metadata and returns no internal storage data | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
+| API-12 | Missing/multiple/empty/type mismatch/unsupported/oversized/sixth upload failures | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
+| API-13 | Storage or metadata failure compensation leaves no inconsistent accessible state | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
+| API-14 | Active content inline/download bytes and headers; cross-owner access rejected | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
+| API-15 | Valid soft removal, reason validation, retained metadata, blocked content/repeat | `server/tests/lab-02/attachments.api.test.ts` | Passing (Issue #18) |
 | API-16 | Invalid JSON, unknown API route, parser/storage errors, and exceptions stay JSON-safe | `server/tests/lab-02/create-ticket.api.test.ts` and `server/tests/lab-02/error-contract.api.test.ts` | Passing for malformed JSON (Issue #15); remaining final error cases planned |
 | DB-01 | Migration relationships, constraints, indexes, and enum/default behavior | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
 | DB-02 | Seed contains required active/inactive records and rerun creates no duplicates | `server/tests/lab-02/data-foundation.integration.test.ts` | Passing (Issue #12) |
@@ -77,14 +77,14 @@ No required test may remain deferred at release.
 | UI-02 | Session restoration, testing-only label, shell identity, switch and stale context | `client/tests/lab-02/RequesterContext.test.tsx` | Passing (Issue #14) |
 | UI-03 | Create fields, active references, read-only values, initial/loading states | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
 | UI-04 | Field validation, focus/message linkage, invalid attachment selection | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issue #15) |
-| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Passing for ticket creation; upload retry remains Issue #18 |
+| UI-05 | Busy/double-click guard, success number, preserved failure values, upload retry | `client/tests/lab-02/CreateTicket.test.tsx` | Passing (Issues #15 and #18) |
 | UI-06 | Owner list table/card data and requester switch clears old content | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
 | UI-07 | Search/filter/sort/page controls produce documented API query/reset page | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
 | UI-08 | Loading, empty, no-results/Clear Filters, failure/Retry states | `client/tests/lab-02/MyTickets.test.tsx` | Passing (Issue #16) |
 | UI-09 | Owned detail, read-only fields, attachments, loading/not-found/failure/back | `client/tests/lab-02/RequesterTicketDetail.test.tsx` and `client/tests/lab-02/ticket-detail-api.test.ts` | Passing (Issue #17) |
-| UI-10 | Attachment queue active/uploading/invalid/failed states and five-file limit | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
-| UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
-| UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Planned |
+| UI-10 | Attachment queue active/uploading/invalid/failed states and five-file limit | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
+| UI-11 | Preview/download actions and removed metadata without content actions | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
+| UI-12 | Removal confirmation/reason validation/busy/failure/focus-return behavior | `client/tests/lab-02/AttachmentSection.test.tsx` | Passing (Issue #18) |
 | UI-13 | Shared safe loading/error/success/empty/not-found live-region semantics | `client/tests/lab-02/FeedbackStates.test.tsx` | Planned |
 | UI-14 | Development Requester response is validated and mapped to the public shape | `client/tests/lab-02/development-requesters.test.ts` | Passing (Issue #14) |
 | UI-15 | Create API client validates context headers and safe field-error response shapes | `client/tests/lab-02/tickets-api.test.ts` | Passing (Issue #15 review fix) |
@@ -205,9 +205,9 @@ fabricated. Update this table in each implementation PR and finalize on `main`.
 
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
-| Unit | Pending | Pending | Pending | Planned |
-| API/integration | `npm test --prefix server` | 81 passed, 0 failed | 2026-09-04 / Issue #17 | Passing for implemented scope |
-| UI component/style/accessibility | `npm test --prefix client` | 76 passed, 0 failed | 2026-09-04 / Issue #17 | Passing for implemented scope |
+| Unit | `npm test --prefix server -- tests/lab-02/attachment-policy.unit.test.ts` | 10 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for attachment scope |
+| API/integration and server regression | `npm test --prefix server` | 99 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for implemented scope |
+| UI component/style/accessibility | `npm test --prefix client` | 87 passed, 0 failed | 2026-09-04 / Issue #18 | Passing for implemented scope |
 | Responsive | Pending | Pending | Pending | Planned |
 | Visual | Pending | Pending | Pending | Planned |
 | E2E | Pending | Pending | Pending | Planned |
