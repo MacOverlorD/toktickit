@@ -11,14 +11,15 @@ import {
 } from './helpers.js'
 import { EMPTY_REQUESTER_EMAIL } from './database.js'
 
-const screenshotRoot = 'artifacts/lab-02/screenshots'
+const screenshotRoot = process.env.PROMOTE_E2E_EVIDENCE === '1'
+  ? 'artifacts/lab-02/screenshots'
+  : 'artifacts/lab-02/test-results/visual-captures'
 
 async function screenshot(page: Page, path: string) {
   await assertNoPageOverflow(page)
   await page.screenshot({
     path: `${screenshotRoot}/${path}`,
     fullPage: true,
-    animations: 'disabled',
   })
 }
 
@@ -72,6 +73,15 @@ test('captures requester selection and Create Ticket states', async ({
 
   await page.getByRole('button', { name: 'Create Ticket' }).click()
   await expect(page.getByText('Select a Category.')).toBeVisible()
+  const category = page.getByRole('combobox', { name: /Category/ })
+  await expect(category).toBeFocused()
+  const skipLink = page.getByRole('link', { name: 'Skip to main content' })
+  await expect(skipLink).not.toBeFocused()
+  expect(await skipLink.evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.bottom <= 0
+  })).toBe(true)
+  await expect(skipLink).toHaveCSS('opacity', '0')
   await screenshot(page, 'create-ticket/desktop-validation.png')
 
   await page.getByLabel('Attachments (optional)').setInputFiles([

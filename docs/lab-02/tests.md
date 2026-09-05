@@ -19,8 +19,8 @@ Lab 2 uses a test pyramid plus explicit visual evidence:
   conventions. These do not replace screenshots.
 - **Responsive:** Playwright at representative desktop, tablet, and mobile sizes,
   including overflow and bounding-box assertions.
-- **Visual:** deterministic screenshots and a completed human checklist against
-  `ui-spec.md`.
+- **Visual:** repeatable runtime captures, explicitly promoted approved
+  screenshots, and a completed human checklist against `ui-spec.md`.
 - **E2E:** Playwright through the real frontend, API, and PostgreSQL database for
   the complete multi-requester Ticket/Attachment lifecycle.
 
@@ -43,6 +43,7 @@ No required test may remain deferred at release.
 | UNIT-03 | Extension/MIME pairs, empty/size/count limits, safe stored filename | `server/tests/lab-02/attachment-policy.unit.test.ts` | Passing (Issue #18) |
 | UNIT-04 | Ticket-list allowlisted query parsing, defaults, and invalid parameters | `server/tests/lab-02/ticket-query.unit.test.ts` | Passing (Issue #16) |
 | UNIT-05 | Requester email trimming, lowercasing, and idempotent normalization | `server/tests/lab-02/requester-email.unit.test.ts` | Passing (Issue #12 review fix) |
+| UNIT-06 | E2E attachment cleanup ignores only missing files and rejects unsafe names while surfacing filesystem failures | `server/tests/lab-02/e2e-cleanup-policy.unit.test.ts` | Passing (Issue #19 review fix) |
 
 ### API and database integration tests
 
@@ -102,7 +103,7 @@ No required test may remain deferred at release.
 | VIS-01 | Required Create Ticket, My Tickets, and Detail screenshots match UI checklist | `e2e/lab-02/visual-evidence.spec.ts` | Passing (Issue #19) |
 | E2E-01 | Select/restore/change requester and recover from requester API failure | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
 | E2E-02 | Create invalid then valid Ticket, preserve failure draft, official DB values | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
-| E2E-03 | Find created Ticket using search/filter/sort/page; B cannot list A's Ticket | `e2e/lab-02/requester-ticket-flow.spec.ts` and `visual-evidence.spec.ts` | Passing (Issue #19) |
+| E2E-03 | Navigate to My Tickets, find the newly created Ticket by Ticket Number, open it from the result, and verify B cannot list A's Ticket | `e2e/lab-02/requester-ticket-flow.spec.ts` and `visual-evidence.spec.ts` | Passing (Issue #19 review fix) |
 | E2E-04 | Open owned detail; B direct URL sees safe not found | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
 | E2E-05 | Upload, preview/download, remove with reason, metadata retained/content blocked | `e2e/lab-02/requester-ticket-flow.spec.ts` | Passing (Issue #19) |
 
@@ -141,7 +142,9 @@ human-reviewed screenshot evidence; it is not the sole proof for any behavior.
 ## 4. Responsive and Visual Checklist
 
 The source checklist and exact screenshot paths are in `ui-spec.md`. The
-Issue #19 run used deterministic test data and the final integrated behavior.
+Issue #19 run used isolated `[E2E]` records and the final integrated behavior.
+The validation capture also asserts that the Category field owns focus and the
+keyboard-only skip link remains hidden when it is not focused.
 
 | Item | Desktop 1280x800 | Tablet 834x1112 | Mobile 390x844 | Evidence |
 |---|---|---|---|---|
@@ -194,7 +197,9 @@ npx playwright test e2e/lab-02
 ```
 
 Root/E2E scripts, environment variables, isolated E2E ports, and the scoped
-`[E2E]` cleanup strategy are documented in README.
+`[E2E]` cleanup strategy are documented in README. Normal visual runs write to
+an ignored runtime directory; only an explicit promotion updates committed
+evidence.
 
 ## 6. Final Results
 
@@ -202,11 +207,11 @@ These results were produced from the Issue #19 working tree on 2026-09-05.
 
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
-| Unit, API/integration, server regression | `npm test --prefix server` | 111 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
+| Unit, API/integration, server regression | `npm test --prefix server` | 114 passed, 0 failed | 2026-09-05 / Issue #19 review fix | Passing |
 | UI component/style/accessibility | `npm test --prefix client` | 95 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
 | Responsive | `npx playwright test e2e/lab-02/responsive-layout.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / Issue #19 | Passing |
 | Visual | `npx playwright test e2e/lab-02/visual-evidence.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / Issue #19 | Passing; 18 screenshots inspected |
-| E2E complete suite | `npx playwright test` | 7 passed, 0 failed | 2026-09-05 / Issue #19 | Passing; [HTML report](../../artifacts/lab-02/playwright-report/index.html) |
+| E2E complete suite | `npx playwright test` | 7 passed, 0 failed | 2026-09-05 / Issue #19 review fix | Passing; fresh isolated web servers and read-only seed validation; [HTML report](../../artifacts/lab-02/playwright-report/index.html) |
 
 ## 7. Known Limitations or Deferred Tests
 

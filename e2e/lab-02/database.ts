@@ -12,6 +12,22 @@ export async function database() {
   return (await import('../../server/src/prisma.js')).default
 }
 
+type RemoveFile = (path: string) => Promise<void>
+
+export async function removeE2EAttachmentFile(
+  storedName: string,
+  removeFile: RemoveFile = unlink,
+) {
+  if (basename(storedName) !== storedName) {
+    throw new Error('Refusing to clean an unsafe E2E attachment filename.')
+  }
+  try {
+    await removeFile(resolve(process.env.UPLOAD_DIR!, storedName))
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+  }
+}
+
 export async function cleanupE2EData() {
   const prisma = await database()
   const tickets = await prisma.ticket.findMany({
@@ -25,9 +41,7 @@ export async function cleanupE2EData() {
 
   for (const ticket of tickets) {
     for (const attachment of ticket.attachments) {
-      if (basename(attachment.storedName) !== attachment.storedName) continue
-      await unlink(resolve(process.env.UPLOAD_DIR!, attachment.storedName))
-        .catch(() => undefined)
+      await removeE2EAttachmentFile(attachment.storedName)
     }
   }
 
@@ -41,4 +55,41 @@ export async function cleanupE2EData() {
       tickets: { none: {} },
     },
   })
+}
+
+export async function assertRequiredSeedData() {
+  const prisma = await database()
+  const [requesterCount, categoryCount, systemCount] = await Promise.all([
+    prisma.requester.count({
+      where: {
+        isActive: true,
+        email: {
+          in: [
+            'anan.wong@example.test',
+            'mali.chaiyasit@example.test',
+            'narin.suksan@example.test',
+            'pimchanok.dee@example.test',
+          ],
+        },
+      },
+    }),
+    prisma.category.count({
+      where: {
+        isActive: true,
+        name: { in: ['Account and Access', 'Hardware'] },
+      },
+    }),
+    prisma.relatedSystem.count({
+      where: {
+        isActive: true,
+        name: { in: ['Corporate Laptop', 'Email'] },
+      },
+    }),
+  ])
+
+  if (requesterCount !== 4 || categoryCount !== 2 || systemCount !== 2) {
+    throw new Error(
+      'Required Lab 2 seed data is missing. Run npm run prisma:seed --prefix server.',
+    )
+  }
 }

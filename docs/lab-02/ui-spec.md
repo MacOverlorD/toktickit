@@ -296,6 +296,10 @@ Complete this table during Issue 09 and link screenshot evidence in `tests.md`.
 
 ## 13. Required Screenshot Paths
 
+Ordinary Playwright runs write disposable captures under
+`artifacts/lab-02/test-results/visual-captures/`. The paths below are updated
+only by an explicit reviewed run with `PROMOTE_E2E_EVIDENCE=1`.
+
 ```text
 artifacts/lab-02/screenshots/
   requester-selection/

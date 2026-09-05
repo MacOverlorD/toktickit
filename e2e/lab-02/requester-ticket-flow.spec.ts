@@ -50,7 +50,13 @@ test('requester owns the complete ticket and attachment lifecycle', async ({
   const ticketHeading = page.getByRole('heading', { name: /^TKT-\d{8}-[A-F0-9]{8}$/ })
   const ticketNumber = (await ticketHeading.textContent())!
 
-  await page.getByRole('link', { name: 'Open Ticket' }).click()
+  await page.getByRole('link', { name: 'Go to My Tickets' }).click()
+  await expect(page.getByRole('heading', { name: 'My Tickets' })).toBeVisible()
+  await page.getByLabel('Search tickets').fill(ticketNumber)
+  await page.getByRole('button', { name: 'Search', exact: true }).click()
+  const matchingRow = page.getByRole('row').filter({ hasText: ticketNumber })
+  await expect(matchingRow).toHaveCount(1)
+  await matchingRow.getByRole('link', { name: ticketNumber, exact: true }).click()
   await expect(page.getByRole('heading', { name: ticketNumber })).toBeVisible()
   await expect(page.getByText(pdfFile.name, { exact: true })).toBeVisible()
 

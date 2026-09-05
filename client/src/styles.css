@@ -102,10 +102,12 @@ a {
   color: var(--color-primary);
   background: var(--color-surface);
   border-radius: 4px;
+  opacity: 0;
   transform: translateY(-160%);
 }
 
 .skip-link:focus {
+  opacity: 1;
   transform: translateY(0);
 }
 
