@@ -1,6 +1,6 @@
 # Lab 2 Test Plan and Results
 
-Status: Feature integration complete on `lab2-staging`; final release PR pending
+Status: Released to `main`; final build and complete test suite passing
 Contract: [specification.md](./specification.md)  
 API: [api-spec.md](./api-spec.md)  
 UI: [ui-spec.md](./ui-spec.md)
@@ -203,16 +203,16 @@ evidence.
 
 ## 6. Final Results
 
-These results were reproduced after integration on `lab2-staging` merge commit
-`e283700` on 2026-09-05.
+These results were reproduced on the final `main` release merge commit
+`b57d273` on 2026-09-05.
 
 | Test level | Final command | Pass/fail counts | Date/commit | Result |
 |---|---|---|---|---|
-| Unit, API/integration, server regression | `npm test --prefix server` | 114 passed, 0 failed | 2026-09-05 / `e283700` | Passing |
-| UI component/style/accessibility | `npm test --prefix client` | 95 passed, 0 failed | 2026-09-05 / `e283700` | Passing |
-| Responsive | `npx playwright test e2e/lab-02/responsive-layout.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / `e283700` | Passing |
-| Visual | `npx playwright test e2e/lab-02/visual-evidence.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / `e283700` | Passing; 18 screenshots inspected |
-| E2E complete suite | `npx playwright test` | 7 passed, 0 failed | 2026-09-05 / `e283700` | Passing; fresh isolated web servers and read-only seed validation; [HTML report](../../artifacts/lab-02/playwright-report/index.html) |
+| Unit, API/integration, server regression | `npm test --prefix server` | 114 passed, 0 failed | 2026-09-05 / `b57d273` | Passing |
+| UI component/style/accessibility | `npm test --prefix client` | 95 passed, 0 failed | 2026-09-05 / `b57d273` | Passing |
+| Responsive | `npx playwright test e2e/lab-02/responsive-layout.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / `b57d273` | Passing |
+| Visual | `npx playwright test e2e/lab-02/visual-evidence.spec.ts` (included in full run) | 3 passed, 0 failed | 2026-09-05 / `b57d273` | Passing; 18 screenshots inspected |
+| E2E complete suite | `npx playwright test` | 7 passed, 0 failed | 2026-09-05 / `b57d273` | Passing; fresh isolated web servers and read-only seed validation; [HTML report](../../artifacts/lab-02/playwright-report/index.html) |
 
 ## 7. Known Limitations or Deferred Tests
 
