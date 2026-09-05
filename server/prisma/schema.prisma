@@ -8,7 +8,90 @@ datasource db {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  tickets      Ticket[]
+}
+
+model Requester {
+  id                  Int          @id @default(autoincrement())
+  name                String       @db.VarChar(120)
+  /// Canonical lowercase storage is enforced by a database check constraint.
+  email               String       @unique @db.VarChar(254)
+  isActive            Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @default(now()) @updatedAt
+  tickets             Ticket[]
+  uploadedAttachments Attachment[] @relation("AttachmentUploader")
+  removedAttachments  Attachment[] @relation("AttachmentRemover")
+}
+
+model RelatedSystem {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique @db.VarChar(120)
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  tickets      Ticket[]
+}
+
+model Ticket {
+  id                Int               @id @default(autoincrement())
+  ticketNumber      String            @unique @db.VarChar(21)
+  submissionKey     String            @db.Uuid
+  requesterId       Int
+  categoryId        Int
+  relatedSystemId   Int
+  summary           String            @db.VarChar(120)
+  requestedPriority RequestedPriority
+  description       String
+  status            TicketStatus      @default(NEW)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now()) @updatedAt
+  requester         Requester         @relation(fields: [requesterId], references: [id], onDelete: Restrict)
+  category          Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  relatedSystem     RelatedSystem     @relation(fields: [relatedSystemId], references: [id], onDelete: Restrict)
+  attachments       Attachment[]
+
+  @@unique([requesterId, submissionKey])
+  @@index([requesterId, createdAt, id])
+  @@index([requesterId, categoryId])
+  @@index([requesterId, relatedSystemId])
+  @@index([requesterId, status])
+  @@index([requesterId, requestedPriority])
+}
+
+model Attachment {
+  id                    Int        @id @default(autoincrement())
+  ticketId              Int
+  originalName          String     @db.VarChar(255)
+  storedName            String     @unique @db.VarChar(255)
+  mimeType              String     @db.VarChar(100)
+  sizeBytes             Int
+  uploadedByRequesterId Int
+  createdAt             DateTime   @default(now())
+  removedAt             DateTime?
+  removalReason         String?    @db.VarChar(250)
+  removedByRequesterId  Int?
+  ticket                Ticket     @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  uploadedBy            Requester  @relation("AttachmentUploader", fields: [uploadedByRequesterId], references: [id], onDelete: Restrict)
+  removedBy             Requester? @relation("AttachmentRemover", fields: [removedByRequesterId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, removedAt])
+}
+
+enum RequestedPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  NEW
 }

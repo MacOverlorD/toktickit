@@ -1,8 +1,11 @@
 node_modules/
+uploads/
 .env
 dist/
 build/
 coverage/
+artifacts/lab-02/playwright-report/
+artifacts/lab-02/test-results/
 .DS_Store
 *.log
 .agents/

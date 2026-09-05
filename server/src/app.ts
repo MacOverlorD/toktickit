@@ -1,12 +1,32 @@
 import cors from 'cors'
-import express, { type ErrorRequestHandler } from 'express'
-import prisma from './prisma.js'
+import express from 'express'
+import {
+  getAttachmentContent,
+  listAttachments,
+  parseAttachmentUpload,
+  requireOwnedAttachmentTicket,
+  removeAttachment,
+  uploadAttachment,
+} from './attachments/attachment-handlers.js'
+import { ApiError } from './errors/api-error.js'
+import { errorHandler } from './errors/error-handler.js'
+import { listCategories, listRelatedSystems } from './references/reference-data.js'
+import { listDevelopmentRequesters } from './requesters/development-requesters.js'
+import { requireDevelopmentRequester } from './requesters/requester-context.js'
+import { createTicket } from './tickets/create-ticket.js'
+import { getTicketDetail } from './tickets/get-ticket-detail.js'
+import { listTickets } from './tickets/list-tickets.js'
 
 const app = express()
 
 app.use(
   cors({
     origin: process.env.CLIENT_URL ?? 'http://localhost:5173',
+    allowedHeaders: [
+      'Content-Type',
+      'X-Development-Requester-Id',
+      'Idempotency-Key',
+    ],
   }),
 )
 app.use(express.json())
@@ -22,30 +42,39 @@ app.get('/api/health', (_request, response) => {
   })
 })
 
-app.get('/api/categories', async (_request, response, next) => {
-  try {
-    const categories = await prisma.category.findMany({
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: {
-        id: 'asc',
-      },
-    })
+app.get('/api/development-requesters', listDevelopmentRequesters)
 
-    response.status(200).json(categories)
-  } catch (error) {
-    next(error)
-  }
+app.get('/api/categories', listCategories)
+app.get('/api/related-systems', listRelatedSystems)
+app.get('/api/tickets', requireDevelopmentRequester, listTickets)
+app.post('/api/tickets', requireDevelopmentRequester, createTicket)
+app.get(
+  '/api/tickets/:ticketNumber',
+  requireDevelopmentRequester,
+  getTicketDetail,
+)
+app.get('/api/tickets/:ticketNumber/attachments', requireDevelopmentRequester, listAttachments)
+app.post(
+  '/api/tickets/:ticketNumber/attachments',
+  requireDevelopmentRequester,
+  requireOwnedAttachmentTicket,
+  parseAttachmentUpload,
+  uploadAttachment,
+)
+app.get(
+  '/api/tickets/:ticketNumber/attachments/:attachmentId/content',
+  requireDevelopmentRequester,
+  getAttachmentContent,
+)
+app.delete(
+  '/api/tickets/:ticketNumber/attachments/:attachmentId',
+  requireDevelopmentRequester,
+  removeAttachment,
+)
+
+app.use((_request, _response, next) => {
+  next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found.'))
 })
-
-const errorHandler: ErrorRequestHandler = (_error, _request, response, _next) => {
-  response.status(500).json({
-    error: 'Internal server error',
-  })
-}
-
 app.use(errorHandler)
 
 export default app

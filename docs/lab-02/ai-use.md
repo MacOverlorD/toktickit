@@ -1,0 +1,61 @@
+# Lab 2 AI Use Record
+
+## 1. Tools Used
+
+| Tool/model | Use in Lab 2 | Responsibility retained by student |
+|---|---|---|
+| OpenAI Codex coding agent | Read the Labsheet, analyze requirements, organize Issues, draft the engineering contract, implement later scoped Issues, and run verification commands | Review and approve requirements, understand decisions, inspect every change, operate Git commits/PRs, demonstrate behavior, and accept final accountability |
+
+Exact model/version should be added from the Codex session information available
+at submission time if required by the course evidence.
+
+## 2. Selected Key Prompts
+
+The final submission requires 6-10 selected prompts. Record concise prompts that
+changed a specification, implementation, test, or review decision. Do not paste
+the full chat transcript or include secrets.
+
+| # | Date | Phase | Selected prompt (concise) | AI contribution | Student review/decision | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | 2026-09-01 | Specification discovery | Read `docs/lab-02/Lab_02_labsheet.pdf` closely and explain the required work sequence in detail. | Extracted scope, workflow, documentation, test levels, UI, API, database, and submission requirements. | Requested clarification before implementation and used the Labsheet as source of truth. | Issue decomposition and this contract |
+| 2 | 2026-09-05 | E2E and release readiness | Continue after the attachment PR was approved and merged; complete Issue #19. | Built isolated Playwright orchestration, real PostgreSQL lifecycle/responsive tests, visual evidence, missing validation/error/feedback coverage, and release documentation. | Required dedicated E2E ports, scoped `[E2E]` cleanup, real ownership checks, deterministic fixtures, full regressions, and visual inspection before review. | Issue #19 branch, `e2e/lab-02/`, screenshots, HTML report, and final test results |
+| 3 | 2026-09-01 | Engineering contract | Start Issue 1 and make it ready according to the Lab 2 workflow and requirements. | Moved #11 to Started, created its feature branch, audited the baseline, resolved open engineering decisions, and drafted six required documents. | Reviewed the summarized decisions and approved the contract for implementation on 2026-09-01. | `docs/lab-02/*.md` and Issue #11 |
+| 4 | 2026-09-01 | Data foundation | Continue with the next Lab 2 Issue after the engineering-contract PR was approved and merged. | Created the required branch from updated staging; implemented the Prisma models, migration checks, repeatable seed, Ticket Number/idempotency service, and focused database tests. | Kept the work inside Issue #12, preserved the approved contract, and required migration plus regression verification before review. | Issue #12 branch, migration, and `server/tests/lab-02/` |
+| 5 | 2026-09-01 | UI foundation | Continue after the data-foundation PR was approved and merged. | Created the required branch from updated staging; implemented the Zen Green shell, route foundation, reusable fields/actions/badges/feedback states, and style/accessibility tests. | Kept requester API behavior outside Issue #13, required exact design tokens and breakpoints, and verified client plus server regressions before review. | Issue #13 branch and `client/tests/lab-02/` |
+| 6 | 2026-09-02 | Requester context | Continue after the UI-foundation PR was approved and merged. | Implemented active requester discovery, strict development-context middleware, tab-scoped restoration, route guards, selector states, switching, and focused API/UI tests. | Required no authentication mechanisms or contract-only endpoint, retained only the numeric requester ID, and verified the real browser flow against PostgreSQL. | Issue #14 branch, `server/tests/lab-02/requester*.api.test.ts`, and `client/tests/lab-02/Requester*.test.tsx` |
+| 7 | 2026-09-03 | Create Ticket | Continue all work after the requester-context PR was approved and merged. | Implemented active reference APIs, requester-derived and idempotent Ticket creation, responsive form states, client attachment selection validation, and API/UI tests. | Kept attachment persistence in Issue #18, required server ownership enforcement, and retained form values plus the same intent key on retry. | Issue #15 branch, `server/tests/lab-02/create-ticket.api.test.ts`, and `client/tests/lab-02/CreateTicket.test.tsx` |
+| 8 | 2026-09-04 | My Tickets | Continue after the Create Ticket PR was approved and merged. | Synced staging, created the required branch, implemented owner-scoped search/filter/sort/pagination API behavior, responsive table/cards, distinct list states, and focused tests. | Required strict query rejection, deterministic secondary sorting, requester-switch isolation, and full regression verification before review. | Issue #16 branch, `server/tests/lab-02/my-tickets.api.test.ts`, and `client/tests/lab-02/MyTickets.test.tsx` |
+| 9 | 2026-09-04 | Ticket Detail | Continue after the My Tickets PR was approved and merged. | Closed the merged workflow, branched from updated staging, and implemented owner-protected read-only detail with attachment metadata and safe UI states. | Required an allowlisted response, indistinguishable missing/cross-owner failures, requester-switch invalidation, and API/UI regression tests. | Issue #17 branch, `server/tests/lab-02/ticket-detail.api.test.ts`, and `client/tests/lab-02/RequesterTicketDetail.test.tsx` |
+| 10 | 2026-09-04 | Attachments | Start the next Issue and implement the complete attachment lifecycle. | Implemented validated temporary-file uploads, protected preview/download, soft removal, retryable post-create uploads, compensation, and API/UI tests. | Required strict file signatures, owner isolation, five-active-file enforcement, retained removal metadata, accessible confirmation, and complete regression verification. | Issue #18 branch, `server/tests/lab-02/attachments.api.test.ts`, and `client/tests/lab-02/AttachmentSection.test.tsx` |
+
+Before submission, keep 6-10 strongest completed rows and remove unused Pending
+rows. Preserve original meaning; minor shortening for readability is acceptable.
+
+## 3. Important AI-Assisted Decisions
+
+| Decision | AI recommendation | Student approval/status |
+|---|---|---|
+| Development identity transport | `X-Development-Requester-Id` plus tab-scoped `sessionStorage`; explicitly not authentication | Approved 2026-09-01 |
+| Ownership failure | Return the same `404` for missing and cross-owner Ticket/Attachment | Approved 2026-09-01 |
+| Duplicate creation | Client busy guard plus UUID `Idempotency-Key` and database uniqueness | Approved 2026-09-01 |
+| Attachment transaction boundary | Create Ticket first, upload one file per request, retain Ticket on upload failure, compensate file/metadata failures | Approved 2026-09-01 |
+| List contract | Owner-scoped search/filter/sort and 1-based pages with sizes 10/20/50 | Approved 2026-09-01 |
+| UI system | Zen Green tokens, flat work-focused surfaces, table desktop/cards mobile, explicit accessible states | Approved 2026-09-01 |
+
+## 4. Verification and Corrections
+
+- The agent's work is checked against the Labsheet, Issue acceptance criteria,
+  current repository state, and GitHub Project workflow.
+- Generated contract documents must be read and approved by the student before
+  implementation. Ambiguities are resolved in the documents, not silently in code.
+- For implementation Issues, record tests run, failures found, review feedback,
+  and corrections. Do not record an AI claim of `done` as evidence by itself.
+- Never include `.env` values, credentials, tokens, private student data, or raw
+  production records in prompts or this document.
+
+## 5. My Reflection
+
+Pending student-authored reflection before submission. In a short paragraph,
+state where AI improved specification or testing quality, one place its output
+needed correction or stronger judgment, and how you verified the final work.
+This section must be written in the student's own words.

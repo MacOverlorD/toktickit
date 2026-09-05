@@ -5,12 +5,16 @@ const apiUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace
   '',
 )
 
-export async function apiFetch(path: string): Promise<Response> {
+export async function apiFetch(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS)
 
   try {
-    return await fetch(`${apiUrl}${path}`, {
+    return await fetch(apiUrl + path, {
+      ...init,
       signal: controller.signal,
     })
   } finally {
