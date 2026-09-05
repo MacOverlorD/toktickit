@@ -414,7 +414,7 @@ becomes inaccessible through the API.
   contract, `Content-Type`, `X-Development-Requester-Id`, and `Idempotency-Key`.
 - JSON request size uses a conservative configured limit; oversized JSON is a
   safe JSON `413 PAYLOAD_TOO_LARGE`.
-- Invalid JSON is `400 INVALID_JSON`.
+- Invalid JSON is `400 VALIDATION_ERROR`.
 - Multer/storage errors are translated into this JSON error contract.
 - A final not-found middleware returns `404 ROUTE_NOT_FOUND` for unknown API
   routes, followed by one final JSON error middleware.
