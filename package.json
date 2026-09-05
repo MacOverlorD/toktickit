@@ -1,0 +1,17 @@
+{
+  "name": "toktickit",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "npm run test:server && npm run test:client && npm run test:e2e",
+    "test:server": "npm test --prefix server",
+    "test:client": "npm test --prefix client",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "build": "npm run build --prefix server && npm run typecheck --prefix client && npm run build --prefix client"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "dotenv": "^17.2.1"
+  }
+}

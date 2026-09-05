@@ -284,21 +284,28 @@ Complete this table during Issue 09 and link screenshot evidence in `tests.md`.
 
 | Check | Desktop | Tablet | Mobile |
 |---|---|---|---|
-| Zen Green colors and hierarchy match tokens | Pending | Pending | Pending |
-| Editable/read-only fields are distinct | Pending | Pending | Pending |
-| Errors sit immediately below their field | Pending | Pending | Pending |
-| Primary/secondary/destructive/busy actions are clear | Pending | Pending | Pending |
-| No clipped labels, values, badges, or filenames | Pending | Pending | Pending |
-| No incoherent overlap or layout shift | Pending | Pending | Pending |
-| No unintended horizontal page overflow | Pending | Pending | Pending |
-| Focus indicators and non-color states are visible | Pending | Pending | Pending |
-| Empty, no-results, failure, and success states are legible | Pending | Pending | Pending |
+| Zen Green colors and hierarchy match tokens | Pass | Pass | Pass |
+| Editable/read-only fields are distinct | Pass | Pass | Pass |
+| Errors sit immediately below their field | Pass | Pass | Pass |
+| Primary/secondary/destructive/busy actions are clear | Pass | Pass | Pass |
+| No clipped labels, values, badges, or filenames | Pass | Pass | Pass |
+| No incoherent overlap or layout shift | Pass | Pass | Pass |
+| No unintended horizontal page overflow | Pass | Pass | Pass |
+| Focus indicators and non-color states are visible | Pass | Pass | Pass |
+| Empty, no-results, failure, and success states are legible | Pass | Pass | Pass |
 
 ## 13. Required Screenshot Paths
+
+Ordinary Playwright runs write disposable captures under
+`artifacts/lab-02/test-results/visual-captures/`. The paths below are updated
+only by an explicit reviewed run with `PROMOTE_E2E_EVIDENCE=1`.
 
 ```text
 artifacts/lab-02/screenshots/
   requester-selection/
+    desktop-loading.png
+    desktop-selection.png
+    desktop-failure.png
   create-ticket/
     desktop-initial.png
     desktop-validation.png

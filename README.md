@@ -55,8 +55,10 @@ toktickit/
 3. Install dependencies:
 
    ```powershell
+   npm install
    npm install --prefix client
    npm install --prefix server
+   npx playwright install chromium
    ```
 
 4. Apply all database migrations and seed the Lab 2 reference data:
@@ -192,11 +194,34 @@ ownership.
 ## Verification
 
 ```powershell
-npm run build --prefix client
-npm run typecheck --prefix client
-npm test --prefix client
-npm run build --prefix server
-npm test --prefix server
+npm run build
+npm test
 npm run prisma:generate --prefix server
 npm run prisma:seed --prefix server
 ```
+
+The root `npm test` command runs server tests, client tests, and the complete
+Chromium E2E suite. Playwright always starts fresh isolated services at
+`http://localhost:5174` (client) and `http://localhost:3100` (API), using
+`client/.env.e2e` so normal development ports can remain independent. If either
+E2E port is occupied, the run fails instead of reusing a potentially stale app.
+
+E2E tests use `DATABASE_URL` from `server/.env`, create records whose summaries
+start with `[E2E]`, and delete only those records plus their test attachments
+before and after the suite. They do not reset or truncate the development
+database, and they only verify that the required seed records already exist.
+Cleanup ignores an already-missing attachment file but surfaces every other
+filesystem failure.
+
+Normal runs write temporary visual captures to the ignored
+`artifacts/lab-02/test-results/visual-captures/` directory. Promote a reviewed
+visual run to the tracked evidence directory explicitly:
+
+```powershell
+$env:PROMOTE_E2E_EVIDENCE='1'
+npx playwright test e2e/lab-02/visual-evidence.spec.ts
+Remove-Item Env:PROMOTE_E2E_EVIDENCE
+```
+
+Approved screenshots live in `artifacts/lab-02/screenshots/`; the local HTML
+report is written to `artifacts/lab-02/playwright-report/index.html`.
