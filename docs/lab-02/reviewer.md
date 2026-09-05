@@ -28,7 +28,7 @@ PR cannot update itself after merge.
 | #16 My Tickets | `feature/2-06-my-tickets` | [#25](https://github.com/MacOverlorD/toktickit/pull/25) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested four correctness fixes](https://github.com/MacOverlorD/toktickit/pull/25#pullrequestreview-5111374036) | Addressed in `0329a47`; responses posted to all review threads | [Approved](https://github.com/MacOverlorD/toktickit/pull/25#pullrequestreview-5111804134) | `86f49e5` |
 | #17 Ticket Detail | `feature/2-07-ticket-detail` | [#26](https://github.com/MacOverlorD/toktickit/pull/26) | [@Ohmmykung09](https://github.com/Ohmmykung09) | No changes requested | No code change required | [Approved](https://github.com/MacOverlorD/toktickit/pull/26#pullrequestreview-5112711158) | `5fea7ba` |
 | #18 Attachments | `feature/2-08-attachments` | [#27](https://github.com/MacOverlorD/toktickit/pull/27) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested three correctness/test fixes](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115432140) | Addressed in `a4a937f`; replied to all review threads | [Approved after re-review](https://github.com/MacOverlorD/toktickit/pull/27#pullrequestreview-5115723000) | `70ad83f` |
-| #19 E2E/release readiness | `feature/2-09-e2e-release` | [#28](https://github.com/MacOverlorD/toktickit/pull/28) | [@Ohmmykung09](https://github.com/Ohmmykung09) | [Requested six release-readiness fixes](https://github.com/MacOverlorD/toktickit/pull/28#pullrequestreview-5120619415) | Addressed in `f1e58fd`; [replied to all review threads](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940683198) | Pending re-review | Pending |
+| #19 E2E/release readiness | `feature/2-09-e2e-release` | [#28](https://github.com/MacOverlorD/toktickit/pull/28) | [@Ohmmykung09](https://github.com/Ohmmykung09), [@justfepwx12](https://github.com/justfepwx12) | [Requested six release-readiness fixes](https://github.com/MacOverlorD/toktickit/pull/28#pullrequestreview-5120619415) plus one API-spec correction | Addressed in `f1e58fd` and `6dad824`; replied to every comment | [LGTM after fixes](https://github.com/MacOverlorD/toktickit/pull/28#issuecomment-5552247396) | `e283700` |
 | Release | `lab2-staging` | Pending PR to `main` | Pending | Pending | Pending | Pending | Pending |
 
 ## 3. Detailed Comments Received
@@ -67,23 +67,23 @@ identify a real engineering tradeoff.
 | 2026-09-05 | [PR #28 validation-image thread](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940090733) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Remove the unintended skip-link overlap from validation evidence. | Yes | Kept the accessible keyboard link focusable, hid it while unfocused, asserted focus/offscreen state, and regenerated the approved image in `f1e58fd`; [replied](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940683310). | Validation screenshot inspected; visual suite passed |
 | 2026-09-05 | [PR #28 cleanup thread](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940091206) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Do not suppress every attachment cleanup filesystem error. | Yes | Cleanup now ignores only `ENOENT`, surfaces other errors, rejects unsafe names, and has three focused unit regressions in `f1e58fd`; [replied](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940683360). | Server suite passed: 114 tests |
 | 2026-09-05 | [PR #28 evidence thread](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940092134) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Stop ordinary test runs from overwriting committed visual evidence. | Yes | Normal runs write ignored runtime captures; only `PROMOTE_E2E_EVIDENCE=1` updates the tracked evidence directory as of `f1e58fd`; [replied](https://github.com/MacOverlorD/toktickit/pull/28#discussion_r3940683421). | Full test run left approved evidence unchanged |
-| 2026-09-05 | [PR #28 API-spec comment](https://github.com/MacOverlorD/toktickit/pull/28#issuecomment-5552349472) | [@justfepwx12](https://github.com/justfepwx12) | Align the malformed-JSON error code in `api-spec.md` with the implemented response contract. | Yes | Changed the stale `INVALID_JSON` reference to the canonical `VALIDATION_ERROR` code used by the middleware and API tests. | Contract search and existing malformed-JSON regressions confirm one consistent code |
+| 2026-09-05 | [PR #28 API-spec comment](https://github.com/MacOverlorD/toktickit/pull/28#issuecomment-5552349472) | [@justfepwx12](https://github.com/justfepwx12) | Align the malformed-JSON error code in `api-spec.md` with the implemented response contract. | Yes | Changed the stale `INVALID_JSON` reference to the canonical `VALIDATION_ERROR` code used by the middleware and API tests in `6dad824`; [replied](https://github.com/MacOverlorD/toktickit/pull/28#issuecomment-5552367796). | Focused error-contract suite passed: 3 tests |
 
 ## 4. Reviews Given to Classmates
 
 | Date | Classmate repository/PR | Author | Files/behavior reviewed | Comment link and summary | Author response/outcome |
 |---|---|---|---|---|---|
-| Pending | Pending | Pending | Pending | Pending | Pending |
+| 2026-08-12 | [Ohmmykung09/toktickit PR #5](https://github.com/Ohmmykung09/toktickit/pull/5) | [@Ohmmykung09](https://github.com/Ohmmykung09) | Built-server startup, PostgreSQL reachability, and test evidence | [Requested changes](https://github.com/Ohmmykung09/toktickit/pull/5#pullrequestreview-4917752987) with two reproducible blockers and required verification | Author [reported both fixes and verification](https://github.com/Ohmmykung09/toktickit/pull/5#issuecomment-5268963896); [approved after re-review](https://github.com/Ohmmykung09/toktickit/pull/5#pullrequestreview-4918787305) |
 
 ## 5. Approval and Workflow Checklist
 
 - [x] Every Issue completed so far was implemented on its documented feature branch.
 - [x] Every completed feature PR targeted `lab2-staging`, not `main`.
-- [ ] Every feature PR received peer review and approval before merge (Issue #19 pending).
+- [x] Every feature PR received peer review and reviewer approval/LGTM before merge.
 - [x] Substantive comments received so far and responses are linked above.
 - [x] Requested changes were verified by tests or a documented manual check.
-- [ ] Reviews given to classmates contain actionable engineering feedback.
-- [ ] Final integration tests passed on `lab2-staging`.
+- [x] Reviews given to classmates contain actionable engineering feedback.
+- [x] Final integration tests passed on `lab2-staging` at `e283700`.
 - [ ] One release PR merged `lab2-staging` into `main`.
 - [ ] Final GitHub Project shows all Lab 2 Issues in `Done`.
 - [ ] Final rendered `reviewer.md` is included in Answer Part 1 evidence.
