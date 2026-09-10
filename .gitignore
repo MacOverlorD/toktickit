@@ -10,3 +10,9 @@ artifacts/lab-02/test-results/
 *.log
 .agents/
 skills-lock.json
+
+# Lab 3 required engineering documents override generic document ignores.
+!docs/lab-03/*.md
+/tmp/
+artifacts/lab-03/playwright-report/
+artifacts/lab-03/test-results/
