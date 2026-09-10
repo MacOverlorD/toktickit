@@ -29,11 +29,14 @@ npm run prisma:deploy --prefix server
 npm run prisma:seed --prefix server
 ```
 
-The migration renames `Requester` to `User` while preserving IDs and its
-sequence. Existing Ticket submitter links and Attachment actor links continue
+The explicitly transactional migration renames `Requester` to `User` while
+preserving IDs and its sequence. Its preflight enforces the complete Lab 3 email
+syntax policy before any rename. Existing Ticket submitter links and Attachment
+actor links continue
 to reference those same IDs. Existing Tickets receive `itPriority` from
 `requestedPriority`. The seed is safe to repeat and does not update existing
-User or Ticket rows selected by their stable natural keys.
+User or Ticket rows selected by their immutable reserved `fixtureKey` values.
+Editable account fields such as email are never used as seed identity.
 
 The seed supplies at least four active and one inactive Requester, three active
 and one inactive IT Staff account, one active Administrator, and demonstration
@@ -74,5 +77,9 @@ npm run build --prefix server
 
 `migration.test.ts` creates isolated PostgreSQL schemas. It applies the real SQL
 to a clean database and to a populated Lab 2 shape with active and removed
-Attachment metadata, then drops only those temporary schemas. It also verifies
-repeatable seed and credential provisioning behavior.
+Attachment metadata, then drops only those temporary schemas. Failure-path
+coverage proves that the whole migration rolls back after a deliberate
+post-rename conflict. Preflight coverage rejects canonical-but-invalid legacy
+email syntax. Seed coverage runs twice on clean and populated schemas and edits
+a fixture email between runs to prove immutable fixture identity. Credential
+provisioning is also verified as repeatable.

@@ -22,6 +22,8 @@ model User {
   name                  String          @db.VarChar(120)
   /// Canonical lowercase storage is enforced by a database check constraint.
   email                 String          @unique @db.VarChar(254)
+  /// Reserved immutable identity for repeatable local fixtures; null for normal accounts.
+  fixtureKey            String?         @unique @db.VarChar(64)
   role                  UserRole        @default(REQUESTER)
   isActive              Boolean         @default(true)
   passwordHash          String?

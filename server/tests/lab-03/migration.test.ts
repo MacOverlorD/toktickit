@@ -18,6 +18,7 @@ const migrationFiles = [
   '20260901111953_lab2_data_foundation',
   '20260901122500_normalize_requester_email',
   '20260911000100_lab3_user_data_foundation',
+  '20260911000200_lab3_stable_seed_identity',
 ].map((name) => path.join(serverRoot, 'prisma', 'migrations', name, 'migration.sql'))
 
 function schemaUrl(schema: string) {
@@ -82,7 +83,7 @@ describe('Lab 3 migration and repeatable data setup', () => {
         `INSERT INTO "RelatedSystem" ("id", "name", "displayOrder") VALUES (21, 'Corporate Laptop', 7)`,
       )
       await client.$executeRawUnsafe(
-        `INSERT INTO "Requester" ("id", "name", "email") VALUES (101, 'Legacy Requester', 'legacy.requester@example.test')`,
+        `INSERT INTO "Requester" ("id", "name", "email") VALUES (101, 'Legacy Requester', 'anan.wong@example.test')`,
       )
       await client.$executeRawUnsafe(
         `SELECT setval(pg_get_serial_sequence('"Requester"', 'id'), 101, true)`,
@@ -107,7 +108,7 @@ describe('Lab 3 migration and repeatable data setup', () => {
            '2026-09-10T02:00:00Z', 'Superseded by a newer diagnostic log', 101)
       `)
 
-      executeMigration(databaseUrl, migrationFiles[3])
+      for (const migration of migrationFiles.slice(3)) executeMigration(databaseUrl, migration)
 
       const users = await client.$queryRawUnsafe<Array<Record<string, unknown>>>(
         'SELECT id, name, email, role, "passwordHash", "mustChangePassword", version FROM "User" WHERE id = 101',
@@ -129,7 +130,7 @@ describe('Lab 3 migration and repeatable data setup', () => {
         expect.objectContaining({
           id: 101,
           name: 'Legacy Requester',
-          email: 'legacy.requester@example.test',
+          email: 'anan.wong@example.test',
           role: 'REQUESTER',
           passwordHash: null,
           mustChangePassword: true,
@@ -168,6 +169,18 @@ describe('Lab 3 migration and repeatable data setup', () => {
       ])
       expect(oldTable[0]?.count).toBe(0n)
       expect(nextUser[0]?.id).toBe(102)
+
+      await seedDatabase(client)
+      await seedDatabase(client)
+      const migratedFixture = await client.user.findUniqueOrThrow({
+        where: { fixtureKey: requesterSeeds[0].fixtureKey },
+      })
+      const populatedSeedTickets = await client.ticket.count({
+        where: { ticketNumber: { startsWith: 'TKT-20260911-' } },
+      })
+      expect(migratedFixture.id).toBe(101)
+      expect(migratedFixture.name).toBe('Legacy Requester')
+      expect(populatedSeedTickets).toBe(8)
     })
   }, 60_000)
 
@@ -177,11 +190,15 @@ describe('Lab 3 migration and repeatable data setup', () => {
 
       await seedDatabase(client)
       const managedUser = await client.user.findUniqueOrThrow({
-        where: { email: requesterSeeds[0].email },
+        where: { fixtureKey: requesterSeeds[0].fixtureKey },
       })
       await client.user.update({
         where: { id: managedUser.id },
-        data: { name: 'Locally Edited Requester', version: 7 },
+        data: {
+          name: 'Locally Edited Requester',
+          email: 'locally.edited.requester@example.test',
+          version: 7,
+        },
       })
       await client.user.create({
         data: {
@@ -197,18 +214,30 @@ describe('Lab 3 migration and repeatable data setup', () => {
 
       await seedDatabase(client)
 
-      const [editedUser, localUser, users, tickets, comments, notes] = await Promise.all([
-        client.user.findUniqueOrThrow({ where: { id: managedUser.id } }),
-        client.user.findUniqueOrThrow({ where: { email: 'locally.managed@example.test' } }),
-        client.user.findMany(),
-        client.ticket.findMany({
-          where: { ticketNumber: { startsWith: 'TKT-20260911-' } },
-        }),
-        client.publicComment.count(),
-        client.internalNote.count(),
-      ])
+      const [editedUser, originalEmailUser, localUser, users, tickets, comments, notes] =
+        await Promise.all([
+          client.user.findUniqueOrThrow({ where: { id: managedUser.id } }),
+          client.user.findUnique({ where: { email: requesterSeeds[0].email } }),
+          client.user.findUniqueOrThrow({ where: { email: 'locally.managed@example.test' } }),
+          client.user.findMany(),
+          client.ticket.findMany({
+            where: { ticketNumber: { startsWith: 'TKT-20260911-' } },
+          }),
+          client.publicComment.count(),
+          client.internalNote.count(),
+        ])
 
-      expect(editedUser).toMatchObject({ name: 'Locally Edited Requester', version: 7 })
+      expect(editedUser).toMatchObject({
+        id: managedUser.id,
+        fixtureKey: requesterSeeds[0].fixtureKey,
+        name: 'Locally Edited Requester',
+        email: 'locally.edited.requester@example.test',
+        version: 7,
+      })
+      expect(originalEmailUser).toBeNull()
+      expect(
+        users.filter(({ fixtureKey }) => fixtureKey === requesterSeeds[0].fixtureKey),
+      ).toHaveLength(1)
       expect(localUser.role).toBe(UserRole.IT_STAFF)
       expect(tickets).toHaveLength(8)
       expect(new Set(tickets.map(({ status }) => status))).toEqual(
@@ -241,7 +270,7 @@ describe('Lab 3 migration and repeatable data setup', () => {
 
       const existingHash = 'existing-local-hash'
       await client.user.update({
-        where: { email: requesterSeeds[0].email },
+        where: { fixtureKey: requesterSeeds[0].fixtureKey },
         data: { passwordHash: existingHash, mustChangePassword: false, version: 9 },
       })
       const firstProvisioned = await provisionInitialPasswords(
@@ -255,10 +284,10 @@ describe('Lab 3 migration and repeatable data setup', () => {
         async (password) => `test-hash:${password}`,
       )
       const preserved = await client.user.findUniqueOrThrow({
-        where: { email: requesterSeeds[0].email },
+        where: { fixtureKey: requesterSeeds[0].fixtureKey },
       })
       const provisionedStaff = await client.user.findUniqueOrThrow({
-        where: { email: staffSeeds[0].email },
+        where: { fixtureKey: staffSeeds[0].fixtureKey },
       })
 
       expect(firstProvisioned).toBe(users.length - 1)
@@ -272,6 +301,54 @@ describe('Lab 3 migration and repeatable data setup', () => {
         passwordHash: 'test-hash:temporary-test-password',
         mustChangePassword: true,
       })
+    })
+  }, 60_000)
+
+  it('rolls back every structural change when DDL fails after the table rename', async () => {
+    await withTemporarySchema('lab3_atomic', async (client, databaseUrl, schema) => {
+      for (const migration of migrationFiles.slice(0, 3)) {
+        executeMigration(databaseUrl, migration)
+      }
+      await client.$executeRawUnsafe('CREATE SEQUENCE "User_id_seq"')
+
+      expect(() => executeMigration(databaseUrl, migrationFiles[3])).toThrow(
+        /User_id_seq.*already exists/,
+      )
+
+      const [tables, userRoleTypes, ticketStatuses] = await Promise.all([
+        client.$queryRawUnsafe<Array<{ table_name: string }>>(
+          `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name IN ('Requester', 'User') ORDER BY table_name`,
+        ),
+        client.$queryRawUnsafe<Array<{ count: bigint }>>(
+          `SELECT COUNT(*)::bigint AS count FROM pg_type type JOIN pg_namespace namespace ON namespace.oid = type.typnamespace WHERE namespace.nspname = '${schema}' AND type.typname = 'UserRole'`,
+        ),
+        client.$queryRawUnsafe<Array<{ enumlabel: string }>>(
+          `SELECT enumlabel FROM pg_enum value JOIN pg_type type ON type.oid = value.enumtypid JOIN pg_namespace namespace ON namespace.oid = type.typnamespace WHERE namespace.nspname = '${schema}' AND type.typname = 'TicketStatus' ORDER BY value.enumsortorder`,
+        ),
+      ])
+      expect(tables).toEqual([{ table_name: 'Requester' }])
+      expect(userRoleTypes[0]?.count).toBe(0n)
+      expect(ticketStatuses.map(({ enumlabel }) => enumlabel)).toEqual(['NEW'])
+    })
+  }, 60_000)
+
+  it('rejects a canonical legacy email that violates the complete Lab 3 policy', async () => {
+    await withTemporarySchema('lab3_email_policy', async (client, databaseUrl, schema) => {
+      for (const migration of migrationFiles.slice(0, 3)) {
+        executeMigration(databaseUrl, migration)
+      }
+      await client.$executeRawUnsafe(
+        `INSERT INTO "Requester" (name, email) VALUES ('Invalid Legacy Email', 'user@localhost')`,
+      )
+
+      expect(() => executeMigration(databaseUrl, migrationFiles[3])).toThrow(
+        /email violates the Lab 3 policy/,
+      )
+
+      const tables = await client.$queryRawUnsafe<Array<{ table_name: string }>>(
+        `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name IN ('Requester', 'User') ORDER BY table_name`,
+      )
+      expect(tables).toEqual([{ table_name: 'Requester' }])
     })
   }, 60_000)
 

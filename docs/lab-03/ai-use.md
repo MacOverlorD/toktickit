@@ -12,6 +12,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 5. User requested completing all Issue 1 authoring work and making the PR ready.
 6. User requested continuing by merging the reviewed Issue 1 PR.
 7. User requested continuing with Issue 2 after Issue 1 was merged.
+8. User requested addressing the peer's requested changes, updating Lab 3 documentation, and resubmitting PR #44 for approval.
 
 These are English summaries, not verbatim quotations. Maintain 6-10 selected
 key prompts by submission, including meaningful specification and coding work.
@@ -30,6 +31,11 @@ migration, Lab 3 account/Ticket communication seeds, guarded Argon2id local
 provisioning, Lab 2 compatibility updates, and isolated clean/populated/preflight
 migration tests. Backed up the existing development database before applying the
 forward migration.
+After peer review on PR #44, added an explicit migration transaction and a
+failure-path rollback test, expanded legacy-email preflight to the complete Lab 3
+syntax policy, and replaced editable-email seed identity with an immutable
+reserved fixture key. Re-ran focused migration/password tests, the full server
+suite, production build, and repeated seed checks before requesting re-review.
 
 ## My Reflection
 

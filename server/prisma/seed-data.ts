@@ -24,22 +24,22 @@ export const relatedSystemSeeds = [
 ] as const
 
 export const requesterSeeds = [
-  { name: 'Anan Wong', email: 'anan.wong@example.test', isActive: true },
-  { name: 'Mali Chaiyasit', email: 'mali.chaiyasit@example.test', isActive: true },
-  { name: 'Narin Suksan', email: 'narin.suksan@example.test', isActive: true },
-  { name: 'Pimchanok Dee', email: 'pimchanok.dee@example.test', isActive: true },
-  { name: 'Former Requester', email: 'former.requester@example.test', isActive: false },
+  { fixtureKey: 'lab3-requester-anan', name: 'Anan Wong', email: 'anan.wong@example.test', isActive: true },
+  { fixtureKey: 'lab3-requester-mali', name: 'Mali Chaiyasit', email: 'mali.chaiyasit@example.test', isActive: true },
+  { fixtureKey: 'lab3-requester-narin', name: 'Narin Suksan', email: 'narin.suksan@example.test', isActive: true },
+  { fixtureKey: 'lab3-requester-pimchanok', name: 'Pimchanok Dee', email: 'pimchanok.dee@example.test', isActive: true },
+  { fixtureKey: 'lab3-requester-former', name: 'Former Requester', email: 'former.requester@example.test', isActive: false },
 ] as const
 
 export const staffSeeds = [
-  { name: 'Kanya Support', email: 'kanya.support@example.test', isActive: true },
-  { name: 'Somchai Service', email: 'somchai.service@example.test', isActive: true },
-  { name: 'Nicha Helpdesk', email: 'nicha.helpdesk@example.test', isActive: true },
-  { name: 'Former IT Staff', email: 'former.staff@example.test', isActive: false },
+  { fixtureKey: 'lab3-staff-kanya', name: 'Kanya Support', email: 'kanya.support@example.test', isActive: true },
+  { fixtureKey: 'lab3-staff-somchai', name: 'Somchai Service', email: 'somchai.service@example.test', isActive: true },
+  { fixtureKey: 'lab3-staff-nicha', name: 'Nicha Helpdesk', email: 'nicha.helpdesk@example.test', isActive: true },
+  { fixtureKey: 'lab3-staff-former', name: 'Former IT Staff', email: 'former.staff@example.test', isActive: false },
 ] as const
 
 export const administratorSeeds = [
-  { name: 'Local Administrator', email: 'admin@example.test', isActive: true },
+  { fixtureKey: 'lab3-admin-local', name: 'Local Administrator', email: 'admin@example.test', isActive: true },
 ] as const
 
 export const userSeeds = [
@@ -55,8 +55,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000001',
     submissionKey: '30000000-0000-4000-8000-000000000001',
-    requesterEmail: requesterSeeds[0].email,
-    ownerEmail: null,
+    requesterKey: requesterSeeds[0].fixtureKey,
+    ownerKey: null,
     category: 'Account and Access',
     relatedSystem: 'Email',
     summary: 'Cannot sign in to university email',
@@ -67,8 +67,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000002',
     submissionKey: '30000000-0000-4000-8000-000000000002',
-    requesterEmail: requesterSeeds[1].email,
-    ownerEmail: staffSeeds[0].email,
+    requesterKey: requesterSeeds[1].fixtureKey,
+    ownerKey: staffSeeds[0].fixtureKey,
     category: 'Network',
     relatedSystem: 'Campus Wi-Fi',
     summary: 'Wi-Fi disconnects during online class',
@@ -79,8 +79,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000003',
     submissionKey: '30000000-0000-4000-8000-000000000003',
-    requesterEmail: requesterSeeds[2].email,
-    ownerEmail: staffSeeds[1].email,
+    requesterKey: requesterSeeds[2].fixtureKey,
+    ownerKey: staffSeeds[1].fixtureKey,
     category: 'Hardware',
     relatedSystem: 'Corporate Laptop',
     summary: 'Laptop battery drains unusually fast',
@@ -91,8 +91,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000004',
     submissionKey: '30000000-0000-4000-8000-000000000004',
-    requesterEmail: requesterSeeds[3].email,
-    ownerEmail: staffSeeds[2].email,
+    requesterKey: requesterSeeds[3].fixtureKey,
+    ownerKey: staffSeeds[2].fixtureKey,
     category: 'Software',
     relatedSystem: 'Grade Submission App',
     summary: 'Grade submission file is rejected',
@@ -103,8 +103,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000005',
     submissionKey: '30000000-0000-4000-8000-000000000005',
-    requesterEmail: requesterSeeds[0].email,
-    ownerEmail: staffSeeds[0].email,
+    requesterKey: requesterSeeds[0].fixtureKey,
+    ownerKey: staffSeeds[0].fixtureKey,
     category: 'Software',
     relatedSystem: 'LEB2 App',
     summary: 'Course material link opened successfully',
@@ -115,8 +115,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000006',
     submissionKey: '30000000-0000-4000-8000-000000000006',
-    requesterEmail: requesterSeeds[1].email,
-    ownerEmail: administratorSeeds[0].email,
+    requesterKey: requesterSeeds[1].fixtureKey,
+    ownerKey: administratorSeeds[0].fixtureKey,
     category: 'Hardware',
     relatedSystem: 'Printer',
     summary: 'Printer queue cleared after maintenance',
@@ -127,8 +127,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000007',
     submissionKey: '30000000-0000-4000-8000-000000000007',
-    requesterEmail: requesterSeeds[2].email,
-    ownerEmail: null,
+    requesterKey: requesterSeeds[2].fixtureKey,
+    ownerKey: null,
     category: 'Network',
     relatedSystem: 'VPN',
     summary: 'VPN request reopened after recurrence',
@@ -139,8 +139,8 @@ const ticketSeeds = [
   {
     ticketNumber: 'TKT-20260911-00000008',
     submissionKey: '30000000-0000-4000-8000-000000000008',
-    requesterEmail: requesterSeeds[3].email,
-    ownerEmail: null,
+    requesterKey: requesterSeeds[3].fixtureKey,
+    ownerKey: null,
     category: 'Account and Access',
     relatedSystem: 'Email',
     summary: 'Duplicate mailbox request cancelled',
@@ -202,7 +202,7 @@ export async function seedDatabase(prisma: PrismaClient) {
   for (const user of userSeeds) {
     const email = normalizeUserEmail(user.email)
     const row = await prisma.user.upsert({
-      where: { email },
+      where: { fixtureKey: user.fixtureKey },
       update: {},
       create: {
         ...user,
@@ -210,7 +210,7 @@ export async function seedDatabase(prisma: PrismaClient) {
         mustChangePassword: true,
       },
     })
-    users.set(email, row)
+    users.set(user.fixtureKey, row)
   }
 
   const counts = await prisma.user.groupBy({
@@ -235,10 +235,8 @@ export async function seedDatabase(prisma: PrismaClient) {
 
   const tickets = new Map<string, number>()
   for (const seed of ticketSeeds) {
-    const requester = users.get(normalizeUserEmail(seed.requesterEmail))
-    const owner = seed.ownerEmail
-      ? users.get(normalizeUserEmail(seed.ownerEmail))
-      : null
+    const requester = users.get(seed.requesterKey)
+    const owner = seed.ownerKey ? users.get(seed.ownerKey) : null
     const categoryId = categories.get(seed.category)
     const relatedSystemId = systems.get(seed.relatedSystem)
     if (!requester || !categoryId || !relatedSystemId) {
@@ -266,8 +264,8 @@ export async function seedDatabase(prisma: PrismaClient) {
   }
 
   const firstTicketId = tickets.get(ticketSeeds[1].ticketNumber)
-  const requester = users.get(requesterSeeds[1].email)
-  const staff = users.get(staffSeeds[0].email)
+  const requester = users.get(requesterSeeds[1].fixtureKey)
+  const staff = users.get(staffSeeds[0].fixtureKey)
   if (!firstTicketId || !requester || !staff) {
     throw new Error('Lab 3 communication seed references are incomplete.')
   }

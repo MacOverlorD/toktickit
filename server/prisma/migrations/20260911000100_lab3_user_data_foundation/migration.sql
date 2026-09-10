@@ -1,4 +1,9 @@
--- Fail before structural changes if an existing email violates the canonical key.
+-- Prisma Migrate does not add a PostgreSQL transaction automatically. Keep the
+-- preflight, enum expansion, renames, backfills, and new structures atomic.
+BEGIN;
+
+-- Fail before structural changes if an existing email violates the canonical
+-- key or the complete Lab 3 email policy.
 DO $$
 BEGIN
   IF EXISTS (
@@ -16,6 +21,19 @@ BEGIN
     HAVING COUNT(*) > 1
   ) THEN
     RAISE EXCEPTION 'Requester email preflight failed: duplicate canonical email exists';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM "Requester"
+    WHERE
+      CHAR_LENGTH("email") > 254
+      OR CHAR_LENGTH(SPLIT_PART("email", '@', 1)) NOT BETWEEN 1 AND 64
+      OR SPLIT_PART("email", '@', 1) !~ '^[a-z0-9_%+-]+(\.[a-z0-9_%+-]+)*$'
+      OR SPLIT_PART("email", '@', 2) !~ '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$'
+      OR "email" <> SPLIT_PART("email", '@', 1) || '@' || SPLIT_PART("email", '@', 2)
+  ) THEN
+    RAISE EXCEPTION 'Requester email preflight failed: email violates the Lab 3 policy';
   END IF;
 END $$;
 
@@ -181,3 +199,5 @@ ALTER TABLE "InternalNote"
   ADD CONSTRAINT "InternalNote_authorId_fkey"
     FOREIGN KEY ("authorId") REFERENCES "User"("id")
     ON DELETE RESTRICT ON UPDATE CASCADE;
+
+COMMIT;

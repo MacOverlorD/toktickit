@@ -13,7 +13,7 @@ are mandatory cases to implement alongside features and expand when new defects 
 | DETAIL-01 | API | AC-08, AC-09 | server/tests/lab-03/staff-ticket-detail.api.test.ts | Assignment, priority, transitions, resolution indication and conflicts | Planned |
 | COMM-01 | API | AC-10 | server/tests/lab-03/comments-notes.api.test.ts | Visibility, append-only author/time, limits and rendering payloads | Planned |
 | ADMIN-01 | API | AC-11, AC-12, AC-13 | server/tests/lab-03/users-admin.api.test.ts | Search/CRUD scope/reset/duplicates/one role and concurrent last-admin protection | Planned |
-| MIG-01 | Integration/unit | AC-06, AC-14 | server/tests/lab-03/migration.test.ts; server/tests/lab-03/password-foundation.test.ts | Populated Lab 2 and clean migration, identity/relationship preservation, preflight, repeated seed/provisioning safety and Argon2id policy | Passed (5 focused tests) |
+| MIG-01 | Integration/unit | AC-06, AC-14 | server/tests/lab-03/migration.test.ts; server/tests/lab-03/password-foundation.test.ts | Populated Lab 2 and clean migration, atomic failure rollback, full email-policy preflight, identity/relationship preservation, immutable fixture identity, repeated seed/provisioning safety and Argon2id policy | Passed (7 focused tests) |
 | UI-01 | UI component | AC-01, AC-15 | client/src/tests/lab-03/Login.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UI-02 | UI component | AC-02, AC-15 | client/src/tests/lab-03/ChangePassword.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UI-03 | UI component | AC-03, AC-04, AC-15 | client/src/tests/lab-03/RoleNavigation.test.tsx | Controls, validation, feedback and role behavior | Planned |
@@ -44,10 +44,10 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 
 | Date | Command | Result |
 |---|---|---|
-| 2026-09-11 | `npx vitest run tests/lab-03/migration.test.ts tests/lab-03/password-foundation.test.ts` from `server/` | 2 files, 5 tests passed; populated/clean/preflight migrations, repeatable seed/provisioning and Argon2id boundaries |
-| 2026-09-11 | `npm test --prefix server` | 19 files, 119 tests passed after all Issue #34 cases were added |
-| 2026-09-11 | `npm run prisma:seed --prefix server` twice | Both runs completed without duplicate/reset failures |
-| 2026-09-11 | `npx prisma validate` / `npx prisma migrate status` / `npm run build --prefix server` | Schema valid, four migrations applied, server TypeScript build passed |
+| 2026-09-11 | `npx vitest run tests/lab-03/migration.test.ts tests/lab-03/password-foundation.test.ts` from `server/` | 2 files, 7 tests passed; clean/populated migrations, atomic failure rollback, full email-policy preflight, edited-email fixture identity, repeatable seed/provisioning and Argon2id boundaries |
+| 2026-09-11 | `npm test --prefix server` | 19 files, 121 tests passed after all Issue #34 review cases were added |
+| 2026-09-11 | `npm run prisma:seed --prefix server` twice on the populated development database | Both runs completed without duplicate/reset failures; fixture identity no longer depends on editable email |
+| 2026-09-11 | `npx prisma validate` / `npm run prisma:status --prefix server` / `npm run build` | Schema valid, five migrations applied, server/client TypeScript checks and production Vite build passed |
 
 ## Completion evidence
 
