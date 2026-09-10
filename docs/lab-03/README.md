@@ -28,16 +28,16 @@ Status: Setup complete; Issue 01 (#33) Started. Issues 02-09 are Backlog.
 
 ## Issue 01 starting point
 
-The [specification](./specification.md) has 11 sections, ten initial FRs,
-fifteen BRs and seventeen ACs. The [test plan](./tests.md) maps all current ACs
-to planned tests. API and UI documents are capability/screen drafts. Required
-review/AI records, [decision register](./decisions.md) and [glossary](./glossary.md)
-are initialized.
+The [specification](./specification.md) has 11 sections, ten FRs, twenty-six
+BRs and seventeen ACs. The [test plan](./tests.md) maps all ACs to planned test
+files and concrete positive/negative/boundary scenarios. API and UI contracts
+now define endpoint DTOs, role/session/CSRF policy, queue queries, screen modes
+and feedback. D-01 through D-07 have proposed decisions with rationale.
 
-Next: complete D-01 through D-06, expand API DTOs and screen behavior, make ACs
-precise, and review the consistent contract before Issue 02 implementation.
-Issue 01 is not complete or approved. Tests are Planned; setup validation is
-limited to document structure, traceability, local links and Git whitespace.
+Current draft PR: https://github.com/MacOverlorD/toktickit/pull/42
+Next: review the proposed contract and capture real peer/student review evidence.
+Issue 01 is not marked Done or approved. Runtime tests remain Planned; document
+validation checks structure, traceability, local links and whitespace only.
 
 ## Evidence requirements
 

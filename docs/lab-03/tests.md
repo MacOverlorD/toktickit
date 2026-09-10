@@ -1,8 +1,8 @@
 # Lab 3 Test Plan and Traceability
 
-Status: Initial plan before implementation. All tests below are Planned, not executed.
-Paths are proposed targets, not files that already exist. Expand boundary cases
-and Given/When/Then details as the Issue #33 contract is completed.
+Status: Proposed test plan before implementation. All tests below are Planned, not executed.
+Paths are proposed targets, not files that already exist. The scenarios below
+are mandatory cases to implement alongside features and expand when new defects arise.
 
 | Test ID | Type | Acceptance criteria | Planned file | Coverage | Status |
 |---|---|---|---|---|---|
@@ -45,3 +45,60 @@ development database to obtain evidence. No tests have run for this setup-only c
 Replace proposed paths with actual paths, record exact commands, commit SHA,
 results and artifacts. Every final AC needs at least one test. Retain feature-level
 tests in Issues 3-7; Issue 8 adds integrated verification rather than delaying TDD.
+
+## Scenario-level cases
+
+Each row is a required group under the referenced test ID above. Split into
+individual executable tests when coding. Use a controllable clock for expiry
+and rate limits; do not slow suites with real waiting or weaken production rules.
+
+| Group | Given / When | Expected result and AC |
+|---|---|---|
+| AUTH-01.a | Active valid, wrong-password, unknown-email, inactive and null-hash users submit login | Only active valid gets session; other credential failures use same 401 body. Hash/salt/session internals absent. AC-01 |
+| AUTH-01.b | New/initial passwords of 14,15,128,129 code points, multibyte text, whitespace-only, mismatched confirmation or unchanged value | Exact policy boundaries; preserve valid spaces/Unicode, reject invalid with field feedback. AC-01/02 |
+| AUTH-01.c | Restricted session directly accesses each normal API, then changes valid password | 403 before change; rotated unrestricted session afterward; old sessions fail. AC-02/03 |
+| AUTH-01.d | Time crosses 15-minute restricted expiry, 30-minute idle or 8-hour absolute expiry | Exact boundary invalidates; expired session does not regain validity via lastSeen update. AC-03 |
+| AUTH-01.e | Logout, role edit, deactivation, reset or password change followed by old-cookie replay | Required sessions invalidated; cleared cookie scope matches original. AC-03 |
+| AUTH-01.f | Mutations omit/wrong CSRF or Origin; login uses hostile/null/missing Origin or non-JSON media | Forbidden or safe media error; trusted Origin + token succeeds. Include multipart upload CSRF. AC-04 |
+| AUTH-01.g | Email failure/IP attempt buckets cross limits, expire or reach capacity | 429 and truthful Retry-After; same unknown-email behavior; success clears only email bucket. AC-01/04 |
+| AUTHZ-01.a | Every route called as anonymous, restricted, Requester A/B, IT Staff and Administrator | Exact authorization matrix, including Administrator ticket permission and exclusive user management. AC-04/05 |
+| AUTHZ-01.b | Requester sends another ID in body/query/development header and guesses protected resources | Body/query rejected, header grants no identity; missing/cross-owner responses identical; Internal Notes contain no data. AC-05 |
+| REG-01.a | Existing authenticated Lab 2 fixture runs create/list/detail and UUID duplicate-intent tests | Original owned data and idempotency preserved; all eight status filters supported. AC-06 |
+| REG-01.b | File types/signatures/size/count and remove/re-download boundaries from Lab 2 | Same 5 MiB/five-active-file policies and soft-remove behavior; Staff can read but cannot upload/delete. AC-05/06/08 |
+| QUEUE-01.a | Seed tickets across statuses/priorities/owners and apply combined filters/search/sorts | AND filters, OR search fields, numeric priority order, stable ID ties and accurate paging. AC-07 |
+| QUEUE-01.b | Unknown/repeated/empty query, invalid enum/ID/page; empty dataset and beyond-last page | Invalid gives 400; legitimate empty gives 200 with correct pagination/filter options. AC-07 |
+| DETAIL-01.a | Claim/reassign/unassign eligible/inactive/Requester owner; stale version races | Eligible current-version write succeeds; invalid owner rejected, no silent overwrite/status change. AC-08 |
+| DETAIL-01.b | Each of 8x8 source/target combinations by each role | Only matrix edges succeed; same-state invalid; Requester cannot resolve/close; required confirmation and owner enforced. AC-09 |
+| DETAIL-01.c | Eligible Requester indicates resolution twice, including response-loss retry; later reopen/wait transition | First timestamp recorded once, status unchanged, repeat idempotent, clear only on defined transitions. AC-09 |
+| DETAIL-01.d | Two clients update same Ticket version; concurrent comment increments version | One stale mutation gets 409; no lost update. UI reloads instead of auto-overwrite. AC-08/09/10 |
+| COMM-01.a | Empty/whitespace, 1/5000/5001 code points, HTML/script-like input and line breaks | Valid text stored/rendered literally; bounds enforced, no script execution. AC-10 |
+| COMM-01.b | User forges author/time, requests edit/delete or reads private notes as Requester | Unknown fields rejected, backend identity/time authoritative, editing/deletion unavailable; no private entry leaks. AC-10 |
+| COMM-01.c | Public/private entries added in every status | Append succeeds for permitted participants, ascending time/id order, no automatic status transition. AC-10 |
+| ADMIN-01.a | Create/edit/search, casing-equivalent email collision, invalid/array roles, empty patch | Safe account DTOs; duplicate 409; invalid 400; one role only; search/optional role filter correct. AC-11 |
+| ADMIN-01.b | Reset another or own initial password and retry old session/login | Old sessions invalid; next login gated; self-reset UI returns to Login. AC-12 |
+| ADMIN-01.c | Self-deactivation or last-active demotion/deactivation; two admins concurrently deactivate each other | Self-deactivation denied, at least one active Administrator persists in real PostgreSQL; retries bounded. AC-13 |
+| ADMIN-01.d | Deactivate/demote owner with tickets in owner-required states | Atomic unassignment/version increments, status/history preserved, Needs assignment displayed; sessions revoked. AC-08/11/13 |
+| MIG-01.a | Populated Lab 2 copy with active/removed attachments undergoes migration | IDs, counts, ticket/author FKs, canonical email, hashes of file bytes and reference data preserved. AC-06/14 |
+| MIG-01.b | Clean DB migration plus seed twice; user password/role/fixture edited between seeds | Minimum fixtures created initially; rerun does not reset user-managed values or duplicate rows. AC-14 |
+| MIG-01.c | Credential provision runs twice; preflight detects orphan/collision | Only null hashes provisioned, passwords not logged; preflight stops before destructive changes. AC-14 |
+| UI-01-07 | Each screen loads/saves/succeeds/fails; empty/no-results/401/403/404/409 cases | Correct accessible feedback, retained recoverable input, no duplicate submit, safe role destination. AC-15 |
+| STYLE-01/VIS-01 | 1440x900,820x1180,390x844 and 320px width; long text; keyboard-only use | No clipping/overlap/page overflow; correct tokens, focus, labels, badge text and read-only distinction. AC-16 |
+| E2E-01 | Initial login -> forced change -> role home -> logout -> direct URL/API | Complete gated flow and replay denial using real cookies/CSRF. AC-01-04 |
+| E2E-02 | Requester creates/upload/comments -> Staff queue/claim/status/internal note -> Requester indication -> Staff resolves/closes | Shared public communication and private-note isolation, attachments preserved, indication not formal resolution. AC-05-10 |
+| E2E-03 | Admin creates/edits/deactivates/resets user then user signs in | Account safeguards and forced-change behavior end to end. AC-11-13 |
+| REL-01 | Final main and all nine PDF answer sections reviewed against rubric | Real passing outputs/commit/PR reviews/links/screenshots, six-to-ten AI prompts and own reflection, complete board evidence. AC-17 |
+
+## Test design and fixtures
+
+Use real PostgreSQL integration tests for foreign keys, migrations, uniqueness,
+transaction retries and concurrent last-admin/owner changes; mocks alone cannot
+prove those invariants. Use isolated test databases or namespaced records and
+existing scoped cleanup; never reset the development database. Supply correct
+Origin/cookies/CSRF in helpers, then deliberately vary them in negative tests.
+Use unit tests for validators/transition matrices and UI tests for feedback;
+retain E2E proof across real API boundaries. Hashes must use configured cost in
+security integration checks; any faster unit fixture is explicitly isolated.
+
+Every new FR/BR must map through an AC to a scenario here. All BR-01-26 are
+covered by AUTH/AUTHZ, REG/MIG, DETAIL/COMM and ADMIN groups; UI/API rules share
+these ACs. Keep final statuses Planned until commands actually execute.
