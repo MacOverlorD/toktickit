@@ -2,7 +2,7 @@
 
 Issue: [#33](https://github.com/MacOverlorD/toktickit/issues/33)
 PR: [#42](https://github.com/MacOverlorD/toktickit/pull/42), targeting lab3-staging.
-Status: Authoring complete; ready for peer review. This is not peer approval.
+Status: Authoring complete; peer approved and merged through PR #42.
 
 ## Lab coverage audit
 
@@ -47,9 +47,11 @@ No migration, account mutation, screenshot or runtime feature completion is clai
 
 ## Review and merge handoff
 
-The Issue 1 documents are ready for review. Review D-01 through D-07 and the
-API/UI/test contracts together. Record genuine reviewer identity, comments,
-responses and approval in reviewer.md. Keep #33 open in PR Review until review
-and merge are complete; do not substitute author self-review for course peer review.
+The Issue 1 documents were reviewed together in PR #42. Collaborator
+`Ohmmykung09` approved commit `270bf9a`, then merged the PR into `lab3-staging`
+as `6418e3f`. The reviewer identified the source-section range as a minor,
+non-blocking correction; this evidence update changes sections 1-13 to 1-14.
+The real reviewer identity, findings, approval timestamp, and merge are recorded
+in reviewer.md. Issue #33 can close after this record is present on staging.
 Later issues must update their tests with actual paths/results as implementation
 lands, and Issue #41 owns final-main evidence and the submission PDF.

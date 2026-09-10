@@ -1,7 +1,7 @@
 # Lab 3 Sprint Engineering Specification
 
-Status: Contract authored and checked; ready for PR review. Peer approval not yet recorded.
-Source: [Lab 3 sheet](./Lab_3_sheet.pdf), sections 1-13.
+Status: Approved in PR #42 and merged into `lab3-staging` on 2026-09-10.
+Source: [Lab 3 sheet](./Lab_3_sheet.pdf), sections 1-14.
 Baseline: `main` / `lab3-staging` at `6a015da569b8f8e276f32ab67071acb891580836`.
 Related: [API](./api-spec.md), [UI](./ui-spec.md), [tests](./tests.md), [decisions](./decisions.md), [glossary](./glossary.md).
 
@@ -209,5 +209,4 @@ in [tests.md](./tests.md); all statuses remain Planned until actually executed.
 
 See [decisions.md](./decisions.md) for D-01 through D-07 and rationale,
 and [review readiness](./review-readiness.md) for the author audit and lab coverage.
-Issue #33 remains open until the contract is reviewed. No feature implementation
-is claimed by this documentation change.
+Issue #33 was approved and merged through PR #42. No feature implementation`r`nis claimed by this documentation contract.
