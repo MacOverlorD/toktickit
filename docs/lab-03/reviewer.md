@@ -21,3 +21,11 @@ exact assignment errors, attachment list shape, specific conflict UI feedback,
 email input policy and table formatting. See [review-readiness.md](./review-readiness.md)
 for coverage and verification. The peer-review row above is transcribed from
 GitHub's review and merge metadata.
+## Review activity on related implementation PRs
+
+On 2026-09-11, MacOverlorD reviewed [PR #37](https://github.com/Ohmmykung09/toktickit/pull/37),
+the related User-migration implementation from `Ohmmykung09`. The review comment
+identified seed-state overwrites, committed/default credentials, bcrypt hash
+provisioning, incomplete canonical-email enforcement, non-isolated migration
+tests, and missing Issue 34 schema pieces. The review was posted as a comment;
+no approval or merge was recorded.
