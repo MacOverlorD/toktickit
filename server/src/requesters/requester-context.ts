@@ -38,10 +38,11 @@ export const requireDevelopmentRequester: RequestHandler = async (
   }
 
   try {
-    const requester = await prisma.requester.findFirst({
+    const requester = await prisma.user.findFirst({
       where: {
         id: requesterId,
         isActive: true,
+        role: 'REQUESTER',
       },
       select: {
         id: true,

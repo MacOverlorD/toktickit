@@ -1,3 +1,1 @@
-export function normalizeRequesterEmail(email: string) {
-  return email.trim().toLowerCase()
-}
+export { normalizeUserEmail as normalizeRequesterEmail } from '../users/user-email.js'

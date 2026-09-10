@@ -209,4 +209,5 @@ in [tests.md](./tests.md); all statuses remain Planned until actually executed.
 
 See [decisions.md](./decisions.md) for D-01 through D-07 and rationale,
 and [review readiness](./review-readiness.md) for the author audit and lab coverage.
-Issue #33 was approved and merged through PR #42. No feature implementation`r`nis claimed by this documentation contract.
+Issue #33 was approved and merged through PR #42. No feature implementation
+is claimed by this documentation contract.

@@ -116,6 +116,7 @@ export async function createTicketWithIdentity(
           relatedSystemId: input.relatedSystemId,
           summary: input.summary,
           requestedPriority: input.requestedPriority,
+          itPriority: input.requestedPriority,
           description: input.description,
         },
       })

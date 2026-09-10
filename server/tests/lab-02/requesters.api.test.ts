@@ -28,19 +28,19 @@ describe('GET /api/development-requesters', () => {
   })
 
   it('returns an empty successful list when no active requester exists', async () => {
-    const findMany = vi.spyOn(prisma.requester, 'findMany').mockResolvedValueOnce([])
+    const findMany = vi.spyOn(prisma.user, 'findMany').mockResolvedValueOnce([])
 
     const response = await request(app).get('/api/development-requesters')
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual([])
     expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { isActive: true } }),
+      expect.objectContaining({ where: { isActive: true, role: 'REQUESTER' } }),
     )
   })
 
   it('orders names without case sensitivity and uses ID as the tie breaker', async () => {
-    vi.spyOn(prisma.requester, 'findMany').mockResolvedValueOnce([
+    vi.spyOn(prisma.user, 'findMany').mockResolvedValueOnce([
       { id: 9, name: 'zeta User', email: 'zeta@example.test' },
       { id: 8, name: 'alpha User', email: 'alpha.two@example.test' },
       { id: 7, name: 'Alpha User', email: 'alpha.one@example.test' },
@@ -53,7 +53,7 @@ describe('GET /api/development-requesters', () => {
   })
 
   it('returns the safe JSON error contract when the database fails', async () => {
-    vi.spyOn(prisma.requester, 'findMany').mockRejectedValueOnce(
+    vi.spyOn(prisma.user, 'findMany').mockRejectedValueOnce(
       new Error('sensitive database detail'),
     )
 

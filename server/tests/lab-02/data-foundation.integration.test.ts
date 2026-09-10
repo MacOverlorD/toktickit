@@ -48,7 +48,7 @@ beforeAll(async () => {
   await seedDatabase(prisma)
 
   const [requester, category, relatedSystem] = await Promise.all([
-    prisma.requester.findUniqueOrThrow({
+    prisma.user.findUniqueOrThrow({
       where: { email: requesterSeeds[0].email },
     }),
     prisma.category.findUniqueOrThrow({
@@ -105,7 +105,7 @@ describe('Lab 2 seed data', () => {
         where: { name: { in: relatedSystemSeeds.map(({ name }) => name) } },
         orderBy: { displayOrder: 'asc' },
       }),
-      prisma.requester.findMany({
+      prisma.user.findMany({
         where: { email: { in: requesterSeeds.map(({ email }) => email) } },
       }),
     ])
@@ -129,15 +129,15 @@ describe('Lab 2 seed data', () => {
     const canonicalEmail = normalizeRequesterEmail(mixedCaseEmail)
 
     await expect(
-      prisma.requester.create({
+      prisma.user.create({
         data: {
           name: 'Non-canonical Requester',
           email: mixedCaseEmail,
         },
       }),
-    ).rejects.toThrow(/Requester_email_canonical_check/)
+    ).rejects.toThrow(/User_email_canonical_check/)
 
-    const requester = await prisma.requester.create({
+    const requester = await prisma.user.create({
       data: {
         name: 'Canonical Requester',
         email: canonicalEmail,
@@ -146,7 +146,7 @@ describe('Lab 2 seed data', () => {
 
     try {
       await expect(
-        prisma.requester.create({
+        prisma.user.create({
           data: {
             name: 'Duplicate Canonical Requester',
             email: normalizeRequesterEmail(`  ${mixedCaseEmail}  `),
@@ -154,7 +154,7 @@ describe('Lab 2 seed data', () => {
         }),
       ).rejects.toMatchObject({ code: 'P2002' })
     } finally {
-      await prisma.requester.delete({ where: { id: requester.id } })
+      await prisma.user.delete({ where: { id: requester.id } })
     }
   })
 })
@@ -300,7 +300,7 @@ describe('Ticket identity and schema behavior', () => {
         storedName: `${randomUUID()}.pdf`,
         mimeType: 'application/pdf',
         sizeBytes: 1024,
-        uploadedByRequesterId: requesterId,
+        uploadedByUserId: requesterId,
       },
     })
 
@@ -316,12 +316,12 @@ describe('Ticket identity and schema behavior', () => {
       data: {
         removedAt: new Date('2026-09-01T12:00:00.000Z'),
         removalReason: 'Uploaded the wrong document',
-        removedByRequesterId: requesterId,
+        removedByUserId: requesterId,
       },
     })
 
     expect(removed.removedAt).toEqual(new Date('2026-09-01T12:00:00.000Z'))
     expect(removed.removalReason).toBe('Uploaded the wrong document')
-    expect(removed.removedByRequesterId).toBe(requesterId)
+    expect(removed.removedByUserId).toBe(requesterId)
   })
 })

@@ -29,13 +29,13 @@ beforeAll(async () => {
     }),
   ])
   const [owner, otherOwner] = await Promise.all([
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'Detail API Owner',
         email: `detail-owner-${marker.toLowerCase()}@example.com`,
       },
     }),
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'Detail API Other Owner',
         email: `detail-other-${marker.toLowerCase()}@example.com`,
@@ -55,6 +55,7 @@ beforeAll(async () => {
         relatedSystemId: relatedSystem.id,
         summary: 'Owned detail request',
         requestedPriority: 'HIGH',
+        itPriority: 'HIGH',
         description: 'First line of detail.\nSecond line remains meaningful.',
         createdAt: new Date('2099-02-01T10:00:00.000Z'),
       },
@@ -68,6 +69,7 @@ beforeAll(async () => {
         relatedSystemId: relatedSystem.id,
         summary: 'Other owner private request',
         requestedPriority: 'URGENT',
+        itPriority: 'URGENT',
         description: 'This description must never cross the owner boundary.',
       },
     }),
@@ -82,7 +84,7 @@ beforeAll(async () => {
         storedName: `${randomUUID()}.pdf`,
         mimeType: 'application/pdf',
         sizeBytes: 2_048,
-        uploadedByRequesterId: ownerId,
+        uploadedByUserId: ownerId,
         createdAt: new Date('2099-02-01T10:01:00.000Z'),
       },
     }),
@@ -93,11 +95,11 @@ beforeAll(async () => {
         storedName: `${randomUUID()}.png`,
         mimeType: 'image/png',
         sizeBytes: 4_096,
-        uploadedByRequesterId: ownerId,
+        uploadedByUserId: ownerId,
         createdAt: new Date('2099-02-01T10:02:00.000Z'),
         removedAt: new Date('2099-02-01T11:00:00.000Z'),
         removalReason: 'No longer relevant',
-        removedByRequesterId: ownerId,
+        removedByUserId: ownerId,
       },
     }),
   ])
@@ -108,7 +110,7 @@ afterAll(async () => {
   await prisma.ticket.deleteMany({
     where: { requesterId: { in: [ownerId, otherOwnerId] } },
   })
-  await prisma.requester.deleteMany({
+  await prisma.user.deleteMany({
     where: { id: { in: [ownerId, otherOwnerId] } },
   })
   await prisma.$disconnect()
@@ -157,7 +159,7 @@ describe('Issue 17 Ticket Detail API', () => {
       ],
     })
     expect(JSON.stringify(response.body)).not.toContain('storedName')
-    expect(JSON.stringify(response.body)).not.toContain('removedByRequesterId')
+    expect(JSON.stringify(response.body)).not.toContain('removedByUserId')
   })
 
   it('normalizes a trimmed lowercase Ticket Number', async () => {
