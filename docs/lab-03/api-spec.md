@@ -1,6 +1,6 @@
 # Lab 3 REST API Contract
 
-Status: Proposed contract for Issue #33 review; not implemented.
+Status: Ready for Issue #33 PR review; application implementation is outside this PR.
 Base URL: http://localhost:3000/api. Normative references:
 [specification](./specification.md), [Lab 2 DTOs](../lab-02/api-spec.md).
 
@@ -14,7 +14,9 @@ Requester ownership scopes lookup before fields/conflicts are returned.
 
 Errors preserve `{error:{code,message,fieldErrors?}}`; fieldErrors maps names to
 messages and is only included for field-addressable validation. No passwords,
-hashes, session IDs, file paths, SQL or stack traces appear in responses/logs.
+password hashes, session IDs, file paths, SQL or stack traces appear in JSON/logs.
+The opaque session token appears only in its Set-Cookie transport, as required.
+The separate CSRF token is deliberately returned in AuthResponse.
 Sensitive JSON uses Cache-Control: no-store. Parse JSON bodies with a 64 KiB
 limit; oversized JSON returns safe 413 PAYLOAD_TOO_LARGE. Existing attachment
 byte/type/count limits and download headers remain unchanged.
@@ -28,6 +30,7 @@ byte/type/count limits and download headers remain unchanged.
 | 403 FORBIDDEN / CSRF_INVALID | Wrong role or failed origin/token checks |
 | 404 RESOURCE_NOT_FOUND | Missing/cross-owner Ticket or Attachment, with identical body for both |
 | 404 ROUTE_NOT_FOUND | Removed Development Requester endpoint or unsupported route |
+| 409 INELIGIBLE_OWNER | Assignment target is missing, inactive or not an operational role |
 | 409 STALE_RESOURCE / INVALID_TRANSITION / OWNER_REQUIRED | Stale version, forbidden edge or absent eligible owner |
 | 409 EMAIL_CONFLICT / ACCOUNT_CONFLICT / ADMIN_REQUIRED | Duplicate email, exhausted transaction retries, self-deactivation or last-Administrator violation |
 | 415 UNSUPPORTED_MEDIA_TYPE | JSON endpoint receives non-JSON request content |
@@ -38,7 +41,8 @@ byte/type/count limits and download headers remain unchanged.
 ## 2. Authentication, credentials and CSRF (FR-01/02; AC-01-05)
 
 Password choice: 15-128 Unicode code points, at most 512 UTF-8 bytes; preserve
-spaces/case/Unicode exactly, do not trim or normalize. Require matching
+spaces/case/Unicode exactly, do not trim or normalize. Reject unpaired UTF-16
+surrogates; count Unicode code points consistently on client and server. Require matching
 confirmation and a different password from the current one for a password
 change. No mandatory character-class rules. Reject blank-only strings. Initial
 passwords use the same policy. Login checks shape/maximum without exposing
@@ -53,8 +57,9 @@ See [security decision sources](./decisions.md#security-design-references).
 Generate a fresh 32-byte cryptographic random session token, base64url encoded;
 store only SHA-256(token) in Session.tokenHash. Set `toktickit.sid` cookie with
 HttpOnly, SameSite=Lax, Path=/ and no Domain. Secure=true for HTTPS; the explicit
-local HTTP development/test environment may set Secure=false. No browser
-localStorage/sessionStorage credentials or role authority. Client fetch uses
+local HTTP development/test environment may set Secure=false. Use a browser-session cookie without Max-Age or Expires at creation; server
+timeouts remain authoritative even when a browser restores session cookies.
+No browser localStorage/sessionStorage credentials or role authority. Client fetch uses
 credentials=include. Normal session has 8-hour absolute expiry and 30-minute
 idle timeout; password-change-only session has 15-minute absolute expiry and
 cannot access business APIs. Expired rows may be cleaned by local maintenance;
@@ -62,9 +67,18 @@ every request checks expiry regardless of cleanup.
 
 Every protected request loads current User active/role/password-change state.
 State-changing database transactions revalidate actor permission/active state
-and target eligibility within the transaction so a concurrent deactivation or
-role change cannot commit an unauthorized mutation. Lock/retry ordering must
-be consistent for account safety and ticket owner eligibility.
+and target eligibility inside a serialized transaction. If an account change
+commits first, a later business mutation must reject; a business mutation
+serialized before the account change may finish. Acquire multiple User locks
+in ascending ID order before Ticket locks; retries re-read all state.
+Login verifies the hash outside the transaction, then rechecks the same User
+version/hash/active state before inserting the session. A changed snapshot
+returns the generic credential failure and creates no session. Password change
+rechecks current-session existence and the verified User version/hash inside
+the transaction before replacing the hash; a competing reset/change returns
+401 if the session was revoked, otherwise 409 STALE_RESOURCE. Only one competing
+change may succeed. This prevents an old verified credential from creating a
+new session after a reset.
 Successful login rotates the session cookie and deletes any previous session
 represented by that cookie. Password change deletes all user sessions and
 creates one fresh unrestricted session. Administrator password reset, role
@@ -170,16 +184,21 @@ Let T be /staff/tickets/:ticketNumber. All T mutations require IT_STAFF or
 ADMINISTRATOR and a positive expectedVersion. On success return 200
 `{ticketNumber,owner,itPriority,status,version,updatedAt,resolutionIndicatedAt}`.
 Invalid state/eligibility is 409; invalid body is 400; missing ticket is 404.
+A non-null ownerId that is missing, inactive or not IT Staff/Administrator is
+409 INELIGIBLE_OWNER. Attempting prohibited unassignment is 409 OWNER_REQUIRED.
+After authentication/role/resource checks, validate the body, then version, then
+state/eligibility; the repeated-indication exception below is explicit.
 
 | Endpoint | Body / rule |
 |---|---|
-| PATCH T/owner | `{ownerId:positiveInt|null,expectedVersion}`. Claim sends current user ID; no separate implicit status change. |
+| PATCH T/owner | `{ownerId:positiveInt\|null,expectedVersion}`. Claim sends current user ID; no separate implicit status change. |
 | PATCH T/priority | `{itPriority,expectedVersion}`. Preserve Requested Priority. |
 | PATCH T/status | `{status,expectedVersion,confirmed?:boolean}`. Exact matrix and owner/confirmation rules in BR-16-18. |
 | POST /tickets/:ticketNumber/resolution-indication | `{expectedVersion}`. Owned Requester only; allowed statuses BR-19. Returns 200 `{ticketNumber,status,resolutionIndicatedAt,version}`; repeat already-indicated request returns current result without another write, after ownership/status checks and regardless of supplied old version. |
 
 Version mismatch blocks writes; assigning an identical owner/priority is a
-successful no-op only if the supplied version is current. First indication
+successful no-op only if the supplied version is current; preserve version and
+updatedAt on these no-ops. First indication
 checks version. Communications update version, so stale operation forms must
 refresh instead of overwriting intervening changes.
 
@@ -209,6 +228,18 @@ are backend-enforced. No DELETE, bulk, history, import/export or invitations.
 | POST /admin/users/:id/initial-password | `{initialPassword,expectedVersion}` | 200 Account with mustChangePassword=true, version incremented; all target sessions revoked |
 
 Missing user is 404. Name/email/role limits use BR-25 and the credential policy.
+For this local lab, email accepts ASCII local parts consisting of letters,
+digits and . _ % + -; local part is 1-64 characters and cannot start/end with
+a dot or contain consecutive dots. Domain has at least two dot-separated labels,
+each 1-63 letters/digits/hyphens and cannot start/end with a hyphen. Total email
+length is <=254. Trim/lowercase before validation/uniqueness; no dot/plus rewriting.
+Internationalized addresses and quoted local parts are outside this lab input
+policy. Migration preflight must report existing incompatible emails for explicit
+correction rather than silently changing them. Name/email/role JSON values are
+strings; isActive is a JSON boolean; expectedVersion is a positive integer.
+All unspecified nulls and coercions such as string booleans/versions are rejected.
+An account PATCH increments version even if editable values equal stored values;
+only actual role/activation transitions trigger associated revocation/unassignment.
 User password change also increments User.version. Reset may use the same
 lab-only initial password; the later user change must differ. Requiring one
 role is an enum, never an array. Self-deactivation is blocked even with other
@@ -221,3 +252,29 @@ or self-reset. Demotion/deactivation triggers BR-21 owner handling atomically.
 Sections 2-6 map to FR/AC in their headings. BR-01-15 govern identity, visibility,
 seeds and account safety; BR-16-26 govern workflow/concurrency/validation.
 [tests.md](./tests.md) specifies executable target paths and scenarios.
+
+## 8. DTO types and baseline compatibility
+
+All User/Entry/Attachment IDs and version fields are positive JSON integers.
+name/email/content/summary/ticketNumber are strings; booleans are not strings;
+roles, priorities and statuses use the exact uppercase schema enums. createdAt,
+updatedAt, expiresAt and ticketDate are ISO UTC strings. Null is permitted only
+where explicitly specified (owner, indication fields and inherited removedAt).
+Entry is the POST communication response shape; Account is UserSummary plus
+createdAt/updatedAt. Safe User role/name data reflects current account state,
+not a historical role snapshot. Preserve immutable author and submitter IDs.
+
+Requester GET /tickets retains the Lab 2 pagination/query/filterOptions envelope.
+GET /categories and /related-systems retain Lab 2 active-only reference arrays;
+queue filter reference items use `{id,name,isActive}`. Staff attachment listing
+returns the existing bare `AttachmentMetadata[]` array (verified in
+server/src/attachments/attachment-handlers.ts); upload/removal retain a single
+AttachmentMetadata object. Content returns protected bytes rather than JSON. No undeclared
+raw Prisma records may be used to fill a DTO.
+
+The data issue owns schema migration, provisioning and shared password-hash
+helper tests; the authentication issue reuses that helper. Mechanical Prisma
+call-site/seed updates needed after renaming Requester to User belong in the data
+issue and must keep existing Lab 2 tests working until authentication is integrated.
+Do not weaken authorization tests to accommodate a staging increment. Final
+Requester migration removes the temporary selector/header path completely.

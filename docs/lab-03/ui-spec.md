@@ -1,6 +1,6 @@
 # Lab 3 UI Contract
 
-Status: Proposed contract for Issue #33 review; not implemented.
+Status: Ready for Issue #33 PR review; application implementation is outside this PR.
 Reuse [Lab 2 design tokens and components](../lab-02/ui-spec.md) without a new
 visual system. Primary #006B3C, secondary #0B7A46, pale green #EAF6EF,
 page #F5F7F6, surface white, text #18211D; retain semantic error/warning tokens.
@@ -62,9 +62,12 @@ All screens have explicit loading, safe error and retry states. Lists distinguis
 no data from no matching results and provide Add/Create or Clear Filters as
 appropriate. Mutation success is announced inline without losing context.
 Validation appears beside fields; focus moves to first invalid control. 404
-shows Not found; 403 shows Forbidden. 409 prompts Reload latest, preserves
+shows Not found; 403 shows Forbidden. 409 STALE_RESOURCE prompts Reload latest, preserves
 recoverable draft text and does not automatically resubmit. On reload, show fresh
-version/allowed actions before the user retries. Errors never expose raw API traces.
+version/allowed actions before the user retries. A 409 EMAIL_CONFLICT identifies the email field;
+ADMIN_REQUIRED explains the account safeguard; INELIGIBLE_OWNER/OWNER_REQUIRED
+asks for an eligible owner; INVALID_TRANSITION reloads permitted status actions.
+Do not use the stale-edit message for these distinct conflicts. Errors never expose raw API traces.
 
 Comment content is plain text with preserved line breaks, never innerHTML or
 rendered Markdown. Label composers Public: visible to Requester and Internal:

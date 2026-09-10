@@ -1,6 +1,6 @@
 # Lab 3 Test Plan and Traceability
 
-Status: Proposed test plan before implementation. All tests below are Planned, not executed.
+Status: Ready for Issue #33 PR review; test plan written before implementation. All tests below are Planned, not executed.
 Paths are proposed targets, not files that already exist. The scenarios below
 are mandatory cases to implement alongside features and expand when new defects arise.
 
@@ -102,3 +102,69 @@ security integration checks; any faster unit fixture is explicitly isolated.
 Every new FR/BR must map through an AC to a scenario here. All BR-01-26 are
 covered by AUTH/AUTHZ, REG/MIG, DETAIL/COMM and ADMIN groups; UI/API rules share
 these ACs. Keep final statuses Planned until commands actually execute.
+
+## Complete requirement-to-test map
+
+| Requirement | Acceptance criteria | Test groups |
+|---|---|---|
+| FR-01 | AC-01, AC-02, AC-03 | AUTH-01, UI-01, UI-02, E2E-01 |
+| FR-02 | AC-04, AC-05 | AUTHZ-01, UI-03, E2E-01 |
+| FR-03 | AC-05, AC-06, AC-14 | REG-01, MIG-01, UI-04, E2E-02 |
+| FR-04 | AC-07 | QUEUE-01, UI-05, E2E-02 |
+| FR-05 | AC-08 | DETAIL-01, REG-01, UI-06, E2E-02 |
+| FR-06 | AC-09 | DETAIL-01, UNIT-01, UI-04, UI-06, E2E-02 |
+| FR-07 | AC-10 | COMM-01, UNIT-01, UI-04, UI-06, E2E-02 |
+| FR-08 | AC-11, AC-12, AC-13 | ADMIN-01, UI-07, E2E-03 |
+| FR-09 | AC-15, AC-16 | UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, STYLE-01, VIS-01 |
+| FR-10 | AC-14, AC-17 | MIG-01, REL-01 |
+| BR-01 | AC-01 | AUTH-01.a |
+| BR-02 | AC-02 | AUTH-01.b, AUTH-01.c |
+| BR-03 | AC-05 | AUTHZ-01.b |
+| BR-04 | AC-04, AC-10 | AUTHZ-01.a, COMM-01.b |
+| BR-05 | AC-09 | DETAIL-01.b, DETAIL-01.c |
+| BR-06 | AC-11 | ADMIN-01.a |
+| BR-07 | AC-08 | DETAIL-01.a, ADMIN-01.d |
+| BR-08 | AC-08, AC-14 | DETAIL-01.a, MIG-01.a |
+| BR-09 | AC-09 | DETAIL-01.b |
+| BR-10 | AC-10 | COMM-01.a, COMM-01.b |
+| BR-11 | AC-01, AC-11 | AUTH-01.a, ADMIN-01.a |
+| BR-12 | AC-13 | ADMIN-01.c |
+| BR-13 | AC-12, AC-13 | ADMIN-01.b, ADMIN-01.c |
+| BR-14 | AC-06, AC-14 | MIG-01.a, REG-01.a, REG-01.b |
+| BR-15 | AC-05 | AUTHZ-01.b |
+| BR-16 | AC-09 | DETAIL-01.b |
+| BR-17 | AC-09 | DETAIL-01.b, ADMIN-01.d |
+| BR-18 | AC-09 | DETAIL-01.b, UI-06 |
+| BR-19 | AC-09 | DETAIL-01.c |
+| BR-20 | AC-08 | DETAIL-01.a |
+| BR-21 | AC-08, AC-11, AC-13 | ADMIN-01.d |
+| BR-22 | AC-05, AC-06, AC-11 | AUTHZ-01.a, ADMIN-01.e |
+| BR-23 | AC-08, AC-09, AC-10 | DETAIL-01.d, DETAIL-01.e |
+| BR-24 | AC-13 | ADMIN-01.c |
+| BR-25 | AC-01, AC-11 | AUTH-01.b, ADMIN-01.a, ADMIN-01.f |
+| BR-26 | AC-10 | COMM-01.a, COMM-01.c |
+
+### Cases added during author audit
+
+- AUTH-01.h: Pause login after credential verification; reset/deactivate/change role,
+  then resume login. No session is created from a stale User snapshot. Race two
+  self password changes and one reset; only a valid serialized change may succeed.
+  Prove a business mutation serialized after deactivation is denied (AC-03/04).
+- AUTH-01.i: Reject unpaired UTF-16 surrogates consistently and verify cookie
+  HttpOnly/SameSite/Path/Domain/Secure settings, server expiry and rotation;
+  no credential token appears in JSON or logs (AC-01/03).
+- DETAIL-01.e: Current-version identical owner/priority changes preserve version
+  and updatedAt; stale identical writes still reject. Invalid owner yields
+  INELIGIBLE_OWNER; prohibited unassignment yields OWNER_REQUIRED (AC-08).
+- ADMIN-01.e: Change a Requester to IT Staff and back, then deactivate/reactivate.
+  Submitted Ticket/Attachment author IDs remain unchanged; owned access follows
+  current active role. No transfer or data loss occurs (AC-05/06/11).
+- ADMIN-01.f: Check email local/domain lengths, consecutive dots, leading/trailing
+  dot or domain hyphen, ASCII policy, lowercase canonicalization and plus/dot
+  preservation; reject null/string boolean/version coercions (AC-11).
+- UI-07.a: Show distinct duplicate-email, administrator-safety, invalid-owner and
+  stale-version feedback; no incorrect Reload latest prompt on email conflict
+  (AC-15). Apply equivalent owner/status feedback in UI-06.
+
+All added cases remain Planned. The author audit validates this contract; it
+is not evidence that application behavior has already passed these tests.

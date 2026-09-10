@@ -1,6 +1,6 @@
 # Lab 3 Sprint Engineering Specification
 
-Status: Proposed engineering contract - Issue #33 in progress; peer/student approval not yet recorded.
+Status: Contract authored and checked; ready for PR review. Peer approval not yet recorded.
 Source: [Lab 3 sheet](./Lab_3_sheet.pdf), sections 1-13.
 Baseline: `main` / `lab3-staging` at `6a015da569b8f8e276f32ab67071acb891580836`.
 Related: [API](./api-spec.md), [UI](./ui-spec.md), [tests](./tests.md), [decisions](./decisions.md), [glossary](./glossary.md).
@@ -104,7 +104,7 @@ same-status requests, return 409 INVALID_TRANSITION without a write.
 - BR-20: Any operational role can work any ticket, not just tickets assigned to them. Assign/claim accepts an active IT Staff or Administrator; null unassign is allowed except in the four owner-required statuses above. It never changes formal status.
 - BR-21: Owner deactivation or change to Requester unassigns all their tickets atomically with the user update and increments affected ticket versions. Existing statuses are preserved; such tickets show Needs assignment and future owner-required transitions are blocked until reassigned. Historical comments, requester identity and attachment authorship remain intact.
 - BR-22: Changing a Requester role does not transfer their submitted tickets; the user loses Requester routes until returned to that role. Historical tickets remain visible operationally and regain owned access if the account is later a Requester again.
-- BR-23: Ticket and User mutations require expectedVersion. A stale version returns 409 STALE_RESOURCE except the already-recorded resolution indication retry defined in the API contract. Comments/notes are independent append operations. Owner, priority, status, indication and communication changes update Ticket.updatedAt; all increment Ticket.version. The server authorizes before returning conflict details.
+- BR-23: Ticket operational changes, resolution indication and Administrator account edits/resets require expectedVersion. Account creation, login, self password change and communication appends use their own authentication/transaction guards. A stale version returns 409 STALE_RESOURCE except the already-recorded resolution indication retry defined in the API contract. Comments/notes are independent append operations. Owner, priority, status, indication and communication changes update Ticket.updatedAt; actual writes increment Ticket.version. Current-version owner/priority no-ops and repeated resolution indications preserve version and updatedAt. The server authorizes before returning conflict details.
 - BR-24: Last-active-Administrator protection uses serializable transactions with bounded retry (three total attempts); recheck count and target state on retry. Return 409 ACCOUNT_CONFLICT when exhausted. Database email uniqueness is authoritative.
 - BR-25: User name is trimmed 1-120 Unicode code points; email is trimmed/lowercased, syntactically valid and at most 254 characters. Do not apply provider-specific dot/plus rewriting. Password policy and login-attempt handling are normative in api-spec.md.
 - BR-26: Public Comments and Internal Notes may be appended in every status. They do not automatically reopen/change status. Render plain text with line breaks; never interpret user text as HTML/Markdown.
@@ -113,7 +113,7 @@ same-status requests, return 409 INVALID_TRANSITION without a write.
 
 Reuse Lab 2 tokens and reusable components. Add Login, Change Password, Staff
 Queue, Staff Detail and User Management; extend Requester Detail and shell.
-See [ui-spec.md](./ui-spec.md) for the initial screen inventory.
+See [ui-spec.md](./ui-spec.md) for the screen, mode, feedback and responsive contract.
 
 ## 7. Data Changes
 
@@ -137,9 +137,10 @@ RESOLVED, CLOSED, REOPENED, CANCELLED. RequestedPriority remains
 LOW, MEDIUM, HIGH, URGENT. Stored timestamps are UTC; display uses browser locale.
 
 Migration sequence: back up the local database and private upload directory;
-preflight row counts, canonical-email collisions and orphan relations; run a
+preflight row counts, canonical-email collisions, email-policy compatibility and orphan relations; run a
 transactional additive/rename migration preserving IDs and sequences; add enum
-values and backfill IT Priority; check counts/FKs/file references; generate Prisma
+values and backfill IT Priority. Commit enum expansion before any seed/statement
+uses a newly added status value; check counts/FKs/file references; generate Prisma
 client; run explicit credential provisioning and seed; verify before switching
 the application to authenticated routes. Test on a disposable populated Lab 2
 copy and a clean database first. On failure roll back the transaction; after a
@@ -206,6 +207,7 @@ in [tests.md](./tests.md); all statuses remain Planned until actually executed.
 
 ## 11. Assumptions and Decisions
 
-See [decisions.md](./decisions.md) for proposed D-01 through D-07 and rationale.
+See [decisions.md](./decisions.md) for D-01 through D-07 and rationale,
+and [review readiness](./review-readiness.md) for the author audit and lab coverage.
 Issue #33 remains open until the contract is reviewed. No feature implementation
 is claimed by this documentation change.
