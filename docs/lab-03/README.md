@@ -1,6 +1,6 @@
 # Lab 3 Sprint Setup
 
-Status: Setup complete; Issue 01 (#33) PR Review. Issues 02-09 are Backlog.
+Status: Setup complete; Issue 01 (#33) approved and merged. Issues 02-09 are Backlog.
 
 ## Workflow
 
@@ -26,7 +26,7 @@ Status: Setup complete; Issue 01 (#33) PR Review. Issues 02-09 are Backlog.
 | 08 | [#40 - Complete integrated testing and visual verification](https://github.com/MacOverlorD/toktickit/issues/40) | `feature/3-08-integrated-verification` | #33, #34, #35, #36, #37, #38, #39 |
 | 09 | [#41 - Integrate the release and prepare submission evidence](https://github.com/MacOverlorD/toktickit/issues/41) | `feature/3-09-release-submission` | #33, #34, #35, #36, #37, #38, #39, #40 |
 
-## Issue 01 review handoff
+## Issue 01 completion
 
 The [specification](./specification.md) has 11 sections, ten FRs, twenty-six
 BRs and seventeen ACs. The [test plan](./tests.md) maps all ACs to planned test
@@ -34,11 +34,11 @@ files and concrete positive/negative/boundary scenarios. API and UI contracts
 now define endpoint DTOs, role/session/CSRF policy, queue queries, screen modes
 and feedback. D-01 through D-07 have proposed decisions with rationale.
 
-Ready-for-review PR: https://github.com/MacOverlorD/toktickit/pull/42
-Authoring and document validation are complete. See [review-readiness.md](./review-readiness.md).
-Next: peer review the contract and record actual responses/approval before merge.
-Issue 01 is not marked Done or approved. Runtime tests remain Planned; document
-validation checks structure, traceability, local links and whitespace only.
+Merged PR: https://github.com/MacOverlorD/toktickit/pull/42
+Authoring, document validation, collaborator approval, and merge are complete.
+See [review-readiness.md](./review-readiness.md) and [reviewer.md](./reviewer.md).
+Runtime feature tests remain Planned because Issue 01 is documentation-only;
+document validation covers structure, traceability, local links and whitespace.
 
 ## Evidence requirements
 

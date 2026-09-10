@@ -10,6 +10,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 3. User selected nine issues and requested setup through starting Issue 1.
 4. User reaffirmed starting Issue 1 after setup; expanded the domain, API/UI and test contracts.
 5. User requested completing all Issue 1 authoring work and making the PR ready.
+6. User requested continuing by merging the reviewed Issue 1 PR.
 
 These are English summaries, not verbatim quotations. Maintain 6-10 selected
 key prompts by submission, including meaningful specification and coding work.
@@ -21,8 +22,10 @@ Lab 3 workflow plus proposed contract documents. Expanded authorization, eight-s
 workflow, migration, session/CSRF, UI and test scenarios using the existing code
 and OWASP primary guidance. Proposed choices are not labeled user approval.
 Completed an author audit and requirement/test coverage checks, then prepared
-PR #42 for peer review. No application implementation, passing runtime test
-result or peer approval is claimed in this record.
+PR #42 for peer review. Collaborator `Ohmmykung09` approved and merged the PR;
+the review evidence was transcribed from GitHub and its non-blocking source-range
+finding was corrected. No application implementation or passing runtime test
+result is claimed in this record.
 
 ## My Reflection
 
