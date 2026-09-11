@@ -233,14 +233,12 @@ function isTicketListResult(value: unknown): value is TicketListResult {
 
 export async function createTicket(
   input: CreateTicketInput,
-  requesterId: number,
   idempotencyKey: string,
 ): Promise<CreateTicketResult> {
   const response = await apiFetch('/api/tickets', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Development-Requester-Id': String(requesterId),
       'Idempotency-Key': idempotencyKey,
     },
     body: JSON.stringify(input),
@@ -273,7 +271,6 @@ export async function createTicket(
 
 export async function getMyTickets(
   query: TicketListQuery,
-  requesterId: number,
 ): Promise<TicketListResult> {
   const parameters = new URLSearchParams({
     sortBy: query.sortBy,
@@ -289,9 +286,7 @@ export async function getMyTickets(
   if (query.status !== null) parameters.set('status', query.status)
   if (query.priority !== null) parameters.set('priority', query.priority)
 
-  const response = await apiFetch(`/api/tickets?${parameters.toString()}`, {
-    headers: { 'X-Development-Requester-Id': String(requesterId) },
-  })
+  const response = await apiFetch(`/api/tickets?${parameters.toString()}`)
   const body: unknown = await response.json().catch(() => null)
   if (!response.ok) {
     if (typeof body === 'object' && body !== null) {

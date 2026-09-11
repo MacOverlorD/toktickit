@@ -1,29 +1,29 @@
 # Lab 3 Test Plan and Traceability
 
-Status: MIG-01 and the Issue #34 password foundation passed on 2026-09-11; remaining feature tests stay Planned until their issues are implemented.
+Status: MIG-01 and the Issue #34 password foundation passed on 2026-09-11. Issue #35 authentication, authenticated requester regression, UI, and E2E tests also passed on 2026-09-11; later feature tests remain Planned.
 Paths marked Planned are proposed targets. Paths marked Passed exist and have been executed. The scenarios below
 are mandatory cases to implement alongside features and expand when new defects arise.
 
 | Test ID | Type | Acceptance criteria | Planned file | Coverage | Status |
 |---|---|---|---|---|---|
-| AUTH-01 | API | AC-01, AC-02, AC-03 | server/tests/lab-03/auth.api.test.ts | Credentials, inactive users, password-change gate, expiry/logout and session policy | Planned |
+| AUTH-01 | API | AC-01, AC-02, AC-03 | server/tests/lab-03/auth.api.test.ts | Credentials, inactive/unprovisioned users, concurrent rate limits, Origin/media checks, password-change gate, parallel session refresh, expiry/logout and rotation | Passed (6 tests) |
 | AUTHZ-01 | API/security | AC-04, AC-05 | server/tests/lab-03/authorization.api.test.ts | Direct role denial, spoofing, cross-owner resources and private-note leakage | Planned |
-| REG-01 | API/regression | AC-05, AC-06 | server/tests/lab-03/requester-regression.api.test.ts | Authenticated Lab 2 ticket/idempotency/attachment behavior | Planned |
+| REG-01 | API/regression | AC-05, AC-06 | server/tests/lab-01/categories.test.ts; server/tests/lab-02/*api.test.ts | Authenticated Lab 2 ticket/idempotency/attachment behavior using real session fixtures | Passed (45 focused API tests) |
 | QUEUE-01 | API | AC-07 | server/tests/lab-03/staff-queue.api.test.ts | Query controls, paging, invalid input and authorization | Planned |
 | DETAIL-01 | API | AC-08, AC-09 | server/tests/lab-03/staff-ticket-detail.api.test.ts | Assignment, priority, transitions, resolution indication and conflicts | Planned |
 | COMM-01 | API | AC-10 | server/tests/lab-03/comments-notes.api.test.ts | Visibility, append-only author/time, limits and rendering payloads | Planned |
 | ADMIN-01 | API | AC-11, AC-12, AC-13 | server/tests/lab-03/users-admin.api.test.ts | Search/CRUD scope/reset/duplicates/one role and concurrent last-admin protection | Planned |
 | MIG-01 | Integration/unit | AC-06, AC-14 | server/tests/lab-03/migration.test.ts; server/tests/lab-03/password-foundation.test.ts | Populated Lab 2 and clean migration, atomic failure rollback, full email-policy preflight, identity/relationship preservation, immutable fixture identity, repeated seed/provisioning safety and Argon2id policy | Passed (7 focused tests) |
-| UI-01 | UI component | AC-01, AC-15 | client/src/tests/lab-03/Login.test.tsx | Controls, validation, feedback and role behavior | Planned |
-| UI-02 | UI component | AC-02, AC-15 | client/src/tests/lab-03/ChangePassword.test.tsx | Controls, validation, feedback and role behavior | Planned |
-| UI-03 | UI component | AC-03, AC-04, AC-15 | client/src/tests/lab-03/RoleNavigation.test.tsx | Controls, validation, feedback and role behavior | Planned |
-| UI-04 | UI component | AC-05, AC-06, AC-09, AC-10, AC-15 | client/src/tests/lab-03/RequesterRegression.test.tsx | Controls, validation, feedback and role behavior | Planned |
+| UI-01 | UI component | AC-01, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Login controls, generic feedback and role-home behavior | Passed (combined 4-test suite) |
+| UI-02 | UI component | AC-02, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Mandatory change validation, CSRF and success routing | Passed (combined 4-test suite) |
+| UI-03 | UI component | AC-03, AC-04, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Role navigation and direct-route denial | Passed (combined 4-test suite) |
+| UI-04 | UI component | AC-05, AC-06, AC-09, AC-10, AC-15 | client/tests/lab-02/*.test.tsx | Session-derived requester identity and retained ticket/attachment UI behavior | Passed in 80-test client suite |
 | UI-05 | UI component | AC-07, AC-15 | client/src/tests/lab-03/StaffTicketQueue.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UI-06 | UI component | AC-08, AC-09, AC-10, AC-15 | client/src/tests/lab-03/StaffTicketDetail.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UI-07 | UI component | AC-11, AC-12, AC-13, AC-15 | client/src/tests/lab-03/UserManagement.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UNIT-01 | Unit | AC-01, AC-02, AC-09, AC-10, AC-13 | server/tests/lab-03/business-rules.test.ts | Validation boundaries and allowed transitions; supplement real DB concurrency tests | Planned |
 | STYLE-01 | UI/style | AC-15, AC-16 | client/src/tests/lab-03/ZenGreen.test.tsx | Tokens, shared components and editable/read-only presentation | Planned |
-| E2E-01 | E2E | AC-01, AC-02, AC-03, AC-04 | e2e/lab-03/authentication.spec.ts | Full login/change-password/logout and direct-access flow | Planned |
+| E2E-01 | E2E | AC-01, AC-02, AC-03, AC-04 | e2e/lab-03/authentication.spec.ts | Full login/change-password/logout and direct-access flow with isolated account cleanup | Passed (1 test) |
 | E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/staff-ticket-flow.spec.ts | Requester/staff ticket, attachments and communication | Planned |
 | E2E-03 | E2E | AC-11, AC-12, AC-13 | e2e/lab-03/user-administration.spec.ts | User lifecycle and safety rules | Planned |
 | VIS-01 | Responsive/accessibility/visual | AC-15, AC-16 | e2e/lab-03/visual-evidence.spec.ts | Desktop/tablet/mobile screenshots plus manual keyboard/focus and visual inspection | Planned |
@@ -48,6 +48,17 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-11 | `npm test --prefix server` | 19 files, 121 tests passed after all Issue #34 review cases were added |
 | 2026-09-11 | `npm run prisma:seed --prefix server` twice on the populated development database | Both runs completed without duplicate/reset failures; fixture identity no longer depends on editable email |
 | 2026-09-11 | `npx prisma validate` / `npm run prisma:status --prefix server` / `npm run build` | Schema valid, five migrations applied, server/client TypeScript checks and production Vite build passed |
+
+## Issue #35 execution evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-11 | `npx vitest run tests/lab-03/auth.api.test.ts` from `server/` | 1 file, 6 tests passed; generic failures, concurrent limits, Origin/media checks, cookie/session restoration, mandatory rotation, role/spoof denial, idle/absolute expiry and logout |
+| 2026-09-11 | Focused authenticated Lab 2 API regression command from `server/` | 6 files, 45 tests passed for references, create/list/detail, idempotency, attachment lifecycle and safe errors using real cookie/CSRF fixtures |
+| 2026-09-11 | `npm test` from `client/` | 12 files, 80 tests passed, including 4 Lab 3 authentication UI tests and migrated session-identity regressions |
+| 2026-09-11 | `npm test` from `server/` | 18 files, 111 tests passed in the final repository-wide run |
+| 2026-09-11 | `npx playwright test` | 1 browser E2E test passed for initial login, forced change, protected API gate, role home, logout and direct replay denial |
+| 2026-09-11 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
 
 ## Completion evidence
 

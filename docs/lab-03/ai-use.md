@@ -13,6 +13,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 6. User requested continuing by merging the reviewed Issue 1 PR.
 7. User requested continuing with Issue 2 after Issue 1 was merged.
 8. User requested addressing the peer's requested changes, updating Lab 3 documentation, and resubmitting PR #44 for approval.
+9. After the reviewed PR was merged, the user requested continuing with the next Lab 3 issue.
 
 These are English summaries, not verbatim quotations. Maintain 6-10 selected
 key prompts by submission, including meaningful specification and coding work.
@@ -36,6 +37,12 @@ failure-path rollback test, expanded legacy-email preflight to the complete Lab 
 syntax policy, and replaced editable-email seed identity with an immutable
 reserved fixture key. Re-ran focused migration/password tests, the full server
 suite, production build, and repeated seed checks before requesting re-review.
+For Issue #35, implemented opaque cookie sessions, Argon2id login verification,
+bounded concurrent-safe rate limits, exact Origin and CSRF checks, mandatory
+password rotation, current-user restoration, logout, role enforcement, and the
+role-aware React shell. Removed the development requester selector/header and
+migrated ticket regressions to authenticated session fixtures. Added API, UI,
+parallel-request, and browser E2E coverage for the complete authentication flow.
 
 ## My Reflection
 

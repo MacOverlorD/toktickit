@@ -1,0 +1,5 @@
+export const API_URL = 'http://localhost:3100'
+export const E2E_AUTH_FIXTURE_KEY = 'lab3-requester-e2e-auth'
+export const E2E_AUTH_EMAIL = 'e2e.lab3.auth@example.test'
+export const E2E_INITIAL_PASSWORD = 'E2E initial password 2026!'
+export const E2E_REPLACEMENT_PASSWORD = 'E2E replacement password 2026!'

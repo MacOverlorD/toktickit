@@ -31,7 +31,7 @@ function ticketNumber(raw: string | string[] | undefined) {
 }
 
 function requesterId(response: Response) {
-  return (response.locals.developmentRequester as { id: number }).id
+  return (response.locals.requester as { id: number }).id
 }
 
 function storageDirectory() {

@@ -36,7 +36,7 @@ export const createTicket: RequestHandler = async (request, response, next) => {
       description,
     } = validateCreateTicketBody(request.body)
 
-    const requester = response.locals.developmentRequester as { id: number }
+    const requester = response.locals.requester as { id: number }
     const normalizedInput = {
       requesterId: requester.id,
       categoryId,

@@ -51,11 +51,10 @@ describe('Ticket Detail API client', () => {
       json: vi.fn().mockResolvedValue(validResponse),
     } as unknown as Response)
 
-    await expect(getTicketDetail('TKT-20260904-A1B2C3D4', 9))
+    await expect(getTicketDetail('TKT-20260904-A1B2C3D4'))
       .resolves.toMatchObject({ ticketNumber: validResponse.ticketNumber })
     expect(apiFetch).toHaveBeenCalledWith(
       '/api/tickets/TKT-20260904-A1B2C3D4',
-      { headers: { 'X-Development-Requester-Id': '9' } },
     )
   })
 
@@ -74,7 +73,7 @@ describe('Ticket Detail API client', () => {
       }),
     } as unknown as Response)
 
-    const ticket = await getTicketDetail(validResponse.ticketNumber, 1)
+    const ticket = await getTicketDetail(validResponse.ticketNumber)
 
     expect(ticket).not.toHaveProperty('requesterId')
     expect(ticket).not.toHaveProperty('internalNotes')
@@ -90,7 +89,7 @@ describe('Ticket Detail API client', () => {
       }),
     } as unknown as Response)
 
-    await expect(getTicketDetail(validResponse.ticketNumber, 2)).rejects.toMatchObject({
+    await expect(getTicketDetail(validResponse.ticketNumber)).rejects.toMatchObject({
       code: 'RESOURCE_NOT_FOUND',
       message: 'Ticket was not found.',
     })
@@ -125,7 +124,7 @@ describe('Ticket Detail API client', () => {
       json: vi.fn().mockResolvedValue(response),
     } as unknown as Response)
 
-    await expect(getTicketDetail(validResponse.ticketNumber, 1)).rejects.toMatchObject({
+    await expect(getTicketDetail(validResponse.ticketNumber)).rejects.toMatchObject({
       code: 'INVALID_RESPONSE',
     })
   })

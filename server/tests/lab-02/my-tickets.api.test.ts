@@ -3,6 +3,10 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
 
 let requesterAId: number
 let requesterBId: number
@@ -14,6 +18,7 @@ let historicalCategoryId: number
 let historicalSystemId: number
 const marker = randomUUID().slice(0, 8)
 const ownedTicketNumbers: string[] = []
+const sessions = new Map<number, TestSession>()
 
 function ticketNumber(index: number) {
   return `TKT-20990101-${marker.slice(0, 6).toUpperCase()}${index
@@ -25,7 +30,7 @@ function ticketNumber(index: number) {
 function listAs(requesterId: number) {
   return request(app)
     .get('/api/tickets')
-    .set('X-Development-Requester-Id', String(requesterId))
+    .set(sessions.get(requesterId)!.headers)
 }
 
 beforeAll(async () => {
@@ -72,6 +77,8 @@ beforeAll(async () => {
   ])
   requesterAId = requesterA.id
   requesterBId = requesterB.id
+  sessions.set(requesterAId, await createTestSession(requesterAId))
+  sessions.set(requesterBId, await createTestSession(requesterBId))
 
   const [historicalCategory, historicalSystem] = await prisma.$transaction(
     async (transaction) => {
@@ -146,6 +153,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+  await Promise.all([...sessions.values()].map((session) => session.cleanup()))
   await prisma.ticket.deleteMany({
     where: { requesterId: { in: [requesterAId, requesterBId] } },
   })

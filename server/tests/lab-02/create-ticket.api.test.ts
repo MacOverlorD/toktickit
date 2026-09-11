@@ -3,6 +3,10 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
 
 const submissionKeys: string[] = []
 let requesterId: number
@@ -10,6 +14,7 @@ let categoryId: number
 let relatedSystemId: number
 let inactiveCategoryId: number
 let inactiveSystemId: number
+let session: TestSession
 
 function newKey() {
   const key = randomUUID()
@@ -30,14 +35,14 @@ function validBody() {
 function createRequest(key = newKey()) {
   return request(app)
     .post('/api/tickets')
-    .set('X-Development-Requester-Id', String(requesterId))
+    .set(session.headers)
     .set('Idempotency-Key', key)
 }
 
 beforeAll(async () => {
   const [requester, category, system] = await Promise.all([
     prisma.user.findFirstOrThrow({
-      where: { isActive: true },
+      where: { isActive: true, role: 'REQUESTER' },
       select: { id: true },
     }),
     prisma.category.findFirstOrThrow({
@@ -52,6 +57,7 @@ beforeAll(async () => {
     }),
   ])
   requesterId = requester.id
+  session = await createTestSession(requesterId)
   categoryId = category.id
   relatedSystemId = system.id
 
@@ -78,6 +84,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+  await session.cleanup()
   await prisma.ticket.deleteMany({ where: { submissionKey: { in: submissionKeys } } })
   await prisma.category.delete({ where: { id: inactiveCategoryId } })
   await prisma.relatedSystem.delete({ where: { id: inactiveSystemId } })
@@ -87,8 +94,8 @@ afterAll(async () => {
 describe('Issue 15 reference data and ticket creation API', () => {
   it('returns only active Categories and Related Systems in display order', async () => {
     const [categories, systems] = await Promise.all([
-      request(app).get('/api/categories'),
-      request(app).get('/api/related-systems'),
+      request(app).get('/api/categories').set(session.headers),
+      request(app).get('/api/related-systems').set(session.headers),
     ])
 
     expect(categories.status).toBe(200)
@@ -195,7 +202,7 @@ describe('Issue 15 reference data and ticket creation API', () => {
     ).resolves.toBe(0)
   })
 
-  it('rejects inactive references and invalid requester/idempotency context', async () => {
+  it('rejects inactive references, missing authentication, and invalid idempotency context', async () => {
     const inactiveResponse = await createRequest().send({
       ...validBody(),
       categoryId: inactiveCategoryId,
@@ -211,12 +218,12 @@ describe('Issue 15 reference data and ticket creation API', () => {
       .post('/api/tickets')
       .set('Idempotency-Key', newKey())
       .send(validBody())
-    expect(missingRequester.status).toBe(400)
-    expect(missingRequester.body.error.code).toBe('INVALID_REQUESTER_CONTEXT')
+    expect(missingRequester.status).toBe(401)
+    expect(missingRequester.body.error.code).toBe('UNAUTHENTICATED')
 
     const invalidKey = await request(app)
       .post('/api/tickets')
-      .set('X-Development-Requester-Id', String(requesterId))
+      .set(session.headers)
       .set('Idempotency-Key', 'not-a-uuid')
       .send(validBody())
     expect(invalidKey.status).toBe(400)
@@ -304,7 +311,7 @@ describe('Issue 15 reference data and ticket creation API', () => {
     const key = newKey()
     const response = await request(app)
       .post('/api/tickets')
-      .set('X-Development-Requester-Id', String(requesterId))
+      .set(session.headers)
       .set('Idempotency-Key', key)
       .set('Content-Type', 'application/json')
       .send('{categoryId:')

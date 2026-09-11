@@ -1,19 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
-import { getDevelopmentRequesters } from '../../src/api/development-requesters'
-import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
-
-vi.mock('../../src/api/development-requesters', () => ({
-  getDevelopmentRequesters: vi.fn(),
-}))
 
 beforeEach(() => {
   window.history.replaceState({}, '', '/tickets')
-  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
-  vi.mocked(getDevelopmentRequesters).mockResolvedValue([
-    { id: 1, name: 'Anan Wong', email: 'anan.wong@example.test' },
-  ])
 })
 
 afterEach(() => {
@@ -32,7 +22,9 @@ describe('application shell accessibility', () => {
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content')
     expect(screen.getByLabelText('TokTickIT home')).toBeInTheDocument()
-    expect(screen.getByText('Lab 2 testing user')).toBeInTheDocument()
+    expect(screen.getByText('Requester')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Change password/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument()
     expect(await screen.findByText('Anan Wong')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'My Tickets' })).toHaveAttribute(
       'aria-current',

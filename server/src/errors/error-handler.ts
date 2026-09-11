@@ -8,6 +8,8 @@ export const errorHandler: ErrorRequestHandler = (
   response,
   _next,
 ) => {
+  response.set('Cache-Control', 'no-store')
+
   if (
     typeof error === 'object' &&
     error !== null &&
@@ -36,6 +38,7 @@ export const errorHandler: ErrorRequestHandler = (
     })
     return
   }
+
   if (
     error instanceof SyntaxError &&
     typeof error === 'object' &&
@@ -55,6 +58,9 @@ export const errorHandler: ErrorRequestHandler = (
   }
 
   if (error instanceof ApiError) {
+    if (error.metadata?.retryAfterSeconds) {
+      response.set('Retry-After', String(error.metadata.retryAfterSeconds))
+    }
     response.status(error.status).json(error.toResponseBody())
     return
   }

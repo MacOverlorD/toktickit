@@ -121,11 +121,9 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
 
 export async function getTicketDetail(
   ticketNumber: string,
-  requesterId: number,
 ): Promise<TicketDetail> {
   const response = await apiFetch(
     `/api/tickets/${encodeURIComponent(ticketNumber)}`,
-    { headers: { 'X-Development-Requester-Id': String(requesterId) } },
   )
   const body: unknown = await response.json().catch(() => null)
 

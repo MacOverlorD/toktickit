@@ -3,6 +3,10 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
 
 const marker = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()
 const ownerTicketNumber = `TKT-20990201-${marker}`
@@ -10,11 +14,12 @@ const otherTicketNumber = `TKT-20990202-${marker}`
 let ownerId: number
 let otherOwnerId: number
 let ownerTicketId: number
+const sessions = new Map<number, TestSession>()
 
 function detailAs(requesterId: number, ticketNumber: string) {
   return request(app)
     .get(`/api/tickets/${ticketNumber}`)
-    .set('X-Development-Requester-Id', String(requesterId))
+    .set(sessions.get(requesterId)!.headers)
 }
 
 beforeAll(async () => {
@@ -44,6 +49,8 @@ beforeAll(async () => {
   ])
   ownerId = owner.id
   otherOwnerId = otherOwner.id
+  sessions.set(ownerId, await createTestSession(ownerId))
+  sessions.set(otherOwnerId, await createTestSession(otherOwnerId))
 
   const [ownerTicket] = await Promise.all([
     prisma.ticket.create({
@@ -106,6 +113,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+  await Promise.all([...sessions.values()].map((session) => session.cleanup()))
   await prisma.attachment.deleteMany({ where: { ticketId: ownerTicketId } })
   await prisma.ticket.deleteMany({
     where: { requesterId: { in: [ownerId, otherOwnerId] } },

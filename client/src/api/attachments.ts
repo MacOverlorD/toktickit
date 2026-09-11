@@ -40,14 +40,12 @@ function base(ticketNumber: string) {
 
 export async function uploadAttachment(
   ticketNumber: string,
-  requesterId: number,
   file: File,
 ): Promise<TicketAttachmentMetadata> {
   const form = new FormData()
   form.append('file', file)
   const response = await apiFetch(base(ticketNumber), {
     method: 'POST',
-    headers: { 'X-Development-Requester-Id': String(requesterId) },
     body: form,
   })
   return metadataResponse(response, 'The attachment could not be uploaded.')
@@ -56,14 +54,12 @@ export async function uploadAttachment(
 export async function removeAttachment(
   ticketNumber: string,
   attachmentId: number,
-  requesterId: number,
   reason: string,
 ): Promise<TicketAttachmentMetadata> {
   const response = await apiFetch(base(ticketNumber) + '/' + attachmentId, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      'X-Development-Requester-Id': String(requesterId),
     },
     body: JSON.stringify({ reason }),
   })
@@ -73,12 +69,10 @@ export async function removeAttachment(
 export async function getAttachmentContent(
   ticketNumber: string,
   attachmentId: number,
-  requesterId: number,
   disposition: 'inline' | 'attachment',
 ) {
   const response = await apiFetch(
     base(ticketNumber) + '/' + attachmentId + '/content?disposition=' + disposition,
-    { headers: { 'X-Development-Requester-Id': String(requesterId) } },
   )
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => null)

@@ -104,7 +104,6 @@ describe('Create Ticket API client', () => {
 
     const error = await createTicket(
       input,
-      1,
       '6f5723c2-e520-4ef3-ab0d-999a48ef2679',
     ).catch((caught: unknown) => caught)
 
@@ -122,7 +121,6 @@ describe('Create Ticket API client', () => {
 
     const error = await createTicket(
       input,
-      1,
       '6f5723c2-e520-4ef3-ab0d-999a48ef2679',
     ).catch((caught: unknown) => caught)
 
@@ -150,7 +148,6 @@ describe('Create Ticket API client', () => {
 
     await createTicket(
       input,
-      1,
       '6f5723c2-e520-4ef3-ab0d-999a48ef2679',
     )
 
@@ -159,7 +156,6 @@ describe('Create Ticket API client', () => {
       expect.objectContaining({
         headers: {
           'Content-Type': 'application/json',
-          'X-Development-Requester-Id': '1',
           'Idempotency-Key': '6f5723c2-e520-4ef3-ab0d-999a48ef2679',
         },
         body: JSON.stringify(input),
@@ -177,7 +173,7 @@ describe('My Tickets API client', () => {
       json: vi.fn().mockResolvedValue(validListResponse()),
     } as unknown as Response)
 
-    await expect(getMyTickets(listQuery, 9)).resolves.toEqual(validListResponse())
+    await expect(getMyTickets(listQuery)).resolves.toEqual(validListResponse())
 
     const [path, init] = vi.mocked(apiFetch).mock.calls[0]
     const url = new URL(path, 'http://localhost')
@@ -192,7 +188,7 @@ describe('My Tickets API client', () => {
       status: 'NEW',
       priority: 'HIGH',
     })
-    expect(init).toEqual({ headers: { 'X-Development-Requester-Id': '9' } })
+    expect(init).toBeUndefined()
   })
 
   it('omits inactive optional controls from the URL', async () => {
@@ -220,7 +216,7 @@ describe('My Tickets API client', () => {
     await getMyTickets({ ...listQuery, ...{
       search: '', categoryId: null, relatedSystemId: null, status: null,
       priority: null, sortBy: 'createdAt', sortOrder: 'desc', page: 1, pageSize: 10,
-    } }, 1)
+    } })
 
     expect(vi.mocked(apiFetch).mock.calls[0][0]).toBe(
       '/api/tickets?sortBy=createdAt&sortOrder=desc&page=1&pageSize=10',
@@ -236,7 +232,7 @@ describe('My Tickets API client', () => {
       }),
     } as unknown as Response)
 
-    await expect(getMyTickets(listQuery, 1)).rejects.toMatchObject({
+    await expect(getMyTickets(listQuery)).rejects.toMatchObject({
       code: 'INVALID_RESPONSE',
     })
   })

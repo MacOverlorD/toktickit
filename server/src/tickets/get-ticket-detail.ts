@@ -33,7 +33,7 @@ export const getTicketDetail: RequestHandler = async (
       throw invalidTicketNumber()
     }
 
-    const requester = response.locals.developmentRequester as { id: number }
+    const requester = response.locals.requester as { id: number }
     const ticket = await prisma.ticket.findFirst({
       where: {
         ticketNumber,
