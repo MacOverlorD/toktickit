@@ -57,13 +57,13 @@ beforeAll(async () => {
   systemBId = systemB.id
 
   const [requesterA, requesterB] = await Promise.all([
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'List API Owner A',
         email: `list-a-${marker}@example.com`,
       },
     }),
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'List API Owner B',
         email: `list-b-${marker}@example.com`,
@@ -120,6 +120,7 @@ beforeAll(async () => {
             : index % 2 === 0 ? systemBId : systemAId,
         summary: index <= 3 ? `Deterministic ${marker}` : `Owned item ${index}`,
         requestedPriority: index % 2 === 0 ? 'HIGH' : 'LOW',
+        itPriority: index % 2 === 0 ? 'HIGH' : 'LOW',
         description:
           index === 4
             ? `Secret searchable phrase ${marker}`
@@ -138,6 +139,7 @@ beforeAll(async () => {
       relatedSystemId: systemAId,
       summary: `Other owner ${marker}`,
       requestedPriority: 'URGENT',
+      itPriority: 'URGENT',
       description: `Secret searchable phrase ${marker}`,
     },
   })
@@ -147,7 +149,7 @@ afterAll(async () => {
   await prisma.ticket.deleteMany({
     where: { requesterId: { in: [requesterAId, requesterBId] } },
   })
-  await prisma.requester.deleteMany({
+  await prisma.user.deleteMany({
     where: { id: { in: [requesterAId, requesterBId] } },
   })
   await prisma.category.delete({ where: { id: historicalCategoryId } })

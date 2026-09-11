@@ -25,8 +25,8 @@ export const listDevelopmentRequesters: RequestHandler = async (
   next,
 ) => {
   try {
-    const requesters = await prisma.requester.findMany({
-      where: { isActive: true },
+    const requesters = await prisma.user.findMany({
+      where: { isActive: true, role: 'REQUESTER' },
       select: {
         id: true,
         name: true,

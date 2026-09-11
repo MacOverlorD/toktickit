@@ -113,7 +113,7 @@ async function createAttachmentMetadata(
           throw new ApiError(409, 'ATTACHMENT_LIMIT_REACHED', 'A ticket can have five active attachments.')
         }
         return transaction.attachment.create({
-          data: { ticketId, uploadedByRequesterId: ownerId, ...validated },
+          data: { ticketId, uploadedByUserId: ownerId, ...validated },
           select: {
             id: true, originalName: true, mimeType: true, sizeBytes: true,
             createdAt: true, removedAt: true, removalReason: true,
@@ -235,7 +235,7 @@ export const removeAttachment: RequestHandler = async (request, response, next) 
     const updated = await prisma.$transaction(async (transaction) => {
       const result = await transaction.attachment.updateMany({
         where: { id, ticketId: ticket.id, removedAt: null },
-        data: { removedAt: new Date(), removalReason: reason, removedByRequesterId: ownerId },
+        data: { removedAt: new Date(), removalReason: reason, removedByUserId: ownerId },
       })
       if (result.count === 0) {
         const existing = await transaction.attachment.findFirst({

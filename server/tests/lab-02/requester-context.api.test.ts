@@ -17,11 +17,11 @@ let inactiveRequesterId: number
 
 beforeAll(async () => {
   const [activeRequester, inactiveRequester] = await Promise.all([
-    prisma.requester.findUniqueOrThrow({
+    prisma.user.findUniqueOrThrow({
       where: { email: 'anan.wong@example.test' },
       select: { id: true },
     }),
-    prisma.requester.findUniqueOrThrow({
+    prisma.user.findUniqueOrThrow({
       where: { email: 'former.requester@example.test' },
       select: { id: true },
     }),
@@ -103,7 +103,7 @@ describe('development requester context middleware', () => {
   })
 
   it('does not leak database failures while validating context', async () => {
-    vi.spyOn(prisma.requester, 'findFirst').mockRejectedValueOnce(
+    vi.spyOn(prisma.user, 'findFirst').mockRejectedValueOnce(
       new Error('sensitive requester lookup failure'),
     )
 

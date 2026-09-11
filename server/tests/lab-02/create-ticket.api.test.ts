@@ -36,7 +36,7 @@ function createRequest(key = newKey()) {
 
 beforeAll(async () => {
   const [requester, category, system] = await Promise.all([
-    prisma.requester.findFirstOrThrow({
+    prisma.user.findFirstOrThrow({
       where: { isActive: true },
       select: { id: true },
     }),

@@ -17,17 +17,43 @@ model Category {
   tickets      Ticket[]
 }
 
-model Requester {
-  id                  Int          @id @default(autoincrement())
-  name                String       @db.VarChar(120)
+model User {
+  id                    Int             @id @default(autoincrement())
+  name                  String          @db.VarChar(120)
   /// Canonical lowercase storage is enforced by a database check constraint.
-  email               String       @unique @db.VarChar(254)
-  isActive            Boolean      @default(true)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @default(now()) @updatedAt
-  tickets             Ticket[]
-  uploadedAttachments Attachment[] @relation("AttachmentUploader")
-  removedAttachments  Attachment[] @relation("AttachmentRemover")
+  email                 String          @unique @db.VarChar(254)
+  /// Reserved immutable identity for repeatable local fixtures; null for normal accounts.
+  fixtureKey            String?         @unique @db.VarChar(64)
+  role                  UserRole        @default(REQUESTER)
+  isActive              Boolean         @default(true)
+  passwordHash          String?
+  mustChangePassword    Boolean         @default(true)
+  version               Int             @default(1)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @default(now()) @updatedAt
+  requestedTickets      Ticket[]        @relation("TicketRequester")
+  ownedTickets          Ticket[]        @relation("TicketOwner")
+  resolutionIndications Ticket[]        @relation("ResolutionIndicator")
+  uploadedAttachments   Attachment[]    @relation("AttachmentUploader")
+  removedAttachments    Attachment[]    @relation("AttachmentRemover")
+  publicComments        PublicComment[]
+  internalNotes         InternalNote[]
+  sessions              Session[]
+
+  @@index([role, isActive, id])
+}
+
+model Session {
+  tokenHash  String   @id @db.Char(64)
+  userId     Int
+  csrfToken  String   @db.Char(64)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt  DateTime @db.Timestamptz(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model RelatedSystem {
@@ -41,22 +67,31 @@ model RelatedSystem {
 }
 
 model Ticket {
-  id                Int               @id @default(autoincrement())
-  ticketNumber      String            @unique @db.VarChar(21)
-  submissionKey     String            @db.Uuid
-  requesterId       Int
-  categoryId        Int
-  relatedSystemId   Int
-  summary           String            @db.VarChar(120)
-  requestedPriority RequestedPriority
-  description       String
-  status            TicketStatus      @default(NEW)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @default(now()) @updatedAt
-  requester         Requester         @relation(fields: [requesterId], references: [id], onDelete: Restrict)
-  category          Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  relatedSystem     RelatedSystem     @relation(fields: [relatedSystemId], references: [id], onDelete: Restrict)
-  attachments       Attachment[]
+  id                      Int               @id @default(autoincrement())
+  ticketNumber            String            @unique @db.VarChar(21)
+  submissionKey           String            @db.Uuid
+  requesterId             Int
+  ownerId                 Int?
+  categoryId              Int
+  relatedSystemId         Int
+  summary                 String            @db.VarChar(120)
+  requestedPriority       RequestedPriority
+  itPriority              RequestedPriority
+  description             String
+  status                  TicketStatus      @default(NEW)
+  version                 Int               @default(1)
+  resolutionIndicatedAt   DateTime?         @db.Timestamptz(3)
+  resolutionIndicatedById Int?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @default(now()) @updatedAt
+  requester               User              @relation("TicketRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  owner                   User?             @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  resolutionIndicatedBy   User?             @relation("ResolutionIndicator", fields: [resolutionIndicatedById], references: [id], onDelete: Restrict)
+  category                Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  relatedSystem           RelatedSystem     @relation(fields: [relatedSystemId], references: [id], onDelete: Restrict)
+  attachments             Attachment[]
+  publicComments          PublicComment[]
+  internalNotes           InternalNote[]
 
   @@unique([requesterId, submissionKey])
   @@index([requesterId, createdAt, id])
@@ -64,25 +99,57 @@ model Ticket {
   @@index([requesterId, relatedSystemId])
   @@index([requesterId, status])
   @@index([requesterId, requestedPriority])
+  @@index([status, itPriority, updatedAt, id])
+  @@index([ownerId, updatedAt, id])
 }
 
 model Attachment {
-  id                    Int        @id @default(autoincrement())
-  ticketId              Int
-  originalName          String     @db.VarChar(255)
-  storedName            String     @unique @db.VarChar(255)
-  mimeType              String     @db.VarChar(100)
-  sizeBytes             Int
-  uploadedByRequesterId Int
-  createdAt             DateTime   @default(now())
-  removedAt             DateTime?
-  removalReason         String?    @db.VarChar(250)
-  removedByRequesterId  Int?
-  ticket                Ticket     @relation(fields: [ticketId], references: [id], onDelete: Restrict)
-  uploadedBy            Requester  @relation("AttachmentUploader", fields: [uploadedByRequesterId], references: [id], onDelete: Restrict)
-  removedBy             Requester? @relation("AttachmentRemover", fields: [removedByRequesterId], references: [id], onDelete: Restrict)
+  id               Int       @id @default(autoincrement())
+  ticketId         Int
+  originalName     String    @db.VarChar(255)
+  storedName       String    @unique @db.VarChar(255)
+  mimeType         String    @db.VarChar(100)
+  sizeBytes        Int
+  uploadedByUserId Int
+  createdAt        DateTime  @default(now())
+  removedAt        DateTime?
+  removalReason    String?   @db.VarChar(250)
+  removedByUserId  Int?
+  ticket           Ticket    @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  uploadedBy       User      @relation("AttachmentUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  removedBy        User?     @relation("AttachmentRemover", fields: [removedByUserId], references: [id], onDelete: Restrict)
 
   @@index([ticketId, removedAt])
+}
+
+model PublicComment {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  authorId  Int
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt, id])
+}
+
+model InternalNote {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  authorId  Int
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt, id])
+}
+
+enum UserRole {
+  REQUESTER
+  IT_STAFF
+  ADMINISTRATOR
 }
 
 enum RequestedPriority {
@@ -94,4 +161,11 @@ enum RequestedPriority {
 
 enum TicketStatus {
   NEW
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_REQUESTER
+  RESOLVED
+  CLOSED
+  REOPENED
+  CANCELLED
 }

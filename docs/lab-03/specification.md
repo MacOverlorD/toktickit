@@ -125,7 +125,7 @@ Attachment uploadedByRequesterId/removedByRequesterId reference Requester.
 
 | Model | Changes / relationships / indexes |
 |---|---|
-| User (renamed Requester) | Preserve id/name/email/isActive/createdAt/updatedAt. Add role enum REQUESTER/IT_STAFF/ADMINISTRATOR default REQUESTER, nullable passwordHash Text during provisioning, mustChangePassword Boolean default true, version Int default 1. Preserve canonical email unique constraint; index (role,isActive,id). Null hash never authenticates. |
+| User (renamed Requester) | Preserve id/name/email/isActive/createdAt/updatedAt. Add role enum REQUESTER/IT_STAFF/ADMINISTRATOR default REQUESTER, nullable passwordHash Text during provisioning, mustChangePassword Boolean default true, version Int default 1, and nullable unique fixtureKey reserved as immutable local-seed identity. Preserve canonical email unique constraint; index (role,isActive,id). fixtureKey is not exposed or editable through application APIs. Null hash never authenticates. |
 | Session | tokenHash char(64) primary key, userId FK Restrict, csrfToken char(64), createdAt/lastSeenAt/expiresAt timestamptz. Index userId and expiresAt. Token itself never stored. |
 | Ticket | Preserve all fields. Add ownerId nullable FK User Restrict, itPriority RequestedPriority NOT NULL backfilled from requestedPriority, version Int default 1, resolutionIndicatedAt timestamptz nullable and resolutionIndicatedById nullable FK User Restrict. Both indication fields null together; indicator must be submitter. Index (status,itPriority,updatedAt,id), (ownerId,updatedAt,id). |
 | PublicComment | id Int PK, ticketId FK Restrict, authorId FK User Restrict, content Text, createdAt timestamptz default now. Index (ticketId,createdAt,id); trimmed length 1-5000. |
@@ -209,4 +209,5 @@ in [tests.md](./tests.md); all statuses remain Planned until actually executed.
 
 See [decisions.md](./decisions.md) for D-01 through D-07 and rationale,
 and [review readiness](./review-readiness.md) for the author audit and lab coverage.
-Issue #33 was approved and merged through PR #42. No feature implementation`r`nis claimed by this documentation contract.
+Issue #33 was approved and merged through PR #42. No feature implementation
+is claimed by this documentation contract.

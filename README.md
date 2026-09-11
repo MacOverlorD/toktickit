@@ -61,14 +61,20 @@ toktickit/
    npx playwright install chromium
    ```
 
-4. Apply all database migrations and seed the Lab 2 reference data:
+4. Apply all database migrations and seed the Lab 3 reference data:
 
    ```powershell
-   npm run prisma:migrate --prefix server
+   npm run prisma:generate --prefix server
+   npm run prisma:deploy --prefix server
    npm run prisma:seed --prefix server
    ```
 
-   The repeatable seed maintains the four required Categories, seven Related Systems, four active Development Requesters, and one inactive Development Requester without creating duplicates.
+   The repeatable seed maintains the reference Categories and Related Systems,
+   Requester/IT Staff/Administrator accounts, and realistic Tickets across all
+   eight workflow states without resetting existing user-managed values. For a
+   populated Lab 2 database, backup, migration, verification, and guarded local
+   password setup are documented in
+   [Lab 3 Data Migration and Local Accounts](docs/lab-03/data-migration.md).
 
 ## Development
 

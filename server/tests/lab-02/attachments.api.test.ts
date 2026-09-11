@@ -31,10 +31,10 @@ beforeAll(async () => {
     prisma.relatedSystem.findFirstOrThrow({ where: { isActive: true } }),
   ])
   const [owner, other] = await Promise.all([
-    prisma.requester.create({
+    prisma.user.create({
       data: { name: 'Attachment Owner', email: `attachment-${marker}@example.test`.toLowerCase() },
     }),
-    prisma.requester.create({
+    prisma.user.create({
       data: { name: 'Attachment Other', email: `attachment-other-${marker}@example.test`.toLowerCase() },
     }),
   ])
@@ -44,6 +44,7 @@ beforeAll(async () => {
     ticketNumber: number, submissionKey: randomUUID(), requesterId: ownerId,
     categoryId: category.id, relatedSystemId: system.id,
     summary: 'Attachment integration ticket', requestedPriority: 'MEDIUM' as const,
+    itPriority: 'MEDIUM' as const,
     description: 'Attachment integration test description.',
   })
   const [ticket, limitTicket] = await Promise.all([
@@ -58,7 +59,7 @@ beforeAll(async () => {
     data: {
       ticketId, originalName: 'baseline.pdf', storedName,
       mimeType: 'application/pdf', sizeBytes: pdf.length,
-      uploadedByRequesterId: ownerId,
+      uploadedByUserId: ownerId,
     },
   })
   attachmentId = baseline.id
@@ -67,7 +68,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.attachment.deleteMany({ where: { ticketId: { in: [ticketId, limitTicketId] } } })
   await prisma.ticket.deleteMany({ where: { id: { in: [ticketId, limitTicketId] } } })
-  await prisma.requester.deleteMany({ where: { id: { in: [ownerId, otherId] } } })
+  await prisma.user.deleteMany({ where: { id: { in: [ownerId, otherId] } } })
   await prisma.$disconnect()
   await rm(uploadDirectory, { recursive: true, force: true })
   delete process.env.UPLOAD_DIR
@@ -147,7 +148,7 @@ describe('Issue 18 attachment lifecycle API', () => {
       data: {
         ticketId, originalName: 'missing.pdf', storedName: randomUUID() + '.pdf',
         mimeType: 'application/pdf', sizeBytes: pdf.length,
-        uploadedByRequesterId: ownerId,
+        uploadedByUserId: ownerId,
       },
     })
     const response = await api(
@@ -179,7 +180,7 @@ describe('Issue 18 attachment lifecycle API', () => {
       data: Array.from({ length: 5 }, (_, index) => ({
         ticketId: limitTicketId, originalName: `existing-${index}.pdf`,
         storedName: randomUUID() + '.pdf', mimeType: 'application/pdf',
-        sizeBytes: pdf.length, uploadedByRequesterId: ownerId,
+        sizeBytes: pdf.length, uploadedByUserId: ownerId,
       })),
     })
     const before = await readdir(uploadDirectory)
