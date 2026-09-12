@@ -6,7 +6,9 @@ import type { RequestHandler, Response } from 'express'
 import multer from 'multer'
 import { Prisma } from '@prisma/client'
 import { ApiError } from '../errors/api-error.js'
+import { isSerializationConflict } from '../errors/prisma-errors.js'
 import prisma from '../prisma.js'
+import { requireActiveRequesterInTransaction } from '../requesters/requester-transaction.js'
 import {
   MAX_ACTIVE_ATTACHMENTS,
   MAX_ATTACHMENT_SIZE,
@@ -31,7 +33,7 @@ function ticketNumber(raw: string | string[] | undefined) {
 }
 
 function requesterId(response: Response) {
-  return (response.locals.developmentRequester as { id: number }).id
+  return (response.locals.requester as { id: number }).id
 }
 
 function storageDirectory() {
@@ -106,6 +108,12 @@ async function createAttachmentMetadata(
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       return await prisma.$transaction(async (transaction) => {
+        await requireActiveRequesterInTransaction(transaction, ownerId)
+        const owned = await transaction.ticket.findFirst({
+          where: { id: ticketId, requesterId: ownerId },
+          select: { id: true },
+        })
+        if (!owned) throw notFound()
         const count = await transaction.attachment.count({
           where: { ticketId, removedAt: null },
         })
@@ -121,9 +129,15 @@ async function createAttachmentMetadata(
         })
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
     } catch (error) {
-      const retryable = error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2034'
-      if (!retryable || attempt === 2) throw error
+      const retryable = isSerializationConflict(error)
+      if (!retryable) throw error
+      if (attempt === 2) {
+        throw new ApiError(
+          409,
+          'CONCURRENT_UPDATE',
+          'The attachment changed concurrently. Try again.',
+        )
+      }
     }
   }
   throw new Error('Attachment transaction retry exhausted.')
@@ -230,9 +244,15 @@ export const removeAttachment: RequestHandler = async (request, response, next) 
       })
     }
     const ownerId = requesterId(response)
-    const ticket = await ownedTicket(ticketNumber(request.params.ticketNumber), ownerId)
+    const number = ticketNumber(request.params.ticketNumber)
     const id = parseAttachmentId(request.params.attachmentId)
     const updated = await prisma.$transaction(async (transaction) => {
+      await requireActiveRequesterInTransaction(transaction, ownerId)
+      const ticket = await transaction.ticket.findFirst({
+        where: { ticketNumber: number, requesterId: ownerId },
+        select: { id: true },
+      })
+      if (!ticket) throw notFound()
       const result = await transaction.attachment.updateMany({
         where: { id, ticketId: ticket.id, removedAt: null },
         data: { removedAt: new Date(), removalReason: reason, removedByUserId: ownerId },

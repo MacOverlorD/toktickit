@@ -167,7 +167,7 @@ function TicketDetailContent({
     const failed: File[] = []
     for (const file of files) {
       try {
-        uploaded.push(await uploadAttachment(ticket.ticketNumber, requesterId, file))
+        uploaded.push(await uploadAttachment(ticket.ticketNumber, file))
       } catch {
         failed.push(file)
       }
@@ -210,7 +210,6 @@ function TicketDetailContent({
       const blob = await getAttachmentContent(
         ticket.ticketNumber,
         attachment.id,
-        requesterId,
         disposition,
       )
       const url = URL.createObjectURL(blob)
@@ -244,7 +243,6 @@ function TicketDetailContent({
       const updated = await removeAttachment(
         ticket.ticketNumber,
         removing.id,
-        requesterId,
         normalized,
       )
       onTicketChange({
@@ -441,7 +439,7 @@ function RequesterTicketDetailPage() {
 
     setTicket(null)
     setLoadState('loading')
-    void getTicketDetail(ticketNumber, selectedRequester.id)
+    void getTicketDetail(ticketNumber)
       .then((nextTicket) => {
         if (!active) return
         setTicket(nextTicket)

@@ -2,18 +2,18 @@ import { defineConfig } from '@playwright/test'
 import { resolve } from 'node:path'
 
 export default defineConfig({
-  testDir: './e2e/lab-02',
+  testDir: './e2e/lab-03',
   fullyParallel: false,
   workers: 1,
   timeout: 60_000,
   expect: { timeout: 8_000 },
-  globalSetup: './e2e/lab-02/global-setup.ts',
-  globalTeardown: './e2e/lab-02/global-teardown.ts',
-  outputDir: 'artifacts/lab-02/test-results',
+  globalSetup: './e2e/lab-03/global-setup.ts',
+  globalTeardown: './e2e/lab-03/global-teardown.ts',
+  outputDir: 'artifacts/lab-03/test-results',
   reporter: [
     ['list'],
     ['html', {
-      outputFolder: 'artifacts/lab-02/playwright-report',
+      outputFolder: 'artifacts/lab-03/playwright-report',
       open: 'never',
     }],
   ],

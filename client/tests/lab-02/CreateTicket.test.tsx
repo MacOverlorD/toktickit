@@ -3,16 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
 import { uploadAttachment } from '../../src/api/attachments'
 import { getCategories } from '../../src/api/categories'
-import { getDevelopmentRequesters } from '../../src/api/development-requesters'
 import { getRelatedSystems } from '../../src/api/related-systems'
 import { createTicket, TicketApiError } from '../../src/api/tickets'
-import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
 
 vi.mock('../../src/api/categories', () => ({ getCategories: vi.fn() }))
 vi.mock('../../src/api/attachments', () => ({ uploadAttachment: vi.fn() }))
-vi.mock('../../src/api/development-requesters', () => ({
-  getDevelopmentRequesters: vi.fn(),
-}))
 vi.mock('../../src/api/related-systems', () => ({
   getRelatedSystems: vi.fn(),
 }))
@@ -39,9 +34,7 @@ const created = {
 beforeEach(() => {
   vi.clearAllMocks()
   sessionStorage.clear()
-  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
   window.history.replaceState({}, '', '/tickets/new')
-  vi.mocked(getDevelopmentRequesters).mockResolvedValue([requester])
   vi.mocked(getCategories).mockResolvedValue([
     { id: 2, name: 'Hardware' },
     { id: 3, name: 'Software' },
@@ -160,7 +153,6 @@ describe('Create Ticket screen', () => {
         requestedPriority: 'MEDIUM',
         description: 'Battery capacity drops from full to empty in one hour.',
       },
-      requester.id,
       expect.stringMatching(/^[0-9a-f-]{36}$/i),
     )
     expect(screen.getByRole('button', { name: 'Creating ticket...' })).toBeDisabled()
@@ -182,10 +174,10 @@ describe('Create Ticket screen', () => {
     expect(screen.getByRole('textbox', { name: /Ticket Summary/ })).toHaveValue(
       '  Laptop battery drains quickly  ',
     )
-    const firstKey = vi.mocked(createTicket).mock.calls[0][2]
+    const firstKey = vi.mocked(createTicket).mock.calls[0][1]
     fireEvent.click(screen.getByRole('button', { name: 'Create Ticket' }))
     expect(await screen.findByText('TKT-20260902-A1B2C3D4')).toBeInTheDocument()
-    expect(vi.mocked(createTicket).mock.calls[1][2]).toBe(firstKey)
+    expect(vi.mocked(createTicket).mock.calls[1][1]).toBe(firstKey)
   })
 
   it('shows backend field errors beside their controls', async () => {
@@ -211,7 +203,7 @@ describe('Create Ticket screen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Ticket' }))
     await screen.findByRole('alert')
-    const firstKey = vi.mocked(createTicket).mock.calls[0][2]
+    const firstKey = vi.mocked(createTicket).mock.calls[0][1]
 
     fireEvent.change(screen.getByRole('textbox', { name: /Ticket Summary/ }), {
       target: { value: 'A changed valid ticket summary' },
@@ -219,33 +211,21 @@ describe('Create Ticket screen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create Ticket' }))
 
     expect(await screen.findByRole('alert')).toBeInTheDocument()
-    expect(vi.mocked(createTicket).mock.calls[1][2]).not.toBe(firstKey)
+    expect(vi.mocked(createTicket).mock.calls[1][1]).not.toBe(firstKey)
   })
 
-  it('confirms before changing requester when the form has an unsaved draft', async () => {
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+  it('keeps requester identity bound to the authenticated session', async () => {
     await renderReadyForm()
     fireEvent.change(screen.getByRole('textbox', { name: /Ticket Summary/ }), {
       target: { value: 'Unsaved ticket summary' },
     })
 
-    fireEvent.click(
-      screen.getByRole('link', { name: /Change Development Requester/ }),
-    )
-    expect(confirm).toHaveBeenCalledWith(
-      'Discard this unsaved ticket and leave this page?',
-    )
-    expect(window.location.pathname).toBe('/tickets/new')
-
-    confirm.mockReturnValue(true)
-    fireEvent.click(
-      screen.getByRole('link', { name: /Change Development Requester/ }),
-    )
     expect(
-      await screen.findByRole('heading', {
-        name: 'Select Development Requester',
-      }),
-    ).toBeInTheDocument()
+      screen.queryByRole('link', { name: /Change Development Requester/ }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByDisplayValue('Anan Wong (anan.wong@example.test)'),
+    ).toHaveAttribute('readonly')
   })
 
   it('blocks Cancel and My Tickets navigation while creation is pending', async () => {

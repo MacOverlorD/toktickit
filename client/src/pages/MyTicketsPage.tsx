@@ -153,7 +153,7 @@ function MyTicketsPage() {
     let active = true
     if (!selectedRequester) return () => undefined
     setLoadState('loading')
-    void getMyTickets(query, selectedRequester.id)
+    void getMyTickets(query)
       .then((nextResult) => {
         if (!active) return
         setResult(nextResult)

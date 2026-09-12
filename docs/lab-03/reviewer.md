@@ -31,3 +31,11 @@ identified seed-state overwrites, committed/default credentials, bcrypt hash
 provisioning, incomplete canonical-email enforcement, non-isolated migration
 tests, and missing Issue 34 schema pieces. The review was posted as a comment;
 no approval or merge was recorded.
+
+On 2026-09-11, MacOverlorD reviewed [PR #38](https://github.com/Ohmmykung09/toktickit/pull/38),
+the related Lab 3 authentication and mandatory-password-change implementation from
+`Ohmmykung09`. The review requested changes for unauthenticated access reaching
+protected APIs, non-atomic concurrent failed-login accounting, and a stale-credential
+login race that could create a session after a concurrent password change. The three
+findings were submitted as blocking inline comments on commit `fbf0326`; no approval
+or merge was recorded.

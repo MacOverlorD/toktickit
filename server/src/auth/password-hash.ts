@@ -19,5 +19,17 @@ export async function hashPassword(password: string) {
 }
 
 export async function verifyPassword(hash: string, password: string) {
-  return argon2.verify(hash, password)
+  try {
+    return await argon2.verify(hash, password)
+  } catch {
+    return false
+  }
+}
+
+export function passwordHashNeedsRehash(hash: string) {
+  try {
+    return argon2.needsRehash(hash, ARGON2_OPTIONS)
+  } catch {
+    return false
+  }
 }
