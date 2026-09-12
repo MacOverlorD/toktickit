@@ -50,6 +50,12 @@ and attachment write transactions, mapped PostgreSQL serialization conflicts to
 documented outcomes, globally reclaimed expired rate-limit buckets, and added
 mandatory-change logout. Added focused status, expiry, active/role and concurrent
 password regressions, then reran the complete server, client, E2E and build checks.
+For Issue #36, audited the inherited authenticated Requester implementation
+against every acceptance criterion, retained the existing server-owned identity
+and Lab 2 regressions, strengthened exact missing/cross-owner Attachment response
+comparisons, and made draft/submission UI state reset synchronously whenever the
+authenticated user, role or version changes. Verification was limited to the
+affected Requester API/UI suites and client typecheck.
 
 ## My Reflection
 

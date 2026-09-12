@@ -62,6 +62,15 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-12 | `npm test` after PR #45 requested changes | Server: 19 files / 114 tests; client: 12 files / 97 tests; Playwright: 1 test. Covered all eight status payloads, transactional requester revalidation, concurrent password changes, expired rate-limit capacity and mandatory-change logout |
 | 2026-09-12 | `npm run build` after PR #45 requested changes | Server TypeScript, client TypeScript and production Vite build passed |
 
+## Issue #36 execution evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-12 | Focused Requester UI command from `client/` | 4 files, 25 tests passed for create/list/detail behavior and session-scoped state reset |
+| 2026-09-12 | Focused Requester API command from `server/` | 4 files, 40 tests passed for create/list/detail, identity ownership, safe errors and attachment lifecycle |
+| 2026-09-12 | `npm test --prefix server -- --run tests/lab-02/attachments.api.test.ts` | 1 file, 10 tests passed after exact missing/cross-owner response comparisons were added for list/upload/content/removal |
+| 2026-09-12 | `npm run typecheck --prefix client` | Passed after identity/version-keyed Requester state reset |
+
 ## Completion evidence
 
 Replace proposed paths with actual paths, record exact commands, commit SHA,

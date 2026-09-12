@@ -27,8 +27,6 @@ const RequesterContext = createContext<RequesterContextValue | null>(null)
 
 export function RequesterProvider({ children }: { children: ReactNode }) {
   const { state } = useAuth()
-  const [hasUnsavedTicketDraft, setUnsavedTicketDraft] = useState(false)
-  const [isTicketSubmitting, setTicketSubmitting] = useState(false)
   const selectedRequester =
     state.status === 'authenticated' && state.payload.user.role === 'REQUESTER'
       ? {
@@ -37,7 +35,35 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
           email: state.payload.user.email,
         }
       : null
+  const contextVersion =
+    state.status === 'authenticated' ? state.payload.user.version : 0
+  const identityKey =
+    state.status === 'authenticated'
+      ? `${state.payload.user.id}:${state.payload.user.role}:${contextVersion}`
+      : 'anonymous'
 
+  return (
+    <RequesterSessionProvider
+      key={identityKey}
+      contextVersion={contextVersion}
+      selectedRequester={selectedRequester}
+    >
+      {children}
+    </RequesterSessionProvider>
+  )
+}
+
+function RequesterSessionProvider({
+  children,
+  contextVersion,
+  selectedRequester,
+}: {
+  children: ReactNode
+  contextVersion: number
+  selectedRequester: AuthenticatedRequester | null
+}) {
+  const [hasUnsavedTicketDraft, setUnsavedTicketDraft] = useState(false)
+  const [isTicketSubmitting, setTicketSubmitting] = useState(false)
   const setTicketDraftState = useCallback(
     (hasDraft: boolean, isSubmitting: boolean) => {
       setUnsavedTicketDraft(hasDraft)
@@ -55,8 +81,7 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       selectedRequester,
-      contextVersion:
-        state.status === 'authenticated' ? state.payload.user.version : 0,
+      contextVersion,
       hasUnsavedTicketDraft,
       isTicketSubmitting,
       confirmTicketNavigation,
@@ -64,11 +89,11 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
     }),
     [
       confirmTicketNavigation,
+      contextVersion,
       hasUnsavedTicketDraft,
       isTicketSubmitting,
       selectedRequester,
       setTicketDraftState,
-      state,
     ],
   )
 
