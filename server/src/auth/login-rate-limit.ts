@@ -28,9 +28,21 @@ export class LoginRateLimiter {
     return bucket
   }
 
+  private pruneExpiredBuckets(now: number) {
+    for (const key of this.emailBuckets.keys()) {
+      this.prune(this.emailBuckets, key, now)
+    }
+    for (const key of this.ipBuckets.keys()) {
+      this.prune(this.ipBuckets, key, now)
+    }
+  }
+
   private bucket(map: Map<string, Bucket>, key: string, now: number) {
     const existing = this.prune(map, key, now)
     if (existing) return existing
+    if (this.emailBuckets.size + this.ipBuckets.size >= MAX_BUCKETS) {
+      this.pruneExpiredBuckets(now)
+    }
     if (this.emailBuckets.size + this.ipBuckets.size >= MAX_BUCKETS) {
       throw new ApiError(
         429,

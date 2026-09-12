@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { Prisma, type UserRole } from '@prisma/client'
 import { ApiError } from '../errors/api-error.js'
+import { isSerializationConflict } from '../errors/prisma-errors.js'
 import prisma from '../prisma.js'
 import {
   hashPassword,
@@ -220,10 +221,7 @@ export async function login(
     return result
   } catch (error) {
     if (error instanceof ApiError) throw error
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2034'
-    ) {
+    if (isSerializationConflict(error)) {
       throw invalidCredentials()
     }
     throw error
@@ -351,8 +349,9 @@ export async function changePassword(
   const newPasswordHash = await hashPassword(newPasswordInput)
   const now = new Date()
 
-  return prisma.$transaction(
-    async (transaction) => {
+  try {
+    return await prisma.$transaction(
+      async (transaction) => {
       const current = await lockUser(transaction, snapshot.id)
       const lockedSessions = await transaction.$queryRawUnsafe<
         Array<{ tokenHash: string }>
@@ -397,9 +396,20 @@ export async function changePassword(
       const created = newSessionData(updated.id, false, now)
       await transaction.session.create({ data: created.data })
       return { ...created, user: summary(updated) }
-    },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-  )
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    )
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    if (isSerializationConflict(error)) {
+      throw new ApiError(
+        409,
+        'STALE_RESOURCE',
+        'Account credentials changed. Sign in again.',
+      )
+    }
+    throw error
+  }
 }
 
 export async function logout(session: ResolvedSession) {

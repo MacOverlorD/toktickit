@@ -1,4 +1,4 @@
-import { KeyRound } from 'lucide-react'
+import { KeyRound, LogOut } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import {
@@ -25,7 +25,7 @@ function localPasswordError(password: string) {
 }
 
 function ChangePasswordPage() {
-  const { changePassword, state } = useAuth()
+  const { changePassword, logout, state } = useAuth()
   const navigate = useNavigate()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -33,6 +33,20 @@ function ChangePasswordPage() {
   const [busy, setBusy] = useState(false)
   const [generalError, setGeneralError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  async function signOut() {
+    if (busy) return
+    setBusy(true)
+    setGeneralError('')
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      setGeneralError('Sign out failed. Try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   if (state.status === 'loading') {
     return (
@@ -144,6 +158,17 @@ function ChangePasswordPage() {
           >
             Save password
           </AppButton>
+          {state.payload.user.mustChangePassword && (
+            <AppButton
+              disabled={busy}
+              icon={<LogOut />}
+              onClick={() => void signOut()}
+              type={'button'}
+              variant={'secondary'}
+            >
+              Log out
+            </AppButton>
+          )}
         </form>
       </section>
     </main>

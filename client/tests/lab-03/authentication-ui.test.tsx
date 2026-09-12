@@ -134,6 +134,22 @@ describe('Lab 3 authentication UI', () => {
     expect((init.headers as Headers).get('X-CSRF-Token')).toBe('c'.repeat(64))
   })
 
+  it('allows a restricted user to log out before changing the initial password', async () => {
+    window.history.replaceState({}, '', '/change-password')
+    const fetchMock = vi.fn().mockResolvedValue(response(204, null))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<App initialAuth={payload('REQUESTER', true)} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
+
+    expect(await screen.findByRole('heading', { name: 'Sign in' }))
+      .toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3000/api/auth/logout',
+      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    )
+  })
+
   it('shows only role-appropriate navigation and blocks direct role escalation', async () => {
     window.history.replaceState({}, '', '/staff/tickets')
     const view = render(<App initialAuth={payload('ADMINISTRATOR')} />)

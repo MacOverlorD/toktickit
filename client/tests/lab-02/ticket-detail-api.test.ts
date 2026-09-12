@@ -45,6 +45,25 @@ beforeEach(() => {
 })
 
 describe('Ticket Detail API client', () => {
+  it.each([
+    'NEW',
+    'OPEN',
+    'IN_PROGRESS',
+    'WAITING_FOR_REQUESTER',
+    'RESOLVED',
+    'CLOSED',
+    'REOPENED',
+    'CANCELLED',
+  ] as const)('accepts the migrated %s ticket status', async (status) => {
+    vi.mocked(apiFetch).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ ...validResponse, status }),
+    } as unknown as Response)
+
+    await expect(getTicketDetail(validResponse.ticketNumber))
+      .resolves.toMatchObject({ status })
+  })
+
   it('requests the encoded ticket route with requester context', async () => {
     vi.mocked(apiFetch).mockResolvedValue({
       ok: true,
@@ -112,7 +131,7 @@ describe('Ticket Detail API client', () => {
     },
     {
       name: 'unexpected ticket status',
-      response: { ...validResponse, status: 'IN_PROGRESS' },
+      response: { ...validResponse, status: 'ESCALATED' },
     },
     {
       name: 'malformed response ticket number',

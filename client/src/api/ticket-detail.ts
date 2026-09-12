@@ -1,6 +1,7 @@
 import { apiFetch } from './request'
 import {
   TicketApiError,
+  ticketStatuses,
   type RequestedPriority,
   type TicketStatus,
 } from './tickets'
@@ -94,7 +95,7 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
     !ticketNumberPattern.test(value.ticketNumber) ||
     !isDate(value.ticketDate) || typeof value.summary !== 'string' ||
     !priorities.has(value.requestedPriority) ||
-    typeof value.description !== 'string' || value.status !== 'NEW' ||
+    typeof value.description !== 'string' || !ticketStatuses.has(value.status) ||
     !Array.isArray(value.attachments)) {
     return null
   }
@@ -114,7 +115,7 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
     summary: value.summary,
     requestedPriority: value.requestedPriority as RequestedPriority,
     description: value.description,
-    status: 'NEW',
+    status: value.status as TicketStatus,
     attachments: attachments as TicketAttachmentMetadata[],
   }
 }

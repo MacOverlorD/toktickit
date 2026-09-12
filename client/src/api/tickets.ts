@@ -22,7 +22,15 @@ export interface CreateTicketResult {
   replayed: boolean
 }
 
-export type TicketStatus = 'NEW'
+export type TicketStatus =
+  | 'NEW'
+  | 'OPEN'
+  | 'IN_PROGRESS'
+  | 'WAITING_FOR_REQUESTER'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'REOPENED'
+  | 'CANCELLED'
 export type TicketSortField =
   | 'createdAt'
   | 'ticketNumber'
@@ -145,6 +153,16 @@ function isCreateTicketResult(value: unknown): value is CreateTicketResult {
 }
 
 const priorities = new Set<unknown>(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+export const ticketStatuses = new Set<unknown>([
+  'NEW',
+  'OPEN',
+  'IN_PROGRESS',
+  'WAITING_FOR_REQUESTER',
+  'RESOLVED',
+  'CLOSED',
+  'REOPENED',
+  'CANCELLED',
+])
 const sortFields = new Set<unknown>([
   'createdAt',
   'ticketNumber',
@@ -181,7 +199,7 @@ function isTicketListItem(value: unknown): value is TicketListItem {
     !Number.isNaN(Date.parse(item.createdAt)) &&
     typeof item.summary === 'string' &&
     priorities.has(item.requestedPriority) &&
-    item.status === 'NEW' &&
+    ticketStatuses.has(item.status) &&
     isReference(item.category) &&
     isReference(item.relatedSystem) &&
     Number.isSafeInteger(item.attachmentCount) &&
@@ -220,7 +238,7 @@ function isTicketListResult(value: unknown): value is TicketListResult {
     (query.search === null || typeof query.search === 'string') &&
     (query.categoryId === null || isPositiveInteger(query.categoryId)) &&
     (query.relatedSystemId === null || isPositiveInteger(query.relatedSystemId)) &&
-    (query.status === null || query.status === 'NEW') &&
+    (query.status === null || ticketStatuses.has(query.status)) &&
     (query.priority === null || priorities.has(query.priority)) &&
     sortFields.has(query.sortBy) &&
     (query.sortOrder === 'asc' || query.sortOrder === 'desc') &&

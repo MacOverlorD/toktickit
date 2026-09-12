@@ -167,6 +167,27 @@ describe('Create Ticket API client', () => {
 })
 
 describe('My Tickets API client', () => {
+  it.each([
+    'NEW',
+    'OPEN',
+    'IN_PROGRESS',
+    'WAITING_FOR_REQUESTER',
+    'RESOLVED',
+    'CLOSED',
+    'REOPENED',
+    'CANCELLED',
+  ] as const)('accepts the migrated %s ticket status', async (status) => {
+    const body = validListResponse()
+    body.items[0].status = status
+    body.query.status = status
+    vi.mocked(apiFetch).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(body),
+    } as unknown as Response)
+
+    await expect(getMyTickets({ ...listQuery, status })).resolves.toEqual(body)
+  })
+
   it('sends only documented query values and requester context', async () => {
     vi.mocked(apiFetch).mockResolvedValue({
       ok: true,

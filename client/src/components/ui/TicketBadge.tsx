@@ -1,7 +1,8 @@
 import { AlertTriangle, Circle, CircleDot, Minus } from 'lucide-react'
+import type { TicketStatus } from '../../api/tickets'
 
 type TicketBadgeProps =
-  | { kind: 'status'; value: 'NEW' }
+  | { kind: 'status'; value: TicketStatus }
   | { kind: 'priority'; value: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' }
 
 const priorityPresentation = {
@@ -11,12 +12,27 @@ const priorityPresentation = {
   URGENT: { label: 'Urgent', className: 'urgent', Icon: AlertTriangle },
 } as const
 
+const statusLabels: Record<TicketStatus, string> = {
+  NEW: 'New',
+  OPEN: 'Open',
+  IN_PROGRESS: 'In Progress',
+  WAITING_FOR_REQUESTER: 'Waiting for Requester',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+  REOPENED: 'Reopened',
+  CANCELLED: 'Cancelled',
+}
+
 function TicketBadge(props: TicketBadgeProps) {
   if (props.kind === 'status') {
+    const label = statusLabels[props.value]
     return (
-      <span className={'ticket-badge badge-status-new'} aria-label={'Status: New'}>
+      <span
+        className={`ticket-badge badge-status-${props.value.toLowerCase().replaceAll('_', '-')}`}
+        aria-label={`Status: ${label}`}
+      >
         <CircleDot aria-hidden={'true'} />
-        New
+        {label}
       </span>
     )
   }

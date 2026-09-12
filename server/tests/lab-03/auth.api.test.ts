@@ -314,6 +314,103 @@ describe('Lab 3 authentication and authorization API', () => {
     expect((await staff.get('/api/categories')).status).toBe(200)
   })
 
+  it('rejects existing sessions after requester active state or role changes', async () => {
+    const encoded = await hashPassword(initialPassword)
+    const inactiveUser = await database.user.create({
+      data: {
+        name: 'Deactivate During Session',
+        email: `inactive-${randomUUID()}@example.test`,
+        passwordHash: encoded,
+        mustChangePassword: false,
+      },
+    })
+    const changedRoleUser = await database.user.create({
+      data: {
+        name: 'Role Changes During Session',
+        email: `role-${randomUUID()}@example.test`,
+        passwordHash: encoded,
+        mustChangePassword: false,
+      },
+    })
+
+    try {
+      const inactiveAgent = request.agent(app)
+      const roleAgent = request.agent(app)
+      const inactiveLogin = await signIn(inactiveAgent, inactiveUser.email)
+      const roleLogin = await signIn(roleAgent, changedRoleUser.email)
+
+      await database.user.update({
+        where: { id: inactiveUser.id },
+        data: { isActive: false },
+      })
+      await database.user.update({
+        where: { id: changedRoleUser.id },
+        data: { role: 'IT_STAFF' },
+      })
+
+      const inactiveMutation = await inactiveAgent
+        .post('/api/tickets')
+        .set('Origin', origin)
+        .set('X-CSRF-Token', inactiveLogin.body.csrfToken)
+      const changedRoleMutation = await roleAgent
+        .post('/api/tickets')
+        .set('Origin', origin)
+        .set('X-CSRF-Token', roleLogin.body.csrfToken)
+
+      expect(inactiveMutation.status).toBe(401)
+      expect(inactiveMutation.body.error.code).toBe('UNAUTHENTICATED')
+      expect(changedRoleMutation.status).toBe(403)
+      expect(changedRoleMutation.body.error.code).toBe('FORBIDDEN')
+    } finally {
+      await database.session.deleteMany({
+        where: { userId: { in: [inactiveUser.id, changedRoleUser.id] } },
+      })
+      await database.user.deleteMany({
+        where: { id: { in: [inactiveUser.id, changedRoleUser.id] } },
+      })
+    }
+  })
+
+  it('returns only documented outcomes for concurrent password changes', async () => {
+    const user = await database.user.create({
+      data: {
+        name: 'Concurrent Password User',
+        email: `password-race-${randomUUID()}@example.test`,
+        passwordHash: await hashPassword(initialPassword),
+        mustChangePassword: true,
+      },
+    })
+
+    try {
+      const agent = request.agent(app)
+      const loginResponse = await signIn(agent, user.email)
+      const cookie = loginResponse.headers['set-cookie']?.[0].split(';')[0]
+      const requestBody = {
+        currentPassword: initialPassword,
+        newPassword: 'Concurrent replacement password 2026!',
+        confirmPassword: 'Concurrent replacement password 2026!',
+      }
+      const change = () =>
+        request(app)
+          .post('/api/auth/change-password')
+          .set('Cookie', cookie)
+          .set('Origin', origin)
+          .set('X-CSRF-Token', loginResponse.body.csrfToken)
+          .send(requestBody)
+
+      const responses = await Promise.all([change(), change()])
+      const statuses = responses.map((response) => response.status).sort()
+
+      expect(statuses[0]).toBe(200)
+      expect([401, 409]).toContain(statuses[1])
+      expect(responses.every((response) => response.status !== 500)).toBe(true)
+      expect(await database.session.count({ where: { userId: user.id } })).toBe(1)
+    } finally {
+      await database.session.deleteMany({ where: { userId: user.id } })
+      await database.user.delete({ where: { id: user.id } })
+    }
+  })
+
   it('expires idle/absolute sessions and logout invalidates the server row', async () => {
     const idleAgent = request.agent(app)
     const idleLogin = await signIn(idleAgent, 'admin@example.test')

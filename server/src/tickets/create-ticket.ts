@@ -1,6 +1,9 @@
 import type { RequestHandler } from 'express'
+import { Prisma } from '@prisma/client'
 import { ApiError } from '../errors/api-error.js'
+import { isSerializationConflict } from '../errors/prisma-errors.js'
 import prisma from '../prisma.js'
+import { requireActiveRequesterInTransaction } from '../requesters/requester-transaction.js'
 import {
   createTicketWithIdentity,
   IdempotencyKeyReuseError,
@@ -46,48 +49,55 @@ export const createTicket: RequestHandler = async (request, response, next) => {
       description,
       submissionKey,
     }
-    const existingResult = await resolveExistingTicketIntent(
-      prisma,
-      normalizedInput,
-    )
-    if (existingResult) {
-      response.status(200).json({
-        data: {
-          ticketNumber: existingResult.ticket.ticketNumber,
-          ticketDate: existingResult.ticket.createdAt.toISOString(),
-          status: existingResult.ticket.status,
-          requesterId: existingResult.ticket.requesterId,
-        },
-        replayed: true,
-      })
-      return
+    let result
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        result = await prisma.$transaction(async (transaction) => {
+          await requireActiveRequesterInTransaction(transaction, requester.id)
+          const existing = await resolveExistingTicketIntent(
+            transaction,
+            normalizedInput,
+          )
+          if (existing) return existing
+          const [category, relatedSystem] = await Promise.all([
+            transaction.category.findFirst({
+              where: { id: categoryId, isActive: true },
+              select: { id: true },
+            }),
+            transaction.relatedSystem.findFirst({
+              where: { id: relatedSystemId, isActive: true },
+              select: { id: true },
+            }),
+          ])
+          const fieldErrors: Record<string, string> = {}
+          if (!category) fieldErrors.categoryId = 'Select an active Category.'
+          if (!relatedSystem) {
+            fieldErrors.relatedSystemId = 'Select an active Related System.'
+          }
+          if (Object.keys(fieldErrors).length > 0) {
+            throw new ApiError(
+              400,
+              'VALIDATION_ERROR',
+              'Check the highlighted ticket fields and try again.',
+              fieldErrors,
+            )
+          }
+          return createTicketWithIdentity(transaction, normalizedInput)
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+        break
+      } catch (error) {
+        const retryable = isSerializationConflict(error)
+        if (!retryable) throw error
+        if (attempt === 2) {
+          throw new ApiError(
+            409,
+            'CONCURRENT_UPDATE',
+            'The account or ticket changed concurrently. Try again.',
+          )
+        }
+      }
     }
-
-    const [category, relatedSystem] = await Promise.all([
-      prisma.category.findFirst({
-        where: { id: categoryId, isActive: true },
-        select: { id: true },
-      }),
-      prisma.relatedSystem.findFirst({
-        where: { id: relatedSystemId, isActive: true },
-        select: { id: true },
-      }),
-    ])
-    const fieldErrors: Record<string, string> = {}
-    if (!category) fieldErrors.categoryId = 'Select an active Category.'
-    if (!relatedSystem) {
-      fieldErrors.relatedSystemId = 'Select an active Related System.'
-    }
-    if (Object.keys(fieldErrors).length > 0) {
-      throw new ApiError(
-        400,
-        'VALIDATION_ERROR',
-        'Check the highlighted ticket fields and try again.',
-        fieldErrors,
-      )
-    }
-
-    const result = await createTicketWithIdentity(prisma, normalizedInput)
+    if (!result) throw new Error('Ticket transaction retry exhausted.')
 
     response.status(result.replayed ? 200 : 201).json({
       data: {
