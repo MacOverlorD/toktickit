@@ -1,16 +1,21 @@
-import { database } from '../lab-02/database.js'
-import { E2E_AUTH_FIXTURE_KEY } from './values.js'
+import { cleanupE2EData, database } from '../lab-02/database.js'
+import { E2E_AUTH_FIXTURE_KEY, E2E_REQUESTER_USERS } from './values.js'
 
 export default async function globalTeardown() {
+  await cleanupE2EData()
   const prisma = await database()
-  const user = await prisma.user.findUnique({
-    where: { fixtureKey: E2E_AUTH_FIXTURE_KEY },
+  const fixtureKeys = [
+    E2E_AUTH_FIXTURE_KEY,
+    ...E2E_REQUESTER_USERS.map(({ fixtureKey }) => fixtureKey),
+  ]
+  const users = await prisma.user.findMany({
+    where: { fixtureKey: { in: fixtureKeys } },
     select: { id: true },
   })
-  if (user) {
-    await prisma.session.deleteMany({ where: { userId: user.id } })
-    await prisma.ticket.deleteMany({ where: { requesterId: user.id } })
-    await prisma.user.delete({ where: { id: user.id } })
+  const userIds = users.map(({ id }) => id)
+  if (userIds.length > 0) {
+    await prisma.session.deleteMany({ where: { userId: { in: userIds } } })
+    await prisma.user.deleteMany({ where: { id: { in: userIds } } })
   }
   await prisma.$disconnect()
 }

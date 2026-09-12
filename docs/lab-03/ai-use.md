@@ -8,7 +8,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 1. Read docs/lab-03/Lab_3_sheet.pdf using grill-with-docs and propose an issue count.
 2. Reduce the breakdown to eight or nine issues while retaining complete lab coverage.
 3. User selected nine issues and requested setup through starting Issue 1.
-4. User reaffirmed starting Issue 1 after setup; expanded the domain, API/UI and test contracts.
+4. User requested addressing PR #46 requested changes, updating Lab 3 documentation, replying to the reviewer, and requesting approval again.
 5. User requested completing all Issue 1 authoring work and making the PR ready.
 6. User requested continuing by merging the reviewed Issue 1 PR.
 7. User requested continuing with Issue 2 after Issue 1 was merged.
@@ -55,7 +55,14 @@ against every acceptance criterion, retained the existing server-owned identity
 and Lab 2 regressions, strengthened exact missing/cross-owner Attachment response
 comparisons, and made draft/submission UI state reset synchronously whenever the
 authenticated user, role or version changes. Verification was limited to the
-affected Requester API/UI suites and client typecheck.
+affected Requester API/UI suites and client typecheck. After peer review on
+PR #46 identified the excluded legacy browser flow, migrated the complete
+Requester ticket/attachment lifecycle into the Lab 3 Playwright project using
+real login, opaque cookie sessions and CSRF-backed UI mutations for two isolated
+Requester accounts. Expanded state-reset coverage across user ID, role, version,
+draft and active-submission transitions, and migrated E2E cleanup to the current
+User schema. Re-ran the focused API/UI suites, executable Requester browser flow
+and production build before requesting approval again.
 
 ## My Reflection
 

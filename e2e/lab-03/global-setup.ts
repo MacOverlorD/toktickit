@@ -4,6 +4,8 @@ import {
   E2E_AUTH_EMAIL,
   E2E_AUTH_FIXTURE_KEY,
   E2E_INITIAL_PASSWORD,
+  E2E_REQUESTER_PASSWORD,
+  E2E_REQUESTER_USERS,
 } from './values.js'
 
 export default async function globalSetup() {
@@ -32,5 +34,32 @@ export default async function globalSetup() {
     select: { id: true },
   })
   await prisma.session.deleteMany({ where: { userId: user.id } })
+
+  const requesterPasswordHash = await hashPassword(E2E_REQUESTER_PASSWORD)
+  for (const requester of E2E_REQUESTER_USERS) {
+    const flowUser = await prisma.user.upsert({
+      where: { fixtureKey: requester.fixtureKey },
+      update: {
+        name: requester.name,
+        email: requester.email,
+        role: 'REQUESTER',
+        isActive: true,
+        passwordHash: requesterPasswordHash,
+        mustChangePassword: false,
+        version: { increment: 1 },
+      },
+      create: {
+        fixtureKey: requester.fixtureKey,
+        name: requester.name,
+        email: requester.email,
+        role: 'REQUESTER',
+        isActive: true,
+        passwordHash: requesterPasswordHash,
+        mustChangePassword: false,
+      },
+      select: { id: true },
+    })
+    await prisma.session.deleteMany({ where: { userId: flowUser.id } })
+  }
   await prisma.$disconnect()
 }

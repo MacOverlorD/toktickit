@@ -39,6 +39,18 @@ const second: AuthPayload = {
   expiresAt: '2026-09-12T19:00:00.000Z',
 }
 
+const staff: AuthPayload = {
+  ...second,
+  user: { ...second.user, role: 'IT_STAFF' },
+  csrfToken: 'c'.repeat(64),
+}
+
+const newerStaff: AuthPayload = {
+  ...staff,
+  user: { ...staff.user, version: 4 },
+  csrfToken: 'd'.repeat(64),
+}
+
 function response(status: number, body: unknown) {
   return {
     ok: status >= 200 && status < 300,
@@ -49,30 +61,34 @@ function response(status: number, body: unknown) {
 }
 
 function Harness() {
-  const { login, logout } = useAuth()
+  const { login, state } = useAuth()
   const {
+    contextVersion,
     hasUnsavedTicketDraft,
+    isTicketSubmitting,
     selectedRequester,
     setTicketDraftState,
   } = useRequester()
 
-  async function switchIdentity() {
-    await logout()
-    await login('second@example.test', 'Second requester password')
-  }
-
   return (
     <>
-      <p>{selectedRequester?.name ?? 'Anonymous'}</p>
+      <p>Identity: {state.status === 'authenticated' ? state.payload.user.id : 'none'}</p>
+      <p>Role: {state.status === 'authenticated' ? state.payload.user.role : 'none'}</p>
+      <p>Version: {contextVersion}</p>
+      <p>Requester: {selectedRequester?.name ?? 'none'}</p>
       <p>{hasUnsavedTicketDraft ? 'Draft retained' : 'Draft clear'}</p>
-      <button
-        onClick={() => setTicketDraftState(true, false)}
-        type={'button'}
-      >
-        Start draft
+      <p>{isTicketSubmitting ? 'Submission active' : 'Submission clear'}</p>
+      <button onClick={() => setTicketDraftState(true, true)} type={'button'}>
+        Start submission
       </button>
-      <button onClick={() => void switchIdentity()} type={'button'}>
-        Switch identity
+      <button onClick={() => void login('second@example.test', 'password')} type={'button'}>
+        Change ID
+      </button>
+      <button onClick={() => void login('staff@example.test', 'password')} type={'button'}>
+        Change role
+      </button>
+      <button onClick={() => void login('newer@example.test', 'password')} type={'button'}>
+        Change version
       </button>
     </>
   )
@@ -84,10 +100,11 @@ afterEach(() => {
 })
 
 describe('Requester session-scoped UI state', () => {
-  it('clears draft state when authentication changes to another requester', async () => {
+  it('clears draft and submission state across ID, role, and version transitions', async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(response(204, null))
       .mockResolvedValueOnce(response(200, second))
+      .mockResolvedValueOnce(response(200, staff))
+      .mockResolvedValueOnce(response(200, newerStaff))
     vi.stubGlobal('fetch', fetchMock)
 
     render(
@@ -98,15 +115,27 @@ describe('Requester session-scoped UI state', () => {
       </AuthProvider>,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start draft' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Start submission' }))
     expect(screen.getByText('Draft retained')).toBeInTheDocument()
+    expect(screen.getByText('Submission active')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch identity' }))
-
-    await waitFor(() =>
-      expect(screen.getByText('Second Requester')).toBeInTheDocument(),
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Change ID' }))
+    await waitFor(() => expect(screen.getByText('Identity: 202')).toBeInTheDocument())
     expect(screen.getByText('Draft clear')).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(screen.getByText('Submission clear')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Start submission' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change role' }))
+    await waitFor(() => expect(screen.getByText('Role: IT_STAFF')).toBeInTheDocument())
+    expect(screen.getByText('Draft clear')).toBeInTheDocument()
+    expect(screen.getByText('Submission clear')).toBeInTheDocument()
+    expect(screen.getByText('Requester: none')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Start submission' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change version' }))
+    await waitFor(() => expect(screen.getByText('Version: 4')).toBeInTheDocument())
+    expect(screen.getByText('Draft clear')).toBeInTheDocument()
+    expect(screen.getByText('Submission clear')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(3)
   })
 })
