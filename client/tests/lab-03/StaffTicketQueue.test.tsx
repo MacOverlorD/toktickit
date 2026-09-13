@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
 import { setApiCsrfToken } from '../../src/api/request'
@@ -20,27 +20,75 @@ beforeEach(() => { window.history.replaceState({}, '', '/staff/tickets'); setApi
 afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); window.history.replaceState({}, '', '/') })
 
 describe('Staff Ticket Queue', () => {
-  it('renders responsive cards with ownership, badges, and detail navigation', async () => {
+  it('applies non-search controls immediately while keeping search submitted', async () => {
+    window.history.replaceState({}, '', '/staff/tickets?page=4')
+    const fetchMock = vi.fn().mockResolvedValue(response(200, queue))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<App initialAuth={staff} />)
+    await screen.findAllByText('Laptop cannot connect')
+    fireEvent.change(screen.getByLabelText('Search tickets'), { target: { value: 'pending' } })
+    for (const [control, value, parameter] of [['Category', '1', 'categoryId'], ['Sort By', 'createdAt', 'sortBy'], ['Page Size', '20', 'pageSize']]) {
+      const count = fetchMock.mock.calls.length
+      fireEvent.change(screen.getByLabelText(control), { target: { value } })
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(count + 1))
+      expect(new URLSearchParams(window.location.search).get(parameter)).toBe(value)
+      expect(new URLSearchParams(window.location.search).get('page')).toBe('1')
+      expect(window.location.search).not.toContain('search=pending')
+      expect(fetchMock.mock.calls.at(-1)?.[0]).toContain(parameter + '=' + value)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    await waitFor(() => expect(window.location.search).toContain('search=pending'))
+  })
+
+  it.each(['IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'RESOLVED', 'CLOSED'])('warns about ownerless %s tickets', async status => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(200, { ...queue, items: [{ ...queue.items[0], status }] })))
+    render(<App initialAuth={staff} />)
+    expect(await screen.findAllByText('Needs assignment')).toHaveLength(2)
+  })
+
+  it('returns an out-of-range page to an available page', async () => {
+    window.history.replaceState({}, '', '/staff/tickets?page=4')
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(200, { ...queue, items: [], pagination: { ...queue.pagination, page: 4 } })).mockResolvedValue(response(200, queue))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<App initialAuth={staff} />)
+    expect(await screen.findByRole('heading', { name: 'Page out of range' })).toBeInTheDocument()
+    expect(screen.queryByText('No tickets yet')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Go to last page' }))
+    await screen.findAllByText('Laptop cannot connect')
+    expect(new URLSearchParams(window.location.search).get('page')).toBe('1')
+  })
+
+  it('denies Requesters access to staff detail', async () => {
+    window.history.replaceState({}, '', '/staff/tickets/TKT-20260913-ABCDEF01')
+    render(<App initialAuth={{ ...staff, user: { ...staff.user, role: 'REQUESTER' } }} />)
+    expect(await screen.findByText('Forbidden')).toBeInTheDocument()
+  })
+
+  it('renders desktop columns and opens a protected detail destination', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(200, queue)))
     render(<App initialAuth={staff} />)
-    expect(await screen.findByText('Laptop cannot connect')).toBeInTheDocument()
-    expect(screen.getAllByText('Unassigned')).toHaveLength(2)
-    expect(screen.getByLabelText('Status: Open')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Open ticket' })).toHaveAttribute('href', '/staff/tickets/TKT-20260913-ABCDEF01')
+    await screen.findAllByText('Laptop cannot connect')
+    const table = screen.getByRole('table', { name: 'Staff ticket queue' })
+    expect(within(table).getAllByRole('columnheader')).toHaveLength(8)
+    expect(within(table).getByText('Unassigned')).toBeInTheDocument()
+    expect(within(table).getByLabelText('Status: Open')).toBeInTheDocument()
+    fireEvent.click(within(table).getByRole('link', { name: 'Open ticket' }))
+    expect(await screen.findByRole('heading', { name: 'Staff Ticket Detail' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/staff/tickets/TKT-20260913-ABCDEF01')
   })
 
   it('stores submitted filters in the URL and resets the page', async () => {
     const fetchMock = vi.fn().mockResolvedValue(response(200, queue))
     vi.stubGlobal('fetch', fetchMock)
     render(<App initialAuth={staff} />)
-    await screen.findByText('Laptop cannot connect')
+    await screen.findAllByText('Laptop cannot connect')
     fireEvent.change(screen.getByLabelText('Search tickets'), { target: { value: 'laptop' } })
     fireEvent.change(screen.getByLabelText('IT Priority'), { target: { value: 'URGENT' } })
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
     await waitFor(() => expect(window.location.search).toContain('search=laptop'))
     expect(window.location.search).toContain('itPriority=URGENT')
     expect(window.location.search).toContain('page=1')
-    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(3)
   })
 
   it('shows forbidden and recoverable failure states', async () => {

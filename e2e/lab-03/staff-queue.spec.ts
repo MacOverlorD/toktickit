@@ -19,6 +19,14 @@ test('staff queue remains usable across desktop, tablet, and mobile', async ({ p
       getComputedStyle(element).gridTemplateColumns.split(' ').length,
     )
     expect(columns).toBe(view.controlColumns)
+    if (view.width >= 992) {
+      await expect(page.getByRole('table', { name: 'Staff ticket queue' })).toBeVisible()
+      await expect(page.locator('.staff-ticket-list')).toBeHidden()
+      await expect(page.getByRole('columnheader')).toHaveCount(8)
+    } else {
+      await expect(page.locator('.staff-ticket-list')).toBeVisible()
+      await expect(page.locator('.staff-ticket-table-wrapper')).toBeHidden()
+    }
     expect(await page.evaluate(() =>
       document.documentElement.scrollWidth <= document.documentElement.clientWidth,
     )).toBe(true)
@@ -27,4 +35,7 @@ test('staff queue remains usable across desktop, tablet, and mobile', async ({ p
       fullPage: true,
     })
   }
+  await page.getByRole('link', { name: 'Open ticket' }).first().click()
+  await expect(page.getByRole('heading', { name: 'Staff Ticket Detail' })).toBeVisible()
+  await expect(page).toHaveURL(/\/staff\/tickets\/TKT-/)
 })

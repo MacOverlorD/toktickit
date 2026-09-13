@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import RequesterTicketDetailPage from './pages/RequesterTicketDetailPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
+import StaffTicketDetailPage from './pages/StaffTicketDetailPage'
 import StaffTicketQueuePage from './pages/StaffTicketQueuePage'
 import { RequesterProvider } from './requesters/RequesterContext'
 
@@ -36,6 +37,7 @@ export function AppRoutes() {
             element={<RequireRole roles={['IT_STAFF', 'ADMINISTRATOR']} />}
           >
             <Route path={'staff/tickets'} element={<StaffTicketQueuePage />} />
+            <Route path={'staff/tickets/:ticketNumber'} element={<StaffTicketDetailPage />} />
           </Route>
           <Route element={<RequireRole roles={['ADMINISTRATOR']} />}>
             <Route

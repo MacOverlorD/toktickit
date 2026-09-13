@@ -18,7 +18,7 @@ are mandatory cases to implement alongside features and expand when new defects 
 | UI-02 | UI component | AC-02, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Mandatory change validation, logout, CSRF and success routing | Passed (combined 5-test suite) |
 | UI-03 | UI component | AC-03, AC-04, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Role navigation and direct-route denial | Passed (combined 5-test suite) |
 | UI-04 | UI component | AC-05, AC-06, AC-09, AC-10, AC-15 | client/tests/lab-02/*.test.tsx | Session-derived requester identity, all eight migrated statuses and retained ticket/attachment UI behavior | Passed in 97-test client suite |
-| UI-05 | UI component | AC-07, AC-15 | client/tests/lab-03/StaffTicketQueue.test.tsx | URL controls, feedback, badges and detail navigation | Passed (4 tests) |
+| UI-05 | UI component | AC-07, AC-15 | client/tests/lab-03/StaffTicketQueue.test.tsx | URL controls, immediate filters/sorting/page size, responsive table/cards, assignment warning, pagination boundary, feedback, badges and protected detail navigation | Passed (11 tests) |
 | UI-06 | UI component | AC-08, AC-09, AC-10, AC-15 | client/src/tests/lab-03/StaffTicketDetail.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UI-07 | UI component | AC-11, AC-12, AC-13, AC-15 | client/src/tests/lab-03/UserManagement.test.tsx | Controls, validation, feedback and role behavior | Planned |
 | UNIT-01 | Unit | AC-01, AC-02, AC-09, AC-10, AC-13 | server/tests/lab-03/business-rules.test.ts | Validation boundaries and allowed transitions; supplement real DB concurrency tests | Planned |
@@ -82,7 +82,10 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | Date | Command | Result |
 |---|---|---|
 | 2026-09-13 | `npm test -- --run tests/lab-03/staff-queue.api.test.ts` from `server/` | 1 file, 12 tests passed for role gates, combined search/filters, priority order, owner behavior, normalized pagination and invalid query boundaries |
-| 2026-09-13 | `npm test -- --run tests/lab-03/StaffTicketQueue.test.tsx` from `client/` | 1 file, 4 tests passed for URL filters, badges, ownership, detail links, empty/no-results, forbidden, failure and working retry |
+| 2026-09-13 | `npm test -- --run tests/lab-03/StaffTicketQueue.test.tsx tests/lab-03/authentication-ui.test.tsx` from `client/` after PR #47 review | 2 files, 16 tests passed for authentication-to-queue request ordering, immediate URL controls, desktop columns, card content, owner warnings, protected detail navigation, pagination boundary and feedback states |
+| 2026-09-13 | `npm run test:client` after PR #47 review | 14 files, 109 tests passed |
+| 2026-09-13 | `npm run build` after PR #47 review | Server TypeScript, client TypeScript and production Vite build passed |
+| 2026-09-13 | `npx playwright test e2e/lab-03/staff-queue.spec.ts` after PR #47 review | Blocked before browser execution because local PostgreSQL at `127.0.0.1:5432` was unavailable; no passing result recorded |
 | 2026-09-13 | `npx playwright test e2e/lab-03/staff-queue.spec.ts` | 1 browser test passed at 1440x900, 820x1180 and 390x844 with responsive columns, no horizontal overflow and screenshots under `artifacts/lab-03/` |
 | 2026-09-13 | `npm run build` from `server/`; `npm run typecheck` from `client/` | Both passed |
 ## Completion evidence
