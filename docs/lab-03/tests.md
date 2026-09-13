@@ -24,6 +24,7 @@ are mandatory cases to implement alongside features and expand when new defects 
 | UNIT-01 | Unit | AC-01, AC-02, AC-09, AC-10, AC-13 | server/tests/lab-03/business-rules.test.ts | Validation boundaries and allowed transitions; supplement real DB concurrency tests | Planned |
 | STYLE-01 | UI/style | AC-15, AC-16 | client/src/tests/lab-03/ZenGreen.test.tsx | Tokens, shared components and editable/read-only presentation | Planned |
 | E2E-01 | E2E | AC-01, AC-02, AC-03, AC-04 | e2e/lab-03/authentication.spec.ts | Full login/change-password/logout and direct-access flow with isolated account cleanup | Passed (1 test) |
+| E2E-REQ | E2E | AC-05, AC-06 | e2e/lab-03/requester-ticket-flow.spec.ts | Authenticated Requester create/list/detail, attachment lifecycle and cross-owner denial using real cookie sessions | Passed (1 test) |
 | E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/staff-ticket-flow.spec.ts | Requester/staff ticket, attachments and communication | Planned |
 | E2E-03 | E2E | AC-11, AC-12, AC-13 | e2e/lab-03/user-administration.spec.ts | User lifecycle and safety rules | Planned |
 | VIS-01 | Responsive/accessibility/visual | AC-15, AC-16 | e2e/lab-03/visual-evidence.spec.ts | Desktop/tablet/mobile screenshots plus manual keyboard/focus and visual inspection | Planned |
@@ -61,6 +62,19 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-11 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
 | 2026-09-12 | `npm test` after PR #45 requested changes | Server: 19 files / 114 tests; client: 12 files / 97 tests; Playwright: 1 test. Covered all eight status payloads, transactional requester revalidation, concurrent password changes, expired rate-limit capacity and mandatory-change logout |
 | 2026-09-12 | `npm run build` after PR #45 requested changes | Server TypeScript, client TypeScript and production Vite build passed |
+
+## Issue #36 execution evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-12 | Focused Requester UI command from `client/` | 4 files, 25 tests passed for create/list/detail behavior and session-scoped state reset |
+| 2026-09-12 | Focused Requester API command from `server/` | 4 files, 40 tests passed for create/list/detail, identity ownership, safe errors and attachment lifecycle |
+| 2026-09-12 | `npm test --prefix server -- --run tests/lab-02/attachments.api.test.ts` | 1 file, 10 tests passed after exact missing/cross-owner response comparisons were added for list/upload/content/removal |
+| 2026-09-12 | `npm run typecheck --prefix client` | Passed after identity/version-keyed Requester state reset |
+| 2026-09-12 | Focused Requester UI command from `client/` after PR #46 review | 4 files, 25 tests passed; reset coverage includes ID, role, version, draft and active submission state |
+| 2026-09-12 | Focused Requester API command from `server/` after PR #46 review | 4 files, 40 tests passed |
+| 2026-09-12 | `npx playwright test e2e/lab-03/requester-ticket-flow.spec.ts` | 1 browser test passed for real login/cookie sessions, create/list/detail, upload/download/remove, 410 removed content and 404 cross-owner denial; scoped teardown passed |
+| 2026-09-12 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
 
 ## Completion evidence
 

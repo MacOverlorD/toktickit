@@ -167,19 +167,36 @@ describe('Issue 18 attachment lifecycle API', () => {
     expect(response.body.error.code).toBe('ATTACHMENT_CONTENT_UNAVAILABLE')
   })
 
-  it('uses safe not-found for cross-owner list/upload/content/removal', async () => {
+  it('makes missing and cross-owner attachment operations indistinguishable', async () => {
     const base = `/api/tickets/${ticketNumber}/attachments`
-    const responses = [
-      await api('get', base, otherId),
-      await api('post', base, otherId)
-        .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
-      await api('get', base + '/' + attachmentId + '/content', otherId),
-      await api('delete', base + '/' + attachmentId, otherId)
-        .send({ reason: 'Should not be allowed' }),
+    const missingBase = '/api/tickets/TKT-20991231-FFFFFFFF/attachments'
+    const pairs = [
+      [
+        await api('get', base, otherId),
+        await api('get', missingBase, ownerId),
+      ],
+      [
+        await api('post', base, otherId)
+          .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
+        await api('post', missingBase, ownerId)
+          .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
+      ],
+      [
+        await api('get', base + '/' + attachmentId + '/content', otherId),
+        await api('get', missingBase + '/' + attachmentId + '/content', ownerId),
+      ],
+      [
+        await api('delete', base + '/' + attachmentId, otherId)
+          .send({ reason: 'Should not be allowed' }),
+        await api('delete', missingBase + '/' + attachmentId, ownerId)
+          .send({ reason: 'Should not be allowed' }),
+      ],
     ]
-    for (const response of responses) {
-      expect(response.status).toBe(404)
-      expect(response.body.error.code).toBe('RESOURCE_NOT_FOUND')
+    for (const [crossOwner, missing] of pairs) {
+      expect(crossOwner.status).toBe(404)
+      expect(missing.status).toBe(404)
+      expect(crossOwner.body).toEqual(missing.body)
+      expect(crossOwner.body.error.code).toBe('RESOURCE_NOT_FOUND')
     }
   })
 

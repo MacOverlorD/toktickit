@@ -1,6 +1,9 @@
 # Lab 3 Review Evidence
 
-Status: Issue #33 reviewed, approved, and merged into `lab3-staging`.
+Status: Issues #33-#35 are merged into `lab3-staging`. Only Issue #33 has a
+recorded peer approval; Issues #34 and #35 were merged after fixes while their
+last recorded peer decisions remained Changes requested. Issue #36 is awaiting
+re-review after its requested changes were addressed.
 
 Record real reviewer identity, PR URL, comments, response, resulting change and
 approval evidence for each feature PR and the release PR. Do not substitute AI
@@ -9,7 +12,9 @@ self-review for a required peer review. Add records as work happens.
 | PR | Reviewer | Comment / response / change | Approval evidence |
 |---|---|---|---|
 | [PR #42](https://github.com/MacOverlorD/toktickit/pull/42) | Titihinan Sobking (`Ohmmykung09`), collaborator | Reviewed the complete lab handout and Lab 2 baseline. Confirmed specification structure, authorization/status rules, data-preserving migration, API/UI contracts, FR/BR/AC traceability, Markdown tables, relative links, whitespace checks, and build after Prisma Client generation. Reported one non-blocking source-section correction; corrected from sections 1-13 to 1-14 in this evidence update. | Approved commit `270bf9a` at 2026-09-10 16:50:34 UTC; merged by the reviewer as merge commit `6418e3f` at 2026-09-10 16:50:51 UTC. |
-| [PR #44](https://github.com/MacOverlorD/toktickit/pull/44) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested an explicit all-or-nothing migration transaction with failure proof, complete legacy-email syntax preflight, and immutable seed fixture identity. The response added transaction boundaries and rollback coverage, the full Lab 3 email policy check, a reserved unique `fixtureKey`, and an edited-email seed rerun test. Focused tests, full server tests, production build, and repeated populated-database seeds passed. | Changes requested on commit `0d8eeb4`; fixes recorded in commit `48bfd05`; re-review pending. |
+| [PR #44](https://github.com/MacOverlorD/toktickit/pull/44) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested an explicit all-or-nothing migration transaction with failure proof, complete legacy-email syntax preflight, and immutable seed fixture identity. The response added transaction boundaries and rollback coverage, the full Lab 3 email policy check, a reserved unique `fixtureKey`, and an edited-email seed rerun test. Focused tests, full server tests, production build, and repeated populated-database seeds passed. | Changes requested on commit `0d8eeb4`; fixes recorded before merge commit `bb4677f` at 2026-09-11 07:13:15 UTC. No later peer approval is recorded. |
+| [PR #45](https://github.com/MacOverlorD/toktickit/pull/45) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested all-status client parsing, transactional current-user checks, safe serialization-conflict handling, global expired rate-bucket cleanup and mandatory-change logout. Commit `e90a518` addressed all five findings and added focused regressions; server 114, client 97 and Playwright 1 passed with the production build. | Changes requested on commit `fe3a4dd`; merged as `f866989` at 2026-09-12 11:42:51 UTC. No later peer approval is recorded. |
+| [PR #46](https://github.com/MacOverlorD/toktickit/pull/46) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested migration of the excluded Lab 2 Requester Playwright flow to real cookie/CSRF authentication and stronger session-state coverage for ID, role, version, draft and submission transitions. The response moved the complete lifecycle flow into `e2e/lab-03`, added two isolated authenticated Requester fixtures, removed selector/sessionStorage/spoofable-header use, updated scoped cleanup for the User schema, and expanded the UI regression. Focused API 40, UI 25, Playwright 1 and production build passed. | Changes requested on commit `479b061` at 2026-09-12 15:08:40 UTC; fixes pushed and re-review requested, approval pending. |
 
 Branch flow: feature/3-* -> lab3-staging -> main. Record final-main verification
 only after the release exists and its tests actually run.

@@ -49,10 +49,11 @@ export async function cleanupE2EData() {
     await prisma.attachment.deleteMany({ where: { ticketId: { in: ticketIds } } })
     await prisma.ticket.deleteMany({ where: { id: { in: ticketIds } } })
   }
-  await prisma.requester.deleteMany({
+  await prisma.user.deleteMany({
     where: {
       email: EMPTY_REQUESTER_EMAIL,
-      tickets: { none: {} },
+      role: 'REQUESTER',
+      requestedTickets: { none: {} },
     },
   })
 }
