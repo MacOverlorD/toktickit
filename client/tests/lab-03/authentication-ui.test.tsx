@@ -32,6 +32,8 @@ function response(status: number, body: unknown, headers: Record<string, string>
   } as unknown as Response
 }
 
+const emptyQueue = { items: [], pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false }, filterOptions: { categories: [], relatedSystems: [], owners: [] } }
+
 beforeEach(() => {
   window.history.replaceState({}, '', '/login')
   setApiCsrfToken(null)
@@ -80,7 +82,8 @@ describe('Lab 3 authentication UI', () => {
   })
 
   it('routes a successful login to the home for the authenticated role', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(200, payload('IT_STAFF'))))
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(200, payload('IT_STAFF'))).mockResolvedValueOnce(response(200, emptyQueue))
+    vi.stubGlobal('fetch', fetchMock)
     render(<App initialAuth={null} />)
 
     fireEvent.change(screen.getByLabelText(/^Email/), {
@@ -94,12 +97,18 @@ describe('Lab 3 authentication UI', () => {
     expect(await screen.findByRole('heading', { name: 'Ticket Queue' }))
       .toBeInTheDocument()
     expect(window.location.pathname).toBe('/staff/tickets')
+    await screen.findByRole('heading', { name: 'No tickets yet' })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/api/auth/login')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/staff/tickets?')
+    expect(fetchMock.mock.calls[1][1]).toEqual(expect.objectContaining({ credentials: 'include' }))
+    expect(fetchMock.mock.calls[1][1].method ?? 'GET').toBe('GET')
   })
 
   it('forces restricted sessions through password change and sends CSRF', async () => {
     window.history.replaceState({}, '', '/staff/tickets')
     const next = payload('IT_STAFF')
-    const fetchMock = vi.fn().mockResolvedValue(response(200, next))
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(200, next)).mockResolvedValueOnce(response(200, emptyQueue))
     vi.stubGlobal('fetch', fetchMock)
     render(<App initialAuth={payload('IT_STAFF', true)} />)
 
@@ -126,6 +135,10 @@ describe('Lab 3 authentication UI', () => {
 
     expect(await screen.findByRole('heading', { name: 'Ticket Queue' }))
       .toBeInTheDocument()
+    await screen.findByRole('heading', { name: 'No tickets yet' })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/api/auth/change-password')
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/staff/tickets?')
     const [, init] = fetchMock.mock.calls[0]
     expect(init).toEqual(expect.objectContaining({
       method: 'POST',
@@ -152,6 +165,7 @@ describe('Lab 3 authentication UI', () => {
 
   it('shows only role-appropriate navigation and blocks direct role escalation', async () => {
     window.history.replaceState({}, '', '/staff/tickets')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(200, emptyQueue)))
     const view = render(<App initialAuth={payload('ADMINISTRATOR')} />)
 
     expect(screen.getByRole('link', { name: 'Ticket Queue' })).toBeInTheDocument()

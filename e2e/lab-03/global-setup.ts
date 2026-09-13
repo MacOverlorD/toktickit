@@ -6,6 +6,7 @@ import {
   E2E_INITIAL_PASSWORD,
   E2E_REQUESTER_PASSWORD,
   E2E_REQUESTER_USERS,
+  E2E_STAFF_USER,
 } from './values.js'
 
 export default async function globalSetup() {
@@ -61,5 +62,12 @@ export default async function globalSetup() {
     })
     await prisma.session.deleteMany({ where: { userId: flowUser.id } })
   }
+  const staffUser = await prisma.user.upsert({
+    where: { fixtureKey: E2E_STAFF_USER.fixtureKey },
+    update: { ...E2E_STAFF_USER, role: 'IT_STAFF', isActive: true, passwordHash: requesterPasswordHash, mustChangePassword: false, version: { increment: 1 } },
+    create: { ...E2E_STAFF_USER, role: 'IT_STAFF', isActive: true, passwordHash: requesterPasswordHash, mustChangePassword: false },
+    select: { id: true },
+  })
+  await prisma.session.deleteMany({ where: { userId: staffUser.id } })
   await prisma.$disconnect()
 }
