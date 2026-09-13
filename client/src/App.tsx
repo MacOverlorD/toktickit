@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import RequesterTicketDetailPage from './pages/RequesterTicketDetailPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
+import StaffTicketQueuePage from './pages/StaffTicketQueuePage'
 import { RequesterProvider } from './requesters/RequesterContext'
 
 export function AppRoutes() {
@@ -34,15 +35,7 @@ export function AppRoutes() {
           <Route
             element={<RequireRole roles={['IT_STAFF', 'ADMINISTRATOR']} />}
           >
-            <Route
-              path={'staff/tickets'}
-              element={
-                <RouteFoundationPage
-                  title={'Ticket Queue'}
-                  description={'The authenticated staff queue is delivered in Issue 5.'}
-                />
-              }
-            />
+            <Route path={'staff/tickets'} element={<StaffTicketQueuePage />} />
           </Route>
           <Route element={<RequireRole roles={['ADMINISTRATOR']} />}>
             <Route

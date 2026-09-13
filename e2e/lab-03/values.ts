@@ -17,3 +17,9 @@ export const E2E_REQUESTER_USERS = [
     email: 'e2e.lab3.other@example.test',
   },
 ] as const
+
+export const E2E_STAFF_USER = {
+  fixtureKey: 'lab3-staff-queue',
+  name: 'E2E Queue Staff',
+  email: 'e2e.lab3.queue.staff@example.test',
+} as const

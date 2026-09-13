@@ -1,0 +1,20 @@
+.staff-queue-page { display: grid; gap: var(--space-5); }
+.staff-queue-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-surface); }
+.staff-queue-controls label { display: grid; gap: var(--space-1); color: var(--color-text-muted); font-size: .82rem; font-weight: 700; }
+.staff-queue-controls input, .staff-queue-controls select { min-width: 0; min-height: 2.75rem; padding: 0 var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: white; color: var(--color-text); }
+.staff-queue-search { grid-column: span 2; }
+.staff-queue-search span { position: relative; display: flex; align-items: center; }
+.staff-queue-search svg { position: absolute; left: var(--space-3); width: 1rem; }
+.staff-queue-search input { width: 100%; padding-left: 2.25rem; }
+.staff-queue-actions { display: flex; align-items: end; gap: var(--space-2); }
+.staff-ticket-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.staff-ticket-card { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-surface); box-shadow: 0 2px 8px rgb(24 33 29 / 8%); }
+.staff-ticket-card h2, .staff-ticket-card p { margin: 0; }
+.staff-ticket-card h2 { font-size: 1.05rem; }
+.staff-ticket-card p { color: var(--color-text-muted); }
+.staff-ticket-heading, .staff-ticket-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.staff-ticket-heading > a { color: var(--color-primary); font-weight: 800; }
+.staff-ticket-meta > span { display: flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-size: .8rem; }
+.staff-ticket-card > .app-button { justify-self: start; }
+@media (max-width: 900px) { .staff-queue-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .staff-ticket-list { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .staff-queue-controls { grid-template-columns: 1fr; } .staff-queue-search { grid-column: auto; } .staff-queue-actions { flex-wrap: wrap; } .staff-ticket-meta { align-items: flex-start; flex-direction: column; } }

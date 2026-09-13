@@ -7,7 +7,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 
 1. Read docs/lab-03/Lab_3_sheet.pdf using grill-with-docs and propose an issue count.
 2. Reduce the breakdown to eight or nine issues while retaining complete lab coverage.
-3. User selected nine issues and requested setup through starting Issue 1.
+3. After the Requester PR merged, the user requested prioritizing our Lab 3 work before returning to the collaborator PRs.
 4. User requested addressing PR #46 requested changes, updating Lab 3 documentation, replying to the reviewer, and requesting approval again.
 5. User requested completing all Issue 1 authoring work and making the PR ready.
 6. User requested continuing by merging the reviewed Issue 1 PR.
@@ -62,7 +62,11 @@ real login, opaque cookie sessions and CSRF-backed UI mutations for two isolated
 Requester accounts. Expanded state-reset coverage across user ID, role, version,
 draft and active-submission transitions, and migrated E2E cleanup to the current
 User schema. Re-ran the focused API/UI suites, executable Requester browser flow
-and production build before requesting approval again.
+and production build before requesting approval again. For Issue #37, implemented the
+authorized Staff Queue API and responsive card UI with strict normalized query
+validation, URL-backed filters, deterministic sorting, snapshot-consistent paging,
+historical reference filters, safe feedback and direct Detail navigation. Added
+focused API/UI tests and a three-viewport Playwright check with screenshots.
 
 ## My Reflection
 
