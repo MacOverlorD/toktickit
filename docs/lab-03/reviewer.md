@@ -1,8 +1,9 @@
 # Lab 3 Review Evidence
 
-Status: Issues #33-#37 are merged into `lab3-staging`. Only Issue #33 has a
-recorded peer approval; Issues #34-#37 were merged after fixes while their last
-recorded peer decisions remained Changes requested.
+Status: Issues #33-#37 are merged into `lab3-staging`. Issue #38 is submitted
+for peer review in PR #48. Only Issue #33 has a recorded peer approval;
+Issues #34-#37 were merged after fixes while their last recorded peer decisions
+remained Changes requested.
 
 Record real reviewer identity, PR URL, comments, response, resulting change and
 approval evidence for each feature PR and the release PR. Do not substitute AI
@@ -15,6 +16,7 @@ self-review for a required peer review. Add records as work happens.
 | [PR #45](https://github.com/MacOverlorD/toktickit/pull/45) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested all-status client parsing, transactional current-user checks, safe serialization-conflict handling, global expired rate-bucket cleanup and mandatory-change logout. Commit `e90a518` addressed all five findings and added focused regressions; server 114, client 97 and Playwright 1 passed with the production build. | Changes requested on commit `fe3a4dd`; merged as `f866989` at 2026-09-12 11:42:51 UTC. No later peer approval is recorded. |
 | [PR #46](https://github.com/MacOverlorD/toktickit/pull/46) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested migration of the excluded Lab 2 Requester Playwright flow to real cookie/CSRF authentication and stronger session-state coverage for ID, role, version, draft and submission transitions. The response moved the complete lifecycle flow into `e2e/lab-03`, added two isolated authenticated Requester fixtures, removed selector/sessionStorage/spoofable-header use, updated scoped cleanup for the User schema, and expanded the UI regression. Focused API 40, UI 25, Playwright 1 and production build passed. | Changes requested on commit `479b061` at 2026-09-12 15:08:40 UTC; fixes were merged as `fea5799` at 2026-09-13 09:51:40 UTC. No later peer approval is recorded. |
 | [PR #47](https://github.com/MacOverlorD/toktickit/pull/47) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested restoration of the authentication UI suite, a protected detail destination, immediate non-search controls, desktop queue columns, Needs assignment warnings and correct out-of-range pagination. The response added ordered authentication/queue mocks, a role-protected scoped detail placeholder, URL-backed immediate controls, an eight-column desktop table with tablet/mobile cards, owner-state warnings and a recoverable page-boundary state with interaction and responsive coverage. Focused UI 16, full client 109 and production build passed; local E2E rerun was blocked because PostgreSQL was offline. | Changes requested on commit `b572882`; fixes committed as `2abb5bd` and merged by the reviewer as `24620a5` at 2026-09-13 14:36:54 UTC. No later peer approval is recorded. |
+| [PR #48](https://github.com/MacOverlorD/toktickit/pull/48) | Titihinan Sobking (`Ohmmykung09`), collaborator | Implements Issue #38 ticket detail, owner/priority/status workflow, requester resolution indication, public comments, private internal notes, attachment access and conflict recovery. Server 136, client 113, focused server 10, focused client 15, Playwright 1 and the production build passed. | Review requested on commit `ef1b763`; approval pending. |
 
 Branch flow: feature/3-* -> lab3-staging -> main. Record final-main verification
 only after the release exists and its tests actually run.
