@@ -13,6 +13,7 @@ import {
   uploadAttachment,
 } from '../api/attachments'
 import { AppButton, FeedbackState, IconButton, TicketBadge } from '../components/ui'
+import RequesterTicketCommunication from '../components/RequesterTicketCommunication'
 import { useRequester } from '../requesters/RequesterContext'
 import {
   formatFileSize,
@@ -491,11 +492,14 @@ function RequesterTicketDetailPage() {
         />
       )}
       {loadState === 'ready' && ticket && selectedRequester && (
-        <TicketDetailContent
-          ticket={ticket}
-          requesterId={selectedRequester.id}
-          onTicketChange={setTicket}
-        />
+        <>
+          <TicketDetailContent
+            ticket={ticket}
+            requesterId={selectedRequester.id}
+            onTicketChange={setTicket}
+          />
+          <RequesterTicketCommunication ticket={ticket} onTicketChange={setTicket} />
+        </>
       )}
     </div>
   )

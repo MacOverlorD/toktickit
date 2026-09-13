@@ -143,6 +143,8 @@ describe('Issue 17 Ticket Detail API', () => {
       requestedPriority: 'HIGH',
       description: 'First line of detail.\nSecond line remains meaningful.',
       status: 'NEW',
+      version: 1,
+      resolutionIndicatedAt: null,
       attachments: [
         {
           id: expect.any(Number),

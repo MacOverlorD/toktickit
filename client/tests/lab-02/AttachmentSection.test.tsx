@@ -31,7 +31,7 @@ const detail: TicketDetail = {
   requester, category: { id: 1, name: 'Hardware' },
   relatedSystem: { id: 1, name: 'Laptop' }, summary: 'Attachment test',
   requestedPriority: 'MEDIUM', description: 'Attachment lifecycle test.',
-  status: 'NEW', attachments: [active, removed],
+  status: 'NEW', version: 1, resolutionIndicatedAt: null, attachments: [active, removed],
 }
 const navigatePreview = vi.fn()
 const closePreview = vi.fn()

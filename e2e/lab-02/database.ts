@@ -46,6 +46,8 @@ export async function cleanupE2EData() {
   }
 
   if (ticketIds.length > 0) {
+    await prisma.publicComment.deleteMany({ where: { ticketId: { in: ticketIds } } })
+    await prisma.internalNote.deleteMany({ where: { ticketId: { in: ticketIds } } })
     await prisma.attachment.deleteMany({ where: { ticketId: { in: ticketIds } } })
     await prisma.ticket.deleteMany({ where: { id: { in: ticketIds } } })
   }

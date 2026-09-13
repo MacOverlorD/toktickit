@@ -23,3 +23,5 @@ export const E2E_STAFF_USER = {
   name: 'E2E Queue Staff',
   email: 'e2e.lab3.queue.staff@example.test',
 } as const
+
+export const E2E_WORKFLOW_TICKET = 'TKT-20990404-E2E00001'
