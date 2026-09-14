@@ -99,6 +99,10 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-13 | `npm run test:client` | 16 files, 113 tests passed |
 | 2026-09-13 | `npx playwright test e2e/lab-03/ticket-workflow.spec.ts` | 1 browser flow passed using real sessions/API/database; Requester indication/comment, Staff claim/priority/status/public reply/internal note and Requester private-note isolation; repeatable cleanup passed |
 | 2026-09-13 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
+| 2026-09-14 | Focused PR #48 review regression command from `client/` | 2 files, 16 tests passed; covers version-bound Staff drafts, authoritative Requester reloads, stale recovery with preserved draft, timeline loading/error/retry and 5,000/5,001 astral Unicode code-point boundaries |
+| 2026-09-14 | `npm run test:client` | 16 files, 125 tests passed after review fixes |
+| 2026-09-14 | `npx playwright test e2e/lab-03/ticket-workflow.spec.ts e2e/lab-03/concurrent-workflow.spec.ts` | 2 browser flows passed against real PostgreSQL; includes two isolated Staff browser contexts proving a communication refresh cannot revert another operator's priority update |
+| 2026-09-14 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed after review fixes |
 
 ## Completion evidence
 
