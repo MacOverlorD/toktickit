@@ -498,7 +498,15 @@ function RequesterTicketDetailPage() {
             requesterId={selectedRequester.id}
             onTicketChange={setTicket}
           />
-          <RequesterTicketCommunication ticket={ticket} onTicketChange={setTicket} />
+          <RequesterTicketCommunication
+            ticket={ticket}
+            onTicketChange={setTicket}
+            onReload={async () => {
+              const latest = await getTicketDetail(ticketNumber)
+              setTicket(latest)
+              return latest
+            }}
+          />
         </>
       )}
     </div>

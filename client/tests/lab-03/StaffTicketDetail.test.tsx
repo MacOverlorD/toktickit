@@ -193,3 +193,93 @@ describe("Staff Ticket Detail", () => {
     );
   });
 });
+
+describe("Staff version-bound drafts", () => {
+  it.each(["comments", "notes"] as const)(
+    "requires reload after another operator changes owner and priority before a %s refresh",
+    async (kind) => {
+      render(<App initialAuth={staff} />);
+      await screen.findByRole("heading", { name: detail.ticketNumber });
+      fireEvent.change(screen.getByLabelText("IT Priority"), {
+        target: { value: "HIGH" },
+      });
+      vi.mocked(workflow.getStaffTicketDetail).mockResolvedValue({
+        ...detail,
+        owner: { id: 9, name: "Suda", role: "IT_STAFF" },
+        itPriority: "URGENT",
+        version: 5,
+      });
+      fireEvent.change(
+        screen.getByLabelText(
+          kind === "comments"
+            ? "Public: visible to Requester"
+            : "Internal: staff only",
+        ),
+        { target: { value: "Refresh communication" } },
+      );
+      fireEvent.click(
+        screen.getByRole("button", {
+          name:
+            kind === "comments" ? "Add Public Comment" : "Add Internal Note",
+        }),
+      );
+      await screen.findByRole("button", { name: "Reload latest" });
+      expect(screen.getByLabelText("IT Priority")).toHaveValue("HIGH");
+      fireEvent.click(screen.getByRole("button", { name: "Save Owner" }));
+      fireEvent.click(screen.getByRole("button", { name: "Save IT Priority" }));
+      expect(workflow.updateOperation).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "Reload latest" }));
+      await screen.findByRole("heading", { name: detail.ticketNumber });
+      expect(screen.getByLabelText("Owner")).toHaveValue("9");
+      expect(screen.getByLabelText("IT Priority")).toHaveValue("URGENT");
+      fireEvent.click(screen.getByRole("button", { name: "Save IT Priority" }));
+      await waitFor(() =>
+        expect(workflow.updateOperation).toHaveBeenCalledWith(
+          detail.ticketNumber,
+          "priority",
+          { itPriority: "URGENT", expectedVersion: 5 },
+        ),
+      );
+    },
+  );
+  it.each([
+    ["comments", 5000],
+    ["comments", 5001],
+    ["notes", 5000],
+    ["notes", 5001],
+  ] as const)(
+    "validates %s at %i astral Unicode code points",
+    async (kind, count) => {
+      render(<App initialAuth={staff} />);
+      await screen.findByRole("heading", { name: detail.ticketNumber });
+      const input = screen.getByLabelText(
+        kind === "comments"
+          ? "Public: visible to Requester"
+          : "Internal: staff only",
+      );
+      const draft = String.fromCodePoint(0x1f600).repeat(count);
+      expect(input).not.toHaveAttribute("maxlength");
+      fireEvent.change(input, { target: { value: draft } });
+      expect(screen.getByText(`${count}/5000 characters`)).toBeInTheDocument();
+      fireEvent.click(
+        screen.getByRole("button", {
+          name:
+            kind === "comments" ? "Add Public Comment" : "Add Internal Note",
+        }),
+      );
+      if (count === 5000) {
+        await waitFor(() =>
+          expect(workflow.appendEntry).toHaveBeenCalledWith(
+            detail.ticketNumber,
+            kind,
+            draft,
+          ),
+        );
+        await waitFor(() => expect(input).toHaveValue(""));
+      } else {
+        expect(workflow.appendEntry).not.toHaveBeenCalled();
+        expect(screen.getByRole("alert")).toHaveTextContent("at most 5000");
+      }
+    },
+  );
+});

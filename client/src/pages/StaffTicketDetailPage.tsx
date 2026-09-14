@@ -101,6 +101,10 @@ function Entries({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function save() {
+    if (Array.from(draft.trim()).length > 5000) {
+      setError("A message must contain at most 5000 characters.");
+      return;
+    }
     if (!draft.trim()) {
       setError("Enter a message.");
       return;
@@ -156,12 +160,13 @@ function Entries({
       <textarea
         id={`${kind}-draft`}
         className={"text-field communication-draft"}
-        maxLength={5000}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         disabled={busy}
       />
-      <span className={"field-hint"}>{draft.length}/5000 characters</span>
+      <span className={"field-hint"}>
+        {Array.from(draft).length}/5000 characters
+      </span>
       {error && (
         <p role={"alert"} className={"field-error"}>
           {error}
@@ -196,6 +201,7 @@ export default function StaffTicketDetailPage() {
   const [busy, setBusy] = useState("");
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [operationVersion, setOperationVersion] = useState(0);
   const [ownerId, setOwnerId] = useState("");
   const [priority, setPriority] = useState<RequestedPriority>("MEDIUM");
   const [status, setStatus] = useState<TicketStatus>("OPEN");
@@ -212,6 +218,7 @@ export default function StaffTicketDetailPage() {
           listEntries(ticketNumber, "notes"),
         ]);
       setDetail(next);
+      setOperationVersion(next.version);
       setOwners(eligible);
       setAttachments(files);
       setComments(publicItems);
@@ -240,11 +247,22 @@ export default function StaffTicketDetailPage() {
       listEntries(ticketNumber, "notes"),
     ]);
     setDetail(next);
+    if (next.version !== operationVersion) {
+      setError(
+        "This ticket changed. Reload latest before saving operation drafts.",
+      );
+    }
     setComments(publicItems);
     setNotes(privateItems);
   }
   async function update(kind: "owner" | "priority" | "status", body: object) {
     if (!detail) return;
+    if (detail.version !== operationVersion) {
+      setError(
+        "This ticket changed. Reload latest before saving operation drafts.",
+      );
+      return;
+    }
     if (
       kind === "status" &&
       confirmed.has(status) &&
@@ -257,12 +275,13 @@ export default function StaffTicketDetailPage() {
     try {
       const next = await updateOperation(ticketNumber, kind, {
         ...body,
-        expectedVersion: detail.version,
+        expectedVersion: operationVersion,
         ...(kind === "status" && confirmed.has(status)
           ? { confirmed: true }
           : {}),
       });
       setDetail({ ...detail, ...next });
+      setOperationVersion(next.version);
       setOwnerId(next.owner ? String(next.owner.id) : "");
       setPriority(next.itPriority);
       setStatus(transitions[next.status][0] ?? next.status);
@@ -349,7 +368,7 @@ export default function StaffTicketDetailPage() {
           </Link>
           <h1>{detail.ticketNumber}</h1>
           <p className={"page-description"}>
-            Updated {date(detail.updatedAt)} ? Version {detail.version}
+            Updated {date(detail.updatedAt)} &middot; Version {detail.version}
           </p>
         </div>
         <div className={"ticket-detail-badges"}>

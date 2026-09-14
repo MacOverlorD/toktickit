@@ -23,22 +23,39 @@ const date = (value: string) =>
 export default function RequesterTicketCommunication({
   ticket,
   onTicketChange,
+  onReload,
 }: {
   ticket: TicketDetail;
   onTicketChange: (ticket: TicketDetail) => void;
+  onReload: () => Promise<TicketDetail>;
 }) {
   const [items, setItems] = useState<Entry[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  const [needsReload, setNeedsReload] = useState(false);
+  const [timelineState, setTimelineState] = useState<
+    "loading" | "ready" | "error"
+  >("loading");
   async function load() {
-    setItems(await listEntries(ticket.ticketNumber, "comments"));
+    setTimelineState("loading");
+    try {
+      setItems(await listEntries(ticket.ticketNumber, "comments"));
+      setTimelineState("ready");
+    } catch (value) {
+      setTimelineState("error");
+      throw value;
+    }
   }
   useEffect(() => {
-    void load().catch(() => setError("Public comments could not be loaded."));
+    void load().catch(() => {});
   }, [ticket.ticketNumber]);
   async function comment() {
+    if (Array.from(draft.trim()).length > 5000) {
+      setError("A public comment must contain at most 5000 characters.");
+      return;
+    }
     if (!draft.trim()) {
       setError("Enter a public comment.");
       return;
@@ -48,17 +65,16 @@ export default function RequesterTicketCommunication({
     try {
       await appendEntry(ticket.ticketNumber, "comments", draft);
       setDraft("");
-      await load();
-      onTicketChange({ ...ticket, version: ticket.version + 1 });
+      await Promise.all([onReload(), load()]);
+      setNeedsReload(false);
     } catch (value) {
       setError(
         value instanceof WorkflowError
           ? value.message
           : "The comment could not be saved.",
       );
-      try {
-        await load();
-      } catch {}
+      const results = await Promise.allSettled([onReload(), load()]);
+      setNeedsReload(results[0].status === "rejected");
     } finally {
       setBusy("");
     }
@@ -73,6 +89,7 @@ export default function RequesterTicketCommunication({
       );
       onTicketChange({
         ...ticket,
+        status: result.status,
         version: result.version,
         resolutionIndicatedAt: result.resolutionIndicatedAt,
       });
@@ -80,13 +97,29 @@ export default function RequesterTicketCommunication({
         "Resolution indication sent. IT Staff still performs formal resolution.",
       );
     } catch (value) {
+      setNeedsReload(
+        value instanceof WorkflowError && value.code === "STALE_RESOURCE",
+      );
       setError(
         value instanceof WorkflowError && value.code === "STALE_RESOURCE"
-          ? "The ticket changed. Reload it before trying again."
+          ? "The ticket changed. Reload latest before trying again."
           : value instanceof Error
             ? value.message
             : "Resolution could not be indicated.",
       );
+    } finally {
+      setBusy("");
+    }
+  }
+  async function reloadLatest() {
+    setBusy("reload");
+    try {
+      await Promise.all([onReload(), load()]);
+      setError("");
+      setNeedsReload(false);
+    } catch {
+      setError("The latest ticket could not be loaded. Try again.");
+      setNeedsReload(true);
     } finally {
       setBusy("");
     }
@@ -124,7 +157,19 @@ export default function RequesterTicketCommunication({
         }
       >
         <h2>Public Comments</h2>
-        {items.length === 0 ? (
+        {timelineState === "loading" ? (
+          <p role="status">Loading public comments...</p>
+        ) : timelineState === "error" ? (
+          <div>
+            <p role="alert">Public comments could not be loaded.</p>
+            <AppButton
+              disabled={!!busy}
+              onClick={() => void load().catch(() => {})}
+            >
+              Retry public comments
+            </AppButton>
+          </div>
+        ) : items.length === 0 ? (
           <p>No public comments yet.</p>
         ) : (
           <ol className={"communication-list"}>
@@ -145,16 +190,26 @@ export default function RequesterTicketCommunication({
         <textarea
           id={"requester-public-comment"}
           className={"text-field communication-draft"}
-          maxLength={5000}
           value={draft}
           disabled={!!busy}
           onChange={(event) => setDraft(event.target.value)}
         />
-        <span className={"field-hint"}>{draft.length}/5000 characters</span>
+        <span className={"field-hint"}>
+          {Array.from(draft).length}/5000 characters
+        </span>
         {error && (
           <p role={"alert"} className={"field-error"}>
             {error}
           </p>
+        )}
+        {needsReload && (
+          <AppButton
+            disabled={!!busy}
+            busy={busy === "reload"}
+            onClick={() => void reloadLatest()}
+          >
+            Reload latest
+          </AppButton>
         )}
         {status && (
           <p role={"status"} className={"attachment-action-success"}>
