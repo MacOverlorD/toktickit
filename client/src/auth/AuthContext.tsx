@@ -195,5 +195,5 @@ export function useAuth() {
 }
 
 export function roleHome(role: UserRole) {
-  return role === 'REQUESTER' ? '/tickets' : '/staff/tickets'
+  return role === 'REQUESTER' ? '/tickets' : role === 'ADMINISTRATOR' ? '/admin/users' : '/staff/tickets'
 }

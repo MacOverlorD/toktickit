@@ -8,6 +8,8 @@ import {
   E2E_REQUESTER_PASSWORD,
   E2E_REQUESTER_USERS,
   E2E_STAFF_USER,
+  E2E_ADMIN_USER,
+  E2E_MANAGED_EMAIL,
   E2E_WORKFLOW_TICKET,
 } from './values.js'
 
@@ -71,6 +73,19 @@ export default async function globalSetup() {
     select: { id: true },
   })
   await prisma.session.deleteMany({ where: { userId: staffUser.id } })
+
+  const previousManaged = await prisma.user.findUnique({ where: { email: E2E_MANAGED_EMAIL } })
+  if (previousManaged) {
+    await prisma.session.deleteMany({ where: { userId: previousManaged.id } })
+    await prisma.user.delete({ where: { id: previousManaged.id } })
+  }
+  const adminUser = await prisma.user.upsert({
+    where: { fixtureKey: E2E_ADMIN_USER.fixtureKey },
+    update: { ...E2E_ADMIN_USER, role: 'ADMINISTRATOR', isActive: true, passwordHash: requesterPasswordHash, mustChangePassword: false, version: { increment: 1 } },
+    create: { ...E2E_ADMIN_USER, role: 'ADMINISTRATOR', isActive: true, passwordHash: requesterPasswordHash, mustChangePassword: false },
+    select: { id: true },
+  })
+  await prisma.session.deleteMany({ where: { userId: adminUser.id } })
 
   const workflowRequester = await prisma.user.findUniqueOrThrow({ where: { fixtureKey: E2E_REQUESTER_USERS[0].fixtureKey } })
   const category = await prisma.category.findFirstOrThrow({ where: { name: 'Hardware' } })

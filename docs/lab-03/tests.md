@@ -104,6 +104,17 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-14 | `npx playwright test e2e/lab-03/ticket-workflow.spec.ts e2e/lab-03/concurrent-workflow.spec.ts` | 2 browser flows passed against real PostgreSQL; includes two isolated Staff browser contexts proving a communication refresh cannot revert another operator's priority update |
 | 2026-09-14 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed after review fixes |
 
+## Issue #39 execution evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-14 | Focused Administrator API/policy command from `server/` | 2 files, 7 tests passed against disposable PostgreSQL; safe DTO/access, create/edit/reset, canonical email, stale versions, concurrent last-admin protection and owner unassignment/version continuity |
+| 2026-09-14 | Focused User Management UI command from `client/` | 1 file, 3 tests passed for list/filter/create, canonical-email conflict and stale-draft recovery |
+| 2026-09-14 | `npm test --prefix server` | 24 files, 143 tests passed |
+| 2026-09-14 | `npm test --prefix client` | 17 files, 128 tests passed |
+| 2026-09-14 | `npx playwright test e2e/lab-03/user-administration.spec.ts` | 1 real browser/database flow passed for Administrator create/edit/reset and mandatory password-change gating; screenshot saved at `artifacts/lab-03/user-management.png` |
+| 2026-09-14 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
+
 ## Completion evidence
 
 Replace proposed paths with actual paths, record exact commands, commit SHA,

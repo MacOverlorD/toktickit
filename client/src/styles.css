@@ -1854,3 +1854,5 @@ a[aria-disabled='true'] {
 .communication-draft { width: 100%; min-height: 7rem; }
 .requester-communication { margin-top: var(--space-5); }
 @media (max-width: 991px) { .staff-operation-grid { grid-template-columns: 1fr; } }
+
+.admin-filter-bar,.admin-layout,.admin-account-list article,.admin-editor form{display:grid;gap:1rem}.admin-filter-bar{grid-template-columns:2fr 1fr auto;align-items:end;margin:1rem 0}.admin-layout{grid-template-columns:minmax(0,1.5fr) minmax(18rem,1fr)}.admin-account-list{display:grid;gap:.75rem}.admin-account-list article{grid-template-columns:1fr auto;padding:1rem;border:1px solid var(--color-border);border-radius:.75rem}.admin-account-list article div{display:grid;gap:.2rem}.admin-editor{padding:1.25rem;background:var(--color-surface);border:1px solid var(--color-border);border-radius:.75rem}.admin-editor label{display:grid;gap:.35rem}.admin-check{grid-template-columns:auto 1fr!important;align-items:center;justify-content:start}@media(max-width:760px){.admin-filter-bar,.admin-layout,.admin-account-list article{grid-template-columns:1fr}}

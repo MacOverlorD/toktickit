@@ -4,7 +4,7 @@ Issue: [#39](https://github.com/MacOverlorD/toktickit/issues/39)
 Branch: `feature/3-07-user-management`
 PR base: `lab3-staging`
 Baseline: `e74f3de13cf1b6636a68962e862dda0d31f9ce8b`, merge of PR #48.
-Status: Prepared; implementation and runtime verification have not started.
+Status: Implemented and verified on the feature branch; PR submission pending.
 
 ## Contract
 
@@ -52,7 +52,7 @@ Implement FR-08 / AC-11-13 using [api-spec.md](./api-spec.md) section 6,
 
 ## Planned test coverage
 
-All scenarios below are Planned, not passing evidence.
+The primary scenarios below now have focused API/UI/E2E coverage; Issue #40 will broaden integrated visual and failure-path verification.
 
 | Layer / proposed path | Scenarios |
 |---|---|
