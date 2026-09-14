@@ -23,6 +23,8 @@ const detail: TicketDetail = {
   requestedPriority: 'HIGH',
   description: 'The VPN client reports an error.\nRestarting does not help.',
   status: 'NEW',
+  version: 1,
+  resolutionIndicatedAt: null,
   attachments: [
     {
       id: 11,

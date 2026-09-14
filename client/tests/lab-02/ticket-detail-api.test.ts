@@ -16,6 +16,8 @@ const validResponse = {
   requestedPriority: 'HIGH',
   description: 'The VPN client cannot establish a connection.',
   status: 'NEW',
+  version: 1,
+  resolutionIndicatedAt: null,
   attachments: [
     {
       id: 11,

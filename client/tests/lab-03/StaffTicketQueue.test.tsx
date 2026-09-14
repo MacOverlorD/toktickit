@@ -73,8 +73,10 @@ describe('Staff Ticket Queue', () => {
     expect(within(table).getByText('Unassigned')).toBeInTheDocument()
     expect(within(table).getByLabelText('Status: Open')).toBeInTheDocument()
     fireEvent.click(within(table).getByRole('link', { name: 'Open ticket' }))
-    expect(await screen.findByRole('heading', { name: 'Staff Ticket Detail' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Loading ticket' })).toBeInTheDocument()
+    expect(screen.queryByText('Page not found')).not.toBeInTheDocument()
     expect(window.location.pathname).toBe('/staff/tickets/TKT-20260913-ABCDEF01')
+    expect(await screen.findByRole('heading', { name: 'Ticket unavailable' })).toBeInTheDocument()
   })
 
   it('stores submitted filters in the URL and resets the page', async () => {

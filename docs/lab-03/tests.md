@@ -1,6 +1,6 @@
 # Lab 3 Test Plan and Traceability
 
-Status: MIG-01 and the Issue #34 password foundation passed on 2026-09-11. Issue #35 authentication, authenticated requester regression, UI, and E2E tests passed again after peer-review fixes on 2026-09-12; later feature tests remain Planned.
+Status: MIG-01 and the Issue #34 password foundation passed on 2026-09-11. Issues #35-#38 authentication, Requester, Staff Queue and Staff Detail/workflow feature tests have passed; later Administrator and integration work remains Planned.
 Paths marked Planned are proposed targets. Paths marked Passed exist and have been executed. The scenarios below
 are mandatory cases to implement alongside features and expand when new defects arise.
 
@@ -10,8 +10,8 @@ are mandatory cases to implement alongside features and expand when new defects 
 | AUTHZ-01 | API/security | AC-04, AC-05 | server/tests/lab-03/authorization.api.test.ts | Direct role denial, spoofing, cross-owner resources and private-note leakage | Planned |
 | REG-01 | API/regression | AC-05, AC-06 | server/tests/lab-01/categories.test.ts; server/tests/lab-02/*api.test.ts | Authenticated Lab 2 ticket/idempotency/attachment behavior using real session fixtures | Passed (45 focused API tests) |
 | QUEUE-01 | API | AC-07 | server/tests/lab-03/staff-queue.api.test.ts | Query controls, paging, invalid input and authorization | Passed (12 tests) |
-| DETAIL-01 | API | AC-08, AC-09 | server/tests/lab-03/staff-ticket-detail.api.test.ts | Assignment, priority, transitions, resolution indication and conflicts | Planned |
-| COMM-01 | API | AC-10 | server/tests/lab-03/comments-notes.api.test.ts | Visibility, append-only author/time, limits and rendering payloads | Planned |
+| DETAIL-01 | API | AC-08, AC-09 | server/tests/lab-03/staff-ticket-detail.api.test.ts | Operational detail, assignment, priority, all transition pairs, resolution indication, optimistic versions and conflicts | Passed (7 combined API tests) |
+| COMM-01 | API | AC-10 | server/tests/lab-03/staff-ticket-detail.api.test.ts; server/tests/lab-03/ticket-domain.test.ts | Public/private visibility, append-only server author/time, validation limits, safe payloads and plain-text rendering | Passed (combined 10-test suite) |
 | ADMIN-01 | API | AC-11, AC-12, AC-13 | server/tests/lab-03/users-admin.api.test.ts | Search/CRUD scope/reset/duplicates/one role and concurrent last-admin protection | Planned |
 | MIG-01 | Integration/unit | AC-06, AC-14 | server/tests/lab-03/migration.test.ts; server/tests/lab-03/password-foundation.test.ts | Populated Lab 2 and clean migration, atomic failure rollback, full email-policy preflight, identity/relationship preservation, immutable fixture identity, repeated seed/provisioning safety and Argon2id policy | Passed (7 focused tests) |
 | UI-01 | UI component | AC-01, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Login controls, generic feedback and role-home behavior | Passed (combined 5-test suite) |
@@ -19,14 +19,14 @@ are mandatory cases to implement alongside features and expand when new defects 
 | UI-03 | UI component | AC-03, AC-04, AC-15 | client/tests/lab-03/authentication-ui.test.tsx | Role navigation and direct-route denial | Passed (combined 5-test suite) |
 | UI-04 | UI component | AC-05, AC-06, AC-09, AC-10, AC-15 | client/tests/lab-02/*.test.tsx | Session-derived requester identity, all eight migrated statuses and retained ticket/attachment UI behavior | Passed in 97-test client suite |
 | UI-05 | UI component | AC-07, AC-15 | client/tests/lab-03/StaffTicketQueue.test.tsx | URL controls, immediate filters/sorting/page size, responsive table/cards, assignment warning, pagination boundary, feedback, badges and protected detail navigation | Passed (11 tests) |
-| UI-06 | UI component | AC-08, AC-09, AC-10, AC-15 | client/src/tests/lab-03/StaffTicketDetail.test.tsx | Controls, validation, feedback and role behavior | Planned |
+| UI-06 | UI component | AC-08, AC-09, AC-10, AC-15 | client/tests/lab-03/StaffTicketDetail.test.tsx; client/tests/lab-03/RequesterCommunication.test.tsx | Staff operations/conflicts, read-only attachments, distinct communication, requester indication and safe rendering | Passed (4 tests) |
 | UI-07 | UI component | AC-11, AC-12, AC-13, AC-15 | client/src/tests/lab-03/UserManagement.test.tsx | Controls, validation, feedback and role behavior | Planned |
-| UNIT-01 | Unit | AC-01, AC-02, AC-09, AC-10, AC-13 | server/tests/lab-03/business-rules.test.ts | Validation boundaries and allowed transitions; supplement real DB concurrency tests | Planned |
+| UNIT-01 | Unit | AC-01, AC-02, AC-09, AC-10, AC-13 | server/tests/lab-03/ticket-domain.test.ts | Exact transition, confirmation/owner sets and communication validation boundaries; supplement real DB transaction tests | Passed for Issue #38 scope (3 tests) |
 | STYLE-01 | UI/style | AC-15, AC-16 | client/src/tests/lab-03/ZenGreen.test.tsx | Tokens, shared components and editable/read-only presentation | Planned |
 | E2E-01 | E2E | AC-01, AC-02, AC-03, AC-04 | e2e/lab-03/authentication.spec.ts | Full login/change-password/logout and direct-access flow with isolated account cleanup | Passed (1 test) |
 | E2E-REQ | E2E | AC-05, AC-06 | e2e/lab-03/requester-ticket-flow.spec.ts | Authenticated Requester create/list/detail, attachment lifecycle and cross-owner denial using real cookie sessions | Passed (1 test) |
 | E2E-QUEUE | E2E | AC-07, AC-16 | e2e/lab-03/staff-queue.spec.ts | Authenticated queue at desktop, tablet and mobile widths with overflow and responsive-column checks | Passed (1 test) |
-| E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/staff-ticket-flow.spec.ts | Requester/staff ticket, attachments and communication | Planned |
+| E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/ticket-workflow.spec.ts | Real Requester indication/comment to Staff claim/priority/status/public/private flow and Requester private-note isolation | Passed (1 test) |
 | E2E-03 | E2E | AC-11, AC-12, AC-13 | e2e/lab-03/user-administration.spec.ts | User lifecycle and safety rules | Planned |
 | VIS-01 | Responsive/accessibility/visual | AC-15, AC-16 | e2e/lab-03/visual-evidence.spec.ts | Desktop/tablet/mobile screenshots plus manual keyboard/focus and visual inspection | Planned |
 | REL-01 | Release verification | AC-17 | docs/lab-03/reviewer.md; final-main CI/command evidence | Passing suites, peer reviews, traceability and nine-part PDF review | Planned |
@@ -88,6 +88,22 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-13 | `npx playwright test e2e/lab-03/staff-queue.spec.ts` after PR #47 review | Blocked before browser execution because local PostgreSQL at `127.0.0.1:5432` was unavailable; no passing result recorded |
 | 2026-09-13 | `npx playwright test e2e/lab-03/staff-queue.spec.ts` | 1 browser test passed at 1440x900, 820x1180 and 390x844 with responsive columns, no horizontal overflow and screenshots under `artifacts/lab-03/` |
 | 2026-09-13 | `npm run build` from `server/`; `npm run typecheck` from `client/` | Both passed |
+
+## Issue #38 execution evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-13 | `npm test --prefix server -- --run tests/lab-03/staff-ticket-detail.api.test.ts tests/lab-03/ticket-domain.test.ts` | 2 files, 10 tests passed; includes the full eight-by-eight transition matrix, optimistic versions, owner eligibility, indication idempotency, direct authorization, communication validation/isolation and attachment scope |
+| 2026-09-13 | Focused Issue #38 UI command from `client/` | 2 files, 4 tests passed for Staff operations, conflict feedback, distinct timelines, plain-text rendering, Requester indication and public comments |
+| 2026-09-13 | `npm run test:server` | 22 files, 136 tests passed |
+| 2026-09-13 | `npm run test:client` | 16 files, 113 tests passed |
+| 2026-09-13 | `npx playwright test e2e/lab-03/ticket-workflow.spec.ts` | 1 browser flow passed using real sessions/API/database; Requester indication/comment, Staff claim/priority/status/public reply/internal note and Requester private-note isolation; repeatable cleanup passed |
+| 2026-09-13 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed |
+| 2026-09-14 | Focused PR #48 review regression command from `client/` | 2 files, 16 tests passed; covers version-bound Staff drafts, authoritative Requester reloads, stale recovery with preserved draft, timeline loading/error/retry and 5,000/5,001 astral Unicode code-point boundaries |
+| 2026-09-14 | `npm run test:client` | 16 files, 125 tests passed after review fixes |
+| 2026-09-14 | `npx playwright test e2e/lab-03/ticket-workflow.spec.ts e2e/lab-03/concurrent-workflow.spec.ts` | 2 browser flows passed against real PostgreSQL; includes two isolated Staff browser contexts proving a communication refresh cannot revert another operator's priority update |
+| 2026-09-14 | `npm run build` | Server TypeScript, client TypeScript and production Vite build passed after review fixes |
+
 ## Completion evidence
 
 Replace proposed paths with actual paths, record exact commands, commit SHA,

@@ -1840,3 +1840,17 @@ a[aria-disabled='true'] {
     flex-wrap: wrap;
   }
 }
+
+
+.staff-operation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.staff-operation-grid > h2 { grid-column: 1 / -1; }
+.staff-operation-grid > div { display: grid; align-content: start; gap: var(--space-2); }
+.communication-section { border-left: 4px solid var(--color-primary); }
+.communication-notes { border-left-color: var(--color-warning); background: var(--color-warning-bg); }
+.communication-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; }
+.communication-list li { padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
+.communication-list header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); color: var(--color-text-muted); }
+.communication-list p, .communication-draft { white-space: pre-wrap; overflow-wrap: anywhere; }
+.communication-draft { width: 100%; min-height: 7rem; }
+.requester-communication { margin-top: var(--space-5); }
+@media (max-width: 991px) { .staff-operation-grid { grid-template-columns: 1fr; } }

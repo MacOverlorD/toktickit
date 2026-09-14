@@ -187,7 +187,7 @@ export const uploadAttachment: RequestHandler = async (request, response, next) 
   }
 }
 
-function contentDisposition(name: string, disposition: 'inline' | 'attachment') {
+export function contentDisposition(name: string, disposition: 'inline' | 'attachment') {
   const fallback = name.replace(/[^\x20-\x7E]/g, '_').replace(/[\x22\\]/g, '_')
   const encoded = encodeURIComponent(name).replace(/[!'()*]/g, (value) =>
     '%' + value.charCodeAt(0).toString(16).toUpperCase())

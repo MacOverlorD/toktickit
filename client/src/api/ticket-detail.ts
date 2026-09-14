@@ -27,6 +27,8 @@ export interface TicketDetail {
   requestedPriority: RequestedPriority
   description: string
   status: TicketStatus
+  version: number
+  resolutionIndicatedAt: string | null
   attachments: TicketAttachmentMetadata[]
 }
 
@@ -96,6 +98,8 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
     !isDate(value.ticketDate) || typeof value.summary !== 'string' ||
     !priorities.has(value.requestedPriority) ||
     typeof value.description !== 'string' || !ticketStatuses.has(value.status) ||
+    !isPositiveInteger(value.version) ||
+    !(value.resolutionIndicatedAt === null || isDate(value.resolutionIndicatedAt)) ||
     !Array.isArray(value.attachments)) {
     return null
   }
@@ -116,6 +120,8 @@ function parseTicketDetail(value: unknown): TicketDetail | null {
     requestedPriority: value.requestedPriority as RequestedPriority,
     description: value.description,
     status: value.status as TicketStatus,
+    version: Number(value.version),
+    resolutionIndicatedAt: value.resolutionIndicatedAt as string | null,
     attachments: attachments as TicketAttachmentMetadata[],
   }
 }
