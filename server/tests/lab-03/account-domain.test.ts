@@ -10,8 +10,28 @@ describe("account policy", () => {
     expect(canonicalEmail("a..b@example.com")).toBeNull();
     expect(canonicalEmail("a@-example.com")).toBeNull();
   });
+  it("trades local and domain lengths within the total email boundary", () => {
+    const domain = ["a".repeat(63), "b".repeat(63), "c".repeat(62)].join(".");
+    expect(canonicalEmail(`x@${domain}`)).not.toBeNull();
+    const boundary = `x@${domain}.${"d".repeat(61)}`;
+    expect(boundary).toHaveLength(254);
+    expect(canonicalEmail(boundary)).toBe(boundary);
+    expect(canonicalEmail(boundary + "d")).toBeNull();
+    const localTradeoffDomain = [
+      "a".repeat(63),
+      "b".repeat(63),
+      "c".repeat(60),
+    ].join(".");
+    expect(
+      canonicalEmail(`${"x".repeat(64)}@${localTradeoffDomain}`),
+    ).not.toBeNull();
+    expect(canonicalEmail(`${"x".repeat(65)}@example.com`)).toBeNull();
+    expect(canonicalEmail(`x@${"a".repeat(64)}.com`)).toBeNull();
+  });
   it("counts Unicode names and rejects malformed input", () => {
-    expect(accountName(String.fromCodePoint(0x1f600).repeat(120))).not.toBeNull();
+    expect(
+      accountName(String.fromCodePoint(0x1f600).repeat(120)),
+    ).not.toBeNull();
     expect(accountName(String.fromCodePoint(0x1f600).repeat(121))).toBeNull();
     expect(accountName(String.fromCharCode(0xd800))).toBeNull();
   });

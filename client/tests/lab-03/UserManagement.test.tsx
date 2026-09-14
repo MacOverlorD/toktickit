@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../../src/App";
 import * as api from "../../src/api/user-management";
@@ -94,5 +100,102 @@ describe("User Management", () => {
       await screen.findByRole("button", { name: "Reload latest" }),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("Keep Draft")).toBeInTheDocument();
+    vi.mocked(api.listAccounts).mockResolvedValue([
+      { ...item, name: "Server name", version: 7 },
+    ]);
+    fireEvent.click(screen.getByRole("button", { name: "Reload latest" }));
+    await screen.findByText("Source version: 7");
+    expect(screen.getByLabelText("Name")).toHaveValue("Keep Draft");
+    expect(api.editAccount).toHaveBeenCalledTimes(1);
+    vi.mocked(api.editAccount).mockResolvedValue({
+      ...item,
+      name: "Keep Draft",
+      version: 8,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+    await waitFor(() =>
+      expect(api.editAccount).toHaveBeenLastCalledWith(
+        item.id,
+        expect.objectContaining({ name: "Keep Draft", expectedVersion: 7 }),
+      ),
+    );
+  });
+  it("keeps password input focused for each character and clears credentials after creation", async () => {
+    vi.mocked(api.createAccount).mockResolvedValue(item);
+    render(<App initialAuth={admin} />);
+    await screen.findByText("user@example.test");
+    fireEvent.click(screen.getByRole("button", { name: "Create User" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: item.name },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: item.email },
+    });
+    for (const label of ["Initial password", "Confirm password"]) {
+      const input = screen.getByLabelText(label) as HTMLInputElement;
+      input.focus();
+      for (const character of "Initial password 2026!") {
+        fireEvent.keyDown(input, { key: character });
+        fireEvent.change(input, { target: { value: input.value + character } });
+        fireEvent.keyUp(input, { key: character });
+        expect(input).toHaveFocus();
+        expect(screen.getByLabelText(label)).toBe(input);
+      }
+      expect(input).toHaveValue("Initial password 2026!");
+    }
+    fireEvent.click(screen.getAllByRole("button", { name: "Create User" })[1]);
+    await screen.findByText("Account created.");
+    expect(screen.getByLabelText("Initial password")).toHaveValue("");
+    expect(screen.getByLabelText("Confirm password")).toHaveValue("");
+  });
+  it.each(["deactivation", "Requester role"])(
+    "explains ticket unassignment for %s",
+    async (transition) => {
+      vi.mocked(api.listAccounts).mockResolvedValue([
+        { ...item, role: "IT_STAFF" },
+      ]);
+      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+      render(<App initialAuth={admin} />);
+      await screen.findByText("user@example.test");
+      fireEvent.click(screen.getByRole("button", { name: "Edit User One" }));
+      if (transition === "deactivation")
+        fireEvent.click(screen.getByLabelText("Active account"));
+      else
+        fireEvent.change(screen.getAllByLabelText("Role")[1], {
+          target: { value: "REQUESTER" },
+        });
+      fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+      expect(confirm).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "Existing sessions will end. Any owned tickets will become unassigned and may require reassignment.",
+        ),
+      );
+      expect(api.editAccount).not.toHaveBeenCalled();
+      confirm.mockRestore();
+    },
+  );
+  it("ignores older responses arriving after the newest search", async () => {
+    let oldResolve!: (items: api.Account[]) => void;
+    let newResolve!: (items: api.Account[]) => void;
+    render(<App initialAuth={admin} />);
+    await screen.findByText("user@example.test");
+    vi.mocked(api.listAccounts).mockImplementation(
+      (search) =>
+        new Promise((resolve) => {
+          if (search === "old") oldResolve = resolve;
+          else newResolve = resolve;
+        }),
+    );
+    fireEvent.change(screen.getByLabelText("Search name or email"), {
+      target: { value: "old" },
+    });
+    fireEvent.change(screen.getByLabelText("Search name or email"), {
+      target: { value: "new" },
+    });
+    await act(async () => newResolve([{ ...item, email: "new@example.test" }]));
+    await screen.findByText("new@example.test");
+    await act(async () => oldResolve([{ ...item, email: "old@example.test" }]));
+    expect(screen.getByText("new@example.test")).toBeInTheDocument();
+    expect(screen.queryByText("old@example.test")).not.toBeInTheDocument();
   });
 });

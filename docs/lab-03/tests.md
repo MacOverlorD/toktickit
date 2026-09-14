@@ -243,3 +243,18 @@ these ACs. Keep final statuses Planned until commands actually execute.
 
 All added cases remain Planned. The author audit validates this contract; it
 is not evidence that application behavior has already passed these tests.
+
+## PR #49 peer-review regression verification
+
+The eight requested changes were verified with 7 User Management UI tests,
+4 account-policy tests, 1 real PostgreSQL/Chromium Administrator E2E flow,
+and the production build. UI regressions retain password focus for each typed
+character, clear submitted credentials, preserve drafts through stale reload
+and save with the refreshed version, reject older search responses, and explain
+session termination and ticket unassignment. Email tests cover valid long domains,
+254-character totals, oversized totals/local parts/domain labels. E2E verifies
+Administrator login lands at `/staff/tickets`, navigates explicitly to User
+Management, and asserts empty reset fields plus single-column layout and no
+horizontal overflow at 820x1180, 390x844 and 320x844. Updated screenshots are
+in `artifacts/lab-03/user-management*.png`. These are focused reruns; the previous
+full-suite counts above describe the initial implementation, not this rerun.

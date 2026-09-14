@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, RefreshCw, Users } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -27,6 +33,45 @@ const label = (v: string) =>
     .split("_")
     .map((x) => x[0].toUpperCase() + x.slice(1))
     .join(" ");
+function PasswordFields({
+  form,
+  fields,
+  setForm,
+}: {
+  form: typeof blank;
+  fields: Record<string, string>;
+  setForm: React.Dispatch<React.SetStateAction<typeof blank>>;
+}) {
+  return (
+    <>
+      <label>
+        Initial password
+        <input
+          className="text-field"
+          type="password"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+        {fields.initialPassword && (
+          <span className="field-error">{fields.initialPassword}</span>
+        )}
+      </label>
+      <label>
+        Confirm password
+        <input
+          className="text-field"
+          type="password"
+          value={form.confirm}
+          onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+        />
+        {fields.confirmPassword && (
+          <span className="field-error">{fields.confirmPassword}</span>
+        )}
+      </label>
+    </>
+  );
+}
+
 export default function UserManagementPage() {
   const { state } = useAuth(),
     navigate = useNavigate();
@@ -45,17 +90,24 @@ export default function UserManagementPage() {
     [error, setError] = useState(""),
     [fields, setFields] = useState<Record<string, string>>({}),
     [stale, setStale] = useState(false);
+  const loadSequence = useRef(0);
   const load = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setLoadState("loading");
     try {
-      setItems(await listAccounts(search.trim(), role));
+      const accounts = await listAccounts(search.trim(), role);
+      if (sequence !== loadSequence.current) return;
+      setItems(accounts);
       setLoadState("ready");
     } catch {
-      setLoadState("error");
+      if (sequence === loadSequence.current) setLoadState("error");
     }
   }, [search, role]);
   useEffect(() => {
     void load();
+    return () => {
+      loadSequence.current++;
+    };
   }, [load]);
   function open(item?: Account) {
     setMessage("");
@@ -104,7 +156,13 @@ export default function UserManagementPage() {
       selected &&
       (selected.isActive !== form.isActive || selected.role !== form.role) &&
       !window.confirm(
-        `Apply access changes to ${selected.name}? Active sessions may end.`,
+        `Apply access changes to ${selected.name}? Existing sessions will end.${
+          selected.isActive &&
+          selected.role !== "REQUESTER" &&
+          (!form.isActive || form.role === "REQUESTER")
+            ? " Any owned tickets will become unassigned and may require reassignment."
+            : ""
+        }`,
       )
     )
       return;
@@ -127,6 +185,7 @@ export default function UserManagementPage() {
             isActive: form.isActive,
             initialPassword: form.password,
           });
+      setForm((v) => ({ ...v, password: "", confirm: "" }));
       setMessage(selected ? "Account updated." : "Account created.");
       setSelected(next);
       setCreating(false);
@@ -175,39 +234,22 @@ export default function UserManagementPage() {
   }
   async function reloadSelected() {
     if (!selected) return;
-    const latest = (await listAccounts()).find((x) => x.id === selected.id);
-    if (latest) open(latest);
-    await load();
-  }
-  function PasswordFields() {
-    return (
-      <>
-        <label>
-          Initial password
-          <input
-            className="text-field"
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-          {fields.initialPassword && (
-            <span className="field-error">{fields.initialPassword}</span>
-          )}
-        </label>
-        <label>
-          Confirm password
-          <input
-            className="text-field"
-            type="password"
-            value={form.confirm}
-            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-          />
-          {fields.confirmPassword && (
-            <span className="field-error">{fields.confirmPassword}</span>
-          )}
-        </label>
-      </>
-    );
+    setBusy(true);
+    try {
+      const latest = (await listAccounts()).find((x) => x.id === selected.id);
+      if (!latest) throw new Error("Account unavailable");
+      setSelected(latest);
+      setStale(false);
+      setError("");
+      setFields({});
+      setMessage(
+        `Loaded account version ${latest.version}. Review your draft and save manually.`,
+      );
+    } catch (e) {
+      fail(e);
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <div className="page-container user-management-page">
@@ -233,7 +275,11 @@ export default function UserManagementPage() {
         </p>
       )}
       {stale && (
-        <AppButton variant="secondary" onClick={() => void reloadSelected()}>
+        <AppButton
+          variant="secondary"
+          busy={busy}
+          onClick={() => void reloadSelected()}
+        >
           Reload latest
         </AppButton>
       )}
@@ -317,6 +363,7 @@ export default function UserManagementPage() {
           {(creating || selected) && (
             <aside className="admin-editor">
               <h2>{selected ? `Edit ${selected.name}` : "Create User"}</h2>
+              {selected && <p>Source version: {selected.version}</p>}
               <form onSubmit={save}>
                 <label>
                   Name
@@ -367,7 +414,13 @@ export default function UserManagementPage() {
                   />{" "}
                   Active account
                 </label>
-                {!selected && <PasswordFields />}
+                {!selected && (
+                  <PasswordFields
+                    form={form}
+                    fields={fields}
+                    setForm={setForm}
+                  />
+                )}
                 <AppButton busy={busy} type="submit">
                   {selected ? "Save Changes" : "Create User"}
                 </AppButton>
@@ -375,7 +428,11 @@ export default function UserManagementPage() {
               {selected && (
                 <section>
                   <h3>Reset initial password</h3>
-                  <PasswordFields />
+                  <PasswordFields
+                    form={form}
+                    fields={fields}
+                    setForm={setForm}
+                  />
                   <AppButton
                     variant="destructive"
                     busy={busy}

@@ -18,6 +18,8 @@ test("Administrator creates, edits and resets an account while non-admin access 
   page,
 }) => {
   await login(page, E2E_ADMIN_USER.email);
+  await expect(page).toHaveURL(/staff\/tickets/);
+  await page.goto("/admin/users");
   await expect(
     page.getByRole("heading", { name: "User Management" }),
   ).toBeVisible();
@@ -37,6 +39,29 @@ test("Administrator creates, edits and resets an account while non-admin access 
     .last()
     .click();
   await expect(page.getByText("Account created.")).toBeVisible();
+  await expect(page.getByLabel("Initial password")).toHaveValue("");
+  await expect(page.getByLabel("Confirm password")).toHaveValue("");
+  for (const [width, height] of [
+    [820, 1180],
+    [390, 844],
+    [320, 844],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await expect(editor).toBeVisible();
+    const listBox = await page.locator(".admin-layout > section").boundingBox();
+    const editorBox = await editor.boundingBox();
+    expect(editorBox!.y).toBeGreaterThanOrEqual(listBox!.y + listBox!.height);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `artifacts/lab-03/user-management-${width}.png`,
+      fullPage: true,
+    });
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.screenshot({
     path: "artifacts/lab-03/user-management.png",
     fullPage: true,

@@ -3,7 +3,7 @@ import { ApiError } from "../errors/api-error.js";
 
 export const accountRoles = Object.values(UserRole);
 const emailPattern =
-  /^([A-Za-z0-9_%+-]|\.(?!\.)){1,64}@(?=.{3,189}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
+  /^([A-Za-z0-9_%+-]|\.(?!\.)){1,64}@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
 export function canonicalEmail(value: unknown) {
   if (typeof value !== "string") return null;
   const email = value.trim().toLowerCase();
