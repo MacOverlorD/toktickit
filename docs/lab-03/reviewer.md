@@ -1,8 +1,8 @@
 # Lab 3 Review Evidence
 
-Status: Issues #33-#38 are merged into `lab3-staging`. Only Issue #33 has a
-recorded peer approval; Issues #34-#38 were merged after fixes while their last
-recorded peer decisions remained Changes requested. Issue #39 is submitted for peer review in PR #49.
+Status: Issues #33-#39 are merged into `lab3-staging`. Only Issue #33 has a
+recorded peer approval; Issues #34-#39 were merged after fixes while their last
+recorded peer decisions remained Changes requested. Issue #40 integrated evidence is ready for peer review.
 
 Record real reviewer identity, PR URL, comments, response, resulting change and
 approval evidence for each feature PR and the release PR. Do not substitute AI
@@ -17,6 +17,8 @@ self-review for a required peer review. Add records as work happens.
 | [PR #47](https://github.com/MacOverlorD/toktickit/pull/47) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested restoration of the authentication UI suite, a protected detail destination, immediate non-search controls, desktop queue columns, Needs assignment warnings and correct out-of-range pagination. The response added ordered authentication/queue mocks, a role-protected scoped detail placeholder, URL-backed immediate controls, an eight-column desktop table with tablet/mobile cards, owner-state warnings and a recoverable page-boundary state with interaction and responsive coverage. Focused UI 16, full client 109 and production build passed; local E2E rerun was blocked because PostgreSQL was offline. | Changes requested on commit `b572882`; fixes committed as `2abb5bd` and merged by the reviewer as `24620a5` at 2026-09-13 14:36:54 UTC. No later peer approval is recorded. |
 | [PR #48](https://github.com/MacOverlorD/toktickit/pull/48) | Titihinan Sobking (`Ohmmykung09`), collaborator | Requested version-bound Staff operation drafts across communication refreshes, authoritative Requester versions after comments, explicit stale recovery, distinct timeline loading/error/retry states, Unicode code-point limits and correction of the header separator. Commit `3615182` binds Staff drafts to their source version, reloads owned Requester detail after successful or uncertain comments, preserves drafts through explicit reload, adds timeline states/retry, validates astral Unicode boundaries and adds a real two-client browser race. Full client 125, focused UI 16, Playwright 2 and production build passed. | Changes requested on commit `18ca182`; fixes committed as `3615182`, followed by evidence commit `e6923c4`. Merged by the reviewer as `e74f3de` at 2026-09-14 10:58:48 UTC. No later peer approval is recorded. |
 | [PR #49](https://github.com/MacOverlorD/toktickit/pull/49) | Titihinan Sobking (`Ohmmykung09`), collaborator | Implements Issue #39 Administrator-only account list/search/filter/create/edit/reset, optimistic versions, session invalidation, current-actor checks, serializable last-admin protection, atomic owner unassignment, responsive UI and real browser coverage. Server 143, client 128, focused API/policy 7, focused UI 3, Playwright 1 and production build passed. | Changes requested on commit `addc581` at 2026-09-14 15:32:27 UTC. All eight inline findings addressed in the follow-up: stable password inputs, cleared credentials, contracted Administrator home, preserved stale drafts/version, total email boundaries, ticket-impact confirmations, ordered search responses and tablet layout. Focused UI 7, policy 4, Playwright 1 (820/390/320px), and production build passed. Re-review requested from `Ohmmykung09` on commit `3b6ebfb`; approval pending. |
+
+| Pending Issue #40 PR | Pending `Ohmmykung09` | Integrated server/client/build/E2E verification, structured responsive screenshots, label/focus/overflow automation and manual image inspection completed at `dc72914`. | Peer review not requested yet. |
 
 Branch flow: feature/3-* -> lab3-staging -> main. Record final-main verification
 only after the release exists and its tests actually run.

@@ -1,6 +1,6 @@
 # Lab 3 UI Contract
 
-Status: Ready for Issue #33 PR review; application implementation is outside this PR.
+Status: Implemented and inspected on Issue #40 evidence commit `dc72914`; final-main confirmation remains for Issue #41.
 Reuse [Lab 2 design tokens and components](../lab-02/ui-spec.md) without a new
 visual system. Primary #006B3C, secondary #0B7A46, pale green #EAF6EF,
 page #F5F7F6, surface white, text #18211D; retain semantic error/warning tokens.
@@ -101,3 +101,19 @@ Capture authentication, staff-queue, staff-ticket-detail and user-management
 folders under artifacts/lab-03/screenshots/, plus Requester regression evidence.
 Test IDs: UI-01-07, STYLE-01, VIS-01 and corresponding E2E cases in tests.md.
 Do not claim screenshots or visual checks exist until executed in Issue 8.
+
+
+## Issue #40 visual evidence record
+
+The automated inspection checks every visible input, select and textarea for a
+programmatic label, moves keyboard focus into each captured page, and rejects
+page-level horizontal overflow. Thirty-two screenshots cover Login and mandatory
+password change, Requester list/detail, Staff Queue/Detail and Administrator list/create
+at 1440x900, 820x1180, 390x844 and 320x844. Images are stored in the documented
+`artifacts/lab-03/screenshots/` role folders.
+
+Manual inspection of the contact sheet and full-size 320px Change Password,
+Requester Detail and Create User images found no clipped/overlapping controls or
+text, inaccessible actions, private-note leakage, credential values or ambiguous
+editable/read-only treatment. Zen Green navigation, borders, badges, feedback and
+focus treatment remain consistent. Repeat this checklist on final `main` in Issue #41.
