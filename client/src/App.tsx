@@ -13,6 +13,7 @@ import MyTicketsPage from './pages/MyTicketsPage'
 import RequesterTicketDetailPage from './pages/RequesterTicketDetailPage'
 import RouteFoundationPage from './pages/RouteFoundationPage'
 import StaffTicketDetailPage from './pages/StaffTicketDetailPage'
+import UserManagementPage from './pages/UserManagementPage'
 import StaffTicketQueuePage from './pages/StaffTicketQueuePage'
 import { RequesterProvider } from './requesters/RequesterContext'
 
@@ -43,10 +44,7 @@ export function AppRoutes() {
             <Route
               path={'admin/users'}
               element={
-                <RouteFoundationPage
-                  title={'User Management'}
-                  description={'Administrator user management is delivered in Issue 7.'}
-                />
+                <UserManagementPage />
               }
             />
           </Route>

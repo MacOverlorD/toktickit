@@ -25,3 +25,6 @@ export const E2E_STAFF_USER = {
 } as const
 
 export const E2E_WORKFLOW_TICKET = 'TKT-20990404-E2E00001'
+
+export const E2E_ADMIN_USER = { fixtureKey: 'lab3-admin-users', name: 'E2E Administrator', email: 'e2e.lab3.admin@example.test' } as const
+export const E2E_MANAGED_EMAIL = 'e2e.lab3.managed@example.test'
