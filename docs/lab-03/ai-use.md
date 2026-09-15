@@ -78,7 +78,16 @@ container. The first integrated E2E run exposed an inherited assertion for a
 heading that the Staff Detail page does not render; the assertion was corrected
 to the visible ticket-number heading and rerun. Codex assembled a contact sheet
 for manual inspection after the direct image and Computer Use paths were blocked
-by Windows ACL/runtime errors. The student reflection below remains intentionally
+by Windows ACL/runtime errors.
+
+After peer review on PR #50, Codex converted the single-Tab smoke check into
+complete keyboard target/focus-indicator traversal, added explicit mobile
+navigation and responsive Administrator editor viewport checks, implemented
+first-invalid focus for password, account, communication and Staff operation
+errors, and regenerated 37 screenshots with dedicated validation evidence. The
+client, production build and complete Playwright suites were rerun.
+
+The student reflection below remains intentionally
 student-owned.
 
 ## My Reflection

@@ -106,14 +106,21 @@ Do not claim screenshots or visual checks exist until executed in Issue 8.
 ## Issue #40 visual evidence record
 
 The automated inspection checks every visible input, select and textarea for a
-programmatic label, moves keyboard focus into each captured page, and rejects
-page-level horizontal overflow. Thirty-two screenshots cover Login and mandatory
-password change, Requester list/detail, Staff Queue/Detail and Administrator list/create
-at 1440x900, 820x1180, 390x844 and 320x844. Images are stored in the documented
-`artifacts/lab-03/screenshots/` role folders.
+programmatic label, traverses every expected keyboard target, and asserts
+`:focus-visible` plus a rendered outline. It separately checks the opened mobile
+navigation and confirms that the Administrator editor heading and first field are
+inside the viewport at 1440x900, 820x1180, 390x844 and 320x844. Page-level
+horizontal overflow is rejected at every viewport.
 
-Manual inspection of the contact sheet and full-size 320px Change Password,
-Requester Detail and Create User images found no clipped/overlapping controls or
-text, inaccessible actions, private-note leakage, credential values or ambiguous
-editable/read-only treatment. Zen Green navigation, borders, badges, feedback and
-focus treatment remain consistent. Repeat this checklist on final `main` in Issue #41.
+Thirty-seven screenshots cover Login and mandatory password change, Requester
+list/detail, Staff Queue/Detail and Administrator list/create. New 320px captures
+show Login, Change Password, Requester/Staff communication and Staff operation
+validation with first-invalid focus. The four Create User validation captures use
+the current viewport after the editor is focused and scrolled into view. Images
+are stored in the documented `artifacts/lab-03/screenshots/` role folders.
+
+Manual inspection of the new validation and responsive editor images found no
+clipped controls, inaccessible actions, private-note leakage, credential values
+or ambiguous editable/read-only treatment. The native Login email validation
+bubble, inline field messages, focused invalid controls, Zen Green navigation,
+borders and badges remain legible. Repeat this checklist on final `main` in Issue #41.
