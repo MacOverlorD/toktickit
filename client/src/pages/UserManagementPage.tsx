@@ -37,10 +37,14 @@ function PasswordFields({
   form,
   fields,
   setForm,
+  initialPasswordRef,
+  confirmPasswordRef,
 }: {
   form: typeof blank;
   fields: Record<string, string>;
   setForm: React.Dispatch<React.SetStateAction<typeof blank>>;
+  initialPasswordRef: React.RefObject<HTMLInputElement | null>;
+  confirmPasswordRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
     <>
@@ -49,6 +53,9 @@ function PasswordFields({
         <input
           className="text-field"
           type="password"
+          ref={initialPasswordRef}
+          aria-label="Initial password"
+          aria-invalid={fields.initialPassword ? "true" : undefined}
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
@@ -61,6 +68,9 @@ function PasswordFields({
         <input
           className="text-field"
           type="password"
+          ref={confirmPasswordRef}
+          aria-label="Confirm password"
+          aria-invalid={fields.confirmPassword ? "true" : undefined}
           value={form.confirm}
           onChange={(e) => setForm({ ...form, confirm: e.target.value })}
         />
@@ -89,7 +99,15 @@ export default function UserManagementPage() {
     [message, setMessage] = useState(""),
     [error, setError] = useState(""),
     [fields, setFields] = useState<Record<string, string>>({}),
-    [stale, setStale] = useState(false);
+    [stale, setStale] = useState(false),
+    [editorFocusRequest, setEditorFocusRequest] = useState(0);
+  const editorHeadingRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const roleRef = useRef<HTMLSelectElement>(null);
+  const activeRef = useRef<HTMLInputElement>(null);
+  const initialPasswordRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement>(null);
   const loadSequence = useRef(0);
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
@@ -109,11 +127,34 @@ export default function UserManagementPage() {
       loadSequence.current++;
     };
   }, [load]);
+  useEffect(() => {
+    if (!editorFocusRequest) return;
+    const heading = editorHeadingRef.current;
+    heading?.focus({ preventScroll: true });
+    if (window.matchMedia?.("(max-width: 991px)").matches) {
+      heading?.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  }, [editorFocusRequest]);
+  function focusField(fieldNames: string[]) {
+    const targets: Record<string, React.RefObject<HTMLElement | null>> = {
+      name: nameRef,
+      email: emailRef,
+      role: roleRef,
+      isActive: activeRef,
+      initialPassword: initialPasswordRef,
+      confirmPassword: confirmPasswordRef,
+    };
+    const target = fieldNames
+      .map((field) => targets[field]?.current)
+      .find(Boolean);
+    window.setTimeout(() => target?.focus(), 0);
+  }
   function open(item?: Account) {
     setMessage("");
     setError("");
     setFields({});
     setStale(false);
+    setEditorFocusRequest((value) => value + 1);
     if (item) {
       setSelected(item);
       setCreating(false);
@@ -134,6 +175,7 @@ export default function UserManagementPage() {
   function fail(e: unknown) {
     if (e instanceof AccountError) {
       setFields(e.fields);
+      focusField(Object.keys(e.fields));
       setStale(e.code === "STALE_RESOURCE");
       setError(
         e.code === "EMAIL_CONFLICT"
@@ -150,6 +192,7 @@ export default function UserManagementPage() {
     e.preventDefault();
     if (!selected && form.password !== form.confirm) {
       setFields({ confirmPassword: "Password confirmation must match." });
+      focusField(["confirmPassword"]);
       return;
     }
     if (
@@ -203,6 +246,7 @@ export default function UserManagementPage() {
   async function reset() {
     if (!selected || form.password !== form.confirm) {
       setFields({ confirmPassword: "Password confirmation must match." });
+      focusField(["confirmPassword"]);
       return;
     }
     if (
@@ -362,24 +406,46 @@ export default function UserManagementPage() {
           </section>
           {(creating || selected) && (
             <aside className="admin-editor">
-              <h2>{selected ? `Edit ${selected.name}` : "Create User"}</h2>
+              <h2 ref={editorHeadingRef} tabIndex={-1}>
+                {selected ? `Edit ${selected.name}` : "Create User"}
+              </h2>
               {selected && <p>Source version: {selected.version}</p>}
               <form onSubmit={save}>
                 <label>
                   Name
                   <input
                     className="text-field"
+                    id="admin-user-name"
+                    ref={nameRef}
+                    aria-label="Name"
+                    aria-invalid={fields.name ? "true" : undefined}
+                    aria-describedby={
+                      fields.name ? "admin-user-name-error" : undefined
+                    }
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                   {fields.name && (
-                    <span className="field-error">{fields.name}</span>
+                    <span
+                      className="field-error"
+                      id="admin-user-name-error"
+                      role="alert"
+                    >
+                      {fields.name}
+                    </span>
                   )}
                 </label>
                 <label>
                   Email
                   <input
                     className="text-field"
+                    id="admin-user-email"
+                    ref={emailRef}
+                    aria-label="Email"
+                    aria-invalid={fields.email ? "true" : undefined}
+                    aria-describedby={
+                      fields.email ? "admin-user-email-error" : undefined
+                    }
                     type="email"
                     value={form.email}
                     onChange={(e) =>
@@ -387,13 +453,20 @@ export default function UserManagementPage() {
                     }
                   />
                   {fields.email && (
-                    <span className="field-error">{fields.email}</span>
+                    <span
+                      className="field-error"
+                      id="admin-user-email-error"
+                      role="alert"
+                    >
+                      {fields.email}
+                    </span>
                   )}
                 </label>
                 <label>
                   Role
                   <select
                     className="select-field"
+                    ref={roleRef}
                     value={form.role}
                     onChange={(e) =>
                       setForm({ ...form, role: e.target.value as AccountRole })
@@ -407,6 +480,7 @@ export default function UserManagementPage() {
                 <label className="admin-check">
                   <input
                     type="checkbox"
+                    ref={activeRef}
                     checked={form.isActive}
                     onChange={(e) =>
                       setForm({ ...form, isActive: e.target.checked })
@@ -419,6 +493,8 @@ export default function UserManagementPage() {
                     form={form}
                     fields={fields}
                     setForm={setForm}
+                    initialPasswordRef={initialPasswordRef}
+                    confirmPasswordRef={confirmPasswordRef}
                   />
                 )}
                 <AppButton busy={busy} type="submit">
@@ -432,6 +508,8 @@ export default function UserManagementPage() {
                     form={form}
                     fields={fields}
                     setForm={setForm}
+                    initialPasswordRef={initialPasswordRef}
+                    confirmPasswordRef={confirmPasswordRef}
                   />
                   <AppButton
                     variant="destructive"
