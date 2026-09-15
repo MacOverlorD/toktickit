@@ -36,6 +36,6 @@ test('staff queue remains usable across desktop, tablet, and mobile', async ({ p
     })
   }
   await page.getByRole('link', { name: 'Open ticket' }).first().click()
-  await expect(page.getByRole('heading', { name: 'Staff Ticket Detail' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^TKT-/ })).toBeVisible()
   await expect(page).toHaveURL(/\/staff\/tickets\/TKT-/)
 })

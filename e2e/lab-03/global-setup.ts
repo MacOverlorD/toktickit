@@ -11,6 +11,7 @@ import {
   E2E_ADMIN_USER,
   E2E_MANAGED_EMAIL,
   E2E_WORKFLOW_TICKET,
+  E2E_VISUAL_AUTH_USER,
 } from './values.js'
 
 export default async function globalSetup() {
@@ -39,6 +40,14 @@ export default async function globalSetup() {
     select: { id: true },
   })
   await prisma.session.deleteMany({ where: { userId: user.id } })
+
+  const visualAuthUser = await prisma.user.upsert({
+    where: { fixtureKey: E2E_VISUAL_AUTH_USER.fixtureKey },
+    update: { ...E2E_VISUAL_AUTH_USER, role: 'REQUESTER', isActive: true, passwordHash, mustChangePassword: true, version: { increment: 1 } },
+    create: { ...E2E_VISUAL_AUTH_USER, role: 'REQUESTER', isActive: true, passwordHash, mustChangePassword: true },
+    select: { id: true },
+  })
+  await prisma.session.deleteMany({ where: { userId: visualAuthUser.id } })
 
   const requesterPasswordHash = await hashPassword(E2E_REQUESTER_PASSWORD)
   for (const requester of E2E_REQUESTER_USERS) {

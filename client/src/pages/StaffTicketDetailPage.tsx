@@ -6,7 +6,13 @@ import {
   LockKeyhole,
   Paperclip,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   AppButton,
@@ -97,16 +103,19 @@ function Entries({
   onSaved: () => Promise<void>;
 }) {
   const { ticketNumber = "" } = useParams();
+  const draftRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function save() {
     if (Array.from(draft.trim()).length > 5000) {
       setError("A message must contain at most 5000 characters.");
+      draftRef.current?.focus();
       return;
     }
     if (!draft.trim()) {
       setError("Enter a message.");
+      draftRef.current?.focus();
       return;
     }
     setBusy(true);
@@ -159,6 +168,8 @@ function Entries({
       </label>
       <textarea
         id={`${kind}-draft`}
+        ref={draftRef}
+        aria-invalid={error ? "true" : undefined}
         className={"text-field communication-draft"}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
@@ -201,6 +212,17 @@ export default function StaffTicketDetailPage() {
   const [busy, setBusy] = useState("");
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [errorKind, setErrorKind] = useState<
+    "owner" | "priority" | "status" | null
+  >(null);
+  const ownerRef = useRef<HTMLSelectElement>(null);
+  const priorityRef = useRef<HTMLSelectElement>(null);
+  const statusRef = useRef<HTMLSelectElement>(null);
+  const operationRefs = {
+    owner: ownerRef,
+    priority: priorityRef,
+    status: statusRef,
+  };
   const [operationVersion, setOperationVersion] = useState(0);
   const [ownerId, setOwnerId] = useState("");
   const [priority, setPriority] = useState<RequestedPriority>("MEDIUM");
@@ -261,6 +283,8 @@ export default function StaffTicketDetailPage() {
       setError(
         "This ticket changed. Reload latest before saving operation drafts.",
       );
+      setErrorKind(kind);
+      window.setTimeout(() => operationRefs[kind].current?.focus(), 0);
       return;
     }
     if (
@@ -271,6 +295,7 @@ export default function StaffTicketDetailPage() {
       return;
     setBusy(kind);
     setError("");
+    setErrorKind(null);
     setFeedback("");
     try {
       const next = await updateOperation(ticketNumber, kind, {
@@ -288,6 +313,8 @@ export default function StaffTicketDetailPage() {
       setFeedback("Ticket updated.");
     } catch (value) {
       setError(message(value));
+      setErrorKind(kind);
+      window.setTimeout(() => operationRefs[kind].current?.focus(), 0);
     } finally {
       setBusy("");
     }
@@ -436,6 +463,8 @@ export default function StaffTicketDetailPage() {
             </label>
             <select
               id={"owner"}
+              ref={ownerRef}
+              aria-invalid={errorKind === "owner" ? "true" : undefined}
               className={"select-field"}
               value={ownerId}
               onChange={(e) => setOwnerId(e.target.value)}
@@ -477,6 +506,8 @@ export default function StaffTicketDetailPage() {
             </label>
             <select
               id={"priority"}
+              ref={priorityRef}
+              aria-invalid={errorKind === "priority" ? "true" : undefined}
               className={"select-field"}
               value={priority}
               onChange={(e) => setPriority(e.target.value as RequestedPriority)}
@@ -500,6 +531,8 @@ export default function StaffTicketDetailPage() {
             </label>
             <select
               id={"status"}
+              ref={statusRef}
+              aria-invalid={errorKind === "status" ? "true" : undefined}
               className={"select-field"}
               value={status}
               onChange={(e) => setStatus(e.target.value as TicketStatus)}

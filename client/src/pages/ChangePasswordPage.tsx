@@ -77,7 +77,12 @@ function ChangePasswordPage() {
     }
     setFieldErrors(errors)
     setGeneralError('')
-    if (Object.keys(errors).length > 0) return
+    if (Object.keys(errors).length > 0) {
+      const firstInvalid = ['currentPassword', 'newPassword', 'confirmPassword']
+        .find((field) => errors[field])
+      window.setTimeout(() => document.getElementById(`change-${firstInvalid}`)?.focus(), 0)
+      return
+    }
 
     setBusy(true)
     try {
@@ -123,6 +128,7 @@ function ChangePasswordPage() {
         )}
         <form className={'auth-form'} onSubmit={submit}>
           <TextField
+            id={'change-currentPassword'}
             autoComplete={'current-password'}
             error={fieldErrors.currentPassword}
             label={'Current password'}
@@ -132,6 +138,7 @@ function ChangePasswordPage() {
             value={currentPassword}
           />
           <TextField
+            id={'change-newPassword'}
             autoComplete={'new-password'}
             error={fieldErrors.newPassword}
             hint={'15-128 characters; maximum 512 UTF-8 bytes.'}
@@ -142,6 +149,7 @@ function ChangePasswordPage() {
             value={newPassword}
           />
           <TextField
+            id={'change-confirmPassword'}
             autoComplete={'new-password'}
             error={fieldErrors.confirmPassword}
             label={'Confirm new password'}
