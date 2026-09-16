@@ -253,7 +253,6 @@ function CreateTicketPage() {
     try {
       const result = await createTicket(
         input,
-        selectedRequester.id,
         submissionRef.current.key,
       )
       const failures: File[] = []
@@ -263,7 +262,6 @@ function CreateTicketPage() {
         try {
           await uploadAttachment(
             result.data.ticketNumber,
-            selectedRequester.id,
             attachment.file,
           )
           completed += 1
@@ -299,7 +297,7 @@ function CreateTicketPage() {
     let completed = uploadedCount
     for (const file of failedUploads) {
       try {
-        await uploadAttachment(createdTicket.ticketNumber, selectedRequester.id, file)
+        await uploadAttachment(createdTicket.ticketNumber, file)
         completed += 1
       } catch {
         remaining.push(file)

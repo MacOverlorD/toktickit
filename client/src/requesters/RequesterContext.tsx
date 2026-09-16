@@ -2,88 +2,68 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
-import {
-  getDevelopmentRequesters,
-  type DevelopmentRequester,
-} from '../api/development-requesters'
+import { useAuth } from '../auth/AuthContext'
 
-export const DEVELOPMENT_REQUESTER_STORAGE_KEY = 'toktickit.devRequesterId'
-
-type RequesterLoadStatus = 'idle' | 'loading' | 'ready' | 'error'
+interface AuthenticatedRequester {
+  id: number
+  name: string
+  email: string
+}
 
 interface RequesterContextValue {
-  requesters: DevelopmentRequester[]
-  selectedRequester: DevelopmentRequester | null
-  loadStatus: RequesterLoadStatus
+  selectedRequester: AuthenticatedRequester | null
   contextVersion: number
   hasUnsavedTicketDraft: boolean
   isTicketSubmitting: boolean
   confirmTicketNavigation: () => boolean
-  refreshRequesters: () => Promise<DevelopmentRequester[]>
   setTicketDraftState: (hasDraft: boolean, isSubmitting: boolean) => void
-  validateAndSelectRequester: (requesterId: number) => Promise<SelectionResult>
 }
-
-export type SelectionResult = 'selected' | 'inactive' | 'storage-error'
 
 const RequesterContext = createContext<RequesterContextValue | null>(null)
 
-function removeStoredRequesterId() {
-  try {
-    sessionStorage.removeItem(DEVELOPMENT_REQUESTER_STORAGE_KEY)
-  } catch {
-    // A blocked storage API behaves like an unavailable requester context.
-  }
-}
-
-function readStoredRequesterId() {
-  try {
-    const storedValue = sessionStorage.getItem(DEVELOPMENT_REQUESTER_STORAGE_KEY)
-    if (storedValue === null) return null
-
-    if (!/^[1-9]\d*$/.test(storedValue)) {
-      removeStoredRequesterId()
-      return null
-    }
-
-    const requesterId = Number(storedValue)
-    if (!Number.isSafeInteger(requesterId)) {
-      removeStoredRequesterId()
-      return null
-    }
-
-    return requesterId
-  } catch {
-    return null
-  }
-}
-
-function storeRequesterId(requesterId: number) {
-  try {
-    sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, String(requesterId))
-    return true
-  } catch {
-    return false
-  }
-}
-
 export function RequesterProvider({ children }: { children: ReactNode }) {
-  const [initialStoredRequesterId] = useState(readStoredRequesterId)
-  const [requesters, setRequesters] = useState<DevelopmentRequester[]>([])
-  const [selectedRequester, setSelectedRequester] =
-    useState<DevelopmentRequester | null>(null)
-  const [loadStatus, setLoadStatus] = useState<RequesterLoadStatus>(
-    initialStoredRequesterId === null ? 'idle' : 'loading',
+  const { state } = useAuth()
+  const selectedRequester =
+    state.status === 'authenticated' && state.payload.user.role === 'REQUESTER'
+      ? {
+          id: state.payload.user.id,
+          name: state.payload.user.name,
+          email: state.payload.user.email,
+        }
+      : null
+  const contextVersion =
+    state.status === 'authenticated' ? state.payload.user.version : 0
+  const identityKey =
+    state.status === 'authenticated'
+      ? `${state.payload.user.id}:${state.payload.user.role}:${contextVersion}`
+      : 'anonymous'
+
+  return (
+    <RequesterSessionProvider
+      key={identityKey}
+      contextVersion={contextVersion}
+      selectedRequester={selectedRequester}
+    >
+      {children}
+    </RequesterSessionProvider>
   )
-  const [contextVersion, setContextVersion] = useState(0)
+}
+
+function RequesterSessionProvider({
+  children,
+  contextVersion,
+  selectedRequester,
+}: {
+  children: ReactNode
+  contextVersion: number
+  selectedRequester: AuthenticatedRequester | null
+}) {
   const [hasUnsavedTicketDraft, setUnsavedTicketDraft] = useState(false)
   const [isTicketSubmitting, setTicketSubmitting] = useState(false)
-
   const setTicketDraftState = useCallback(
     (hasDraft: boolean, isSubmitting: boolean) => {
       setUnsavedTicketDraft(hasDraft)
@@ -98,98 +78,30 @@ export function RequesterProvider({ children }: { children: ReactNode }) {
     return window.confirm('Discard this unsaved ticket and leave this page?')
   }, [hasUnsavedTicketDraft, isTicketSubmitting])
 
-  const applyRequesterList = useCallback((requesterList: DevelopmentRequester[]) => {
-    setRequesters(requesterList)
-
-    const storedRequesterId = readStoredRequesterId()
-    const restoredRequester =
-      storedRequesterId === null
-        ? null
-        : requesterList.find(({ id }) => id === storedRequesterId) ?? null
-
-    if (storedRequesterId !== null && !restoredRequester) {
-      removeStoredRequesterId()
-    }
-
-    setSelectedRequester(restoredRequester)
-    return restoredRequester
-  }, [])
-
-  const refreshRequesters = useCallback(async () => {
-    setLoadStatus('loading')
-
-    try {
-      const requesterList = await getDevelopmentRequesters()
-      applyRequesterList(requesterList)
-      setLoadStatus('ready')
-      return requesterList
-    } catch (error) {
-      setLoadStatus('error')
-      throw error
-    }
-  }, [applyRequesterList])
-
-  const validateAndSelectRequester = useCallback(
-    async (requesterId: number) => {
-      const requesterList = await getDevelopmentRequesters()
-      const requester = requesterList.find(({ id }) => id === requesterId) ?? null
-
-      setRequesters(requesterList)
-      if (!requester) {
-        removeStoredRequesterId()
-        setSelectedRequester(null)
-        return 'inactive'
-      }
-
-      if (!storeRequesterId(requester.id)) {
-        removeStoredRequesterId()
-        setSelectedRequester(null)
-        return 'storage-error'
-      }
-
-      setSelectedRequester(requester)
-      setLoadStatus('ready')
-      setTicketDraftState(false, false)
-      setContextVersion((version) => version + 1)
-      return 'selected'
-    },
-    [setTicketDraftState],
-  )
-
-  useEffect(() => {
-    if (initialStoredRequesterId !== null) {
-      void refreshRequesters().catch(() => undefined)
-    }
-  }, [initialStoredRequesterId, refreshRequesters])
-
   const value = useMemo(
     () => ({
-      requesters,
       selectedRequester,
-      loadStatus,
       contextVersion,
       hasUnsavedTicketDraft,
       isTicketSubmitting,
       confirmTicketNavigation,
-      refreshRequesters,
       setTicketDraftState,
-      validateAndSelectRequester,
     }),
     [
       confirmTicketNavigation,
       contextVersion,
       hasUnsavedTicketDraft,
       isTicketSubmitting,
-      loadStatus,
-      refreshRequesters,
-      requesters,
       selectedRequester,
       setTicketDraftState,
-      validateAndSelectRequester,
     ],
   )
 
-  return <RequesterContext.Provider value={value}>{children}</RequesterContext.Provider>
+  return (
+    <RequesterContext.Provider value={value}>
+      {children}
+    </RequesterContext.Provider>
+  )
 }
 
 export function useRequester() {

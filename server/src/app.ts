@@ -8,28 +8,39 @@ import {
   removeAttachment,
   uploadAttachment,
 } from './attachments/attachment-handlers.js'
+import {
+  requireAuthenticatedSession,
+  requireCompletedPassword,
+  requireMutationCsrf,
+} from './auth/auth-middleware.js'
+import { authRouter } from './auth/auth-router.js'
 import { ApiError } from './errors/api-error.js'
 import { errorHandler } from './errors/error-handler.js'
 import { listCategories, listRelatedSystems } from './references/reference-data.js'
-import { listDevelopmentRequesters } from './requesters/development-requesters.js'
-import { requireDevelopmentRequester } from './requesters/requester-context.js'
+import { requireRequester } from './requesters/requester-context.js'
 import { createTicket } from './tickets/create-ticket.js'
 import { getTicketDetail } from './tickets/get-ticket-detail.js'
 import { listTickets } from './tickets/list-tickets.js'
+import { queueRouter } from './staff/queue-router.js'
+import { ticketDetailRouter } from './staff/ticket-detail-router.js'
+import { communicationRouter } from './tickets/communication-router.js'
+import { usersAdminRouter } from './admin/users-router.js'
 
 const app = express()
+const clientUrl = process.env.CLIENT_URL ?? 'http://localhost:5173'
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL ?? 'http://localhost:5173',
+    origin: clientUrl,
+    credentials: true,
     allowedHeaders: [
       'Content-Type',
-      'X-Development-Requester-Id',
       'Idempotency-Key',
+      'X-CSRF-Token',
     ],
   }),
 )
-app.use(express.json())
+app.use(express.json({ limit: '64kb' }))
 
 app.get('/', (_request, response) => {
   response.json({ service: 'TokTickIT API' })
@@ -42,33 +53,44 @@ app.get('/api/health', (_request, response) => {
   })
 })
 
-app.get('/api/development-requesters', listDevelopmentRequesters)
+app.use('/api/auth', authRouter)
+
+app.use(
+  '/api',
+  requireAuthenticatedSession,
+  requireCompletedPassword,
+  requireMutationCsrf,
+)
 
 app.get('/api/categories', listCategories)
+app.use('/api/staff', queueRouter)
+app.use('/api/staff', ticketDetailRouter)
+app.use('/api', communicationRouter)
+app.use('/api/admin', usersAdminRouter)
 app.get('/api/related-systems', listRelatedSystems)
-app.get('/api/tickets', requireDevelopmentRequester, listTickets)
-app.post('/api/tickets', requireDevelopmentRequester, createTicket)
+app.get('/api/tickets', requireRequester, listTickets)
+app.post('/api/tickets', requireRequester, createTicket)
+app.get('/api/tickets/:ticketNumber', requireRequester, getTicketDetail)
 app.get(
-  '/api/tickets/:ticketNumber',
-  requireDevelopmentRequester,
-  getTicketDetail,
+  '/api/tickets/:ticketNumber/attachments',
+  requireRequester,
+  listAttachments,
 )
-app.get('/api/tickets/:ticketNumber/attachments', requireDevelopmentRequester, listAttachments)
 app.post(
   '/api/tickets/:ticketNumber/attachments',
-  requireDevelopmentRequester,
+  requireRequester,
   requireOwnedAttachmentTicket,
   parseAttachmentUpload,
   uploadAttachment,
 )
 app.get(
   '/api/tickets/:ticketNumber/attachments/:attachmentId/content',
-  requireDevelopmentRequester,
+  requireRequester,
   getAttachmentContent,
 )
 app.delete(
   '/api/tickets/:ticketNumber/attachments/:attachmentId',
-  requireDevelopmentRequester,
+  requireRequester,
   removeAttachment,
 )
 

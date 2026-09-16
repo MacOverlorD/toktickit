@@ -39,6 +39,7 @@ export class TicketNumberGenerationError extends Error {
 }
 
 type TicketNumberGenerator = () => string
+type TicketStore = Pick<PrismaClient, 'ticket'>
 
 function hasEquivalentPayload(
   ticket: Ticket,
@@ -55,7 +56,7 @@ function hasEquivalentPayload(
 }
 
 async function findIdempotentTicket(
-  prisma: PrismaClient,
+  prisma: TicketStore,
   input: NormalizedTicketCreation,
 ) {
   return prisma.ticket.findUnique({
@@ -69,7 +70,7 @@ async function findIdempotentTicket(
 }
 
 export async function resolveExistingTicketIntent(
-  prisma: PrismaClient,
+  prisma: TicketStore,
   input: NormalizedTicketCreation,
 ): Promise<TicketCreationResult | null> {
   const existingTicket = await findIdempotentTicket(prisma, input)
@@ -98,7 +99,7 @@ function isUniqueConstraintError(error: unknown) {
 }
 
 export async function createTicketWithIdentity(
-  prisma: PrismaClient,
+  prisma: TicketStore,
   input: NormalizedTicketCreation,
   generateNumber: TicketNumberGenerator = generateTicketNumber,
 ): Promise<TicketCreationResult> {
@@ -116,6 +117,7 @@ export async function createTicketWithIdentity(
           relatedSystemId: input.relatedSystemId,
           summary: input.summary,
           requestedPriority: input.requestedPriority,
+          itPriority: input.requestedPriority,
           description: input.description,
         },
       })

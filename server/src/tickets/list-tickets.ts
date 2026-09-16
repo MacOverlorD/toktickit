@@ -5,7 +5,7 @@ import { parseTicketListQuery } from './ticket-query.js'
 
 export const listTickets: RequestHandler = async (request, response, next) => {
   try {
-    const requester = response.locals.developmentRequester as { id: number }
+    const requester = response.locals.requester as { id: number }
     const query = parseTicketListQuery(request.query)
     const where: Prisma.TicketWhereInput = {
       requesterId: requester.id,

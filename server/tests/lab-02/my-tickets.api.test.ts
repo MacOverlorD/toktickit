@@ -3,6 +3,10 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
 
 let requesterAId: number
 let requesterBId: number
@@ -14,6 +18,7 @@ let historicalCategoryId: number
 let historicalSystemId: number
 const marker = randomUUID().slice(0, 8)
 const ownedTicketNumbers: string[] = []
+const sessions = new Map<number, TestSession>()
 
 function ticketNumber(index: number) {
   return `TKT-20990101-${marker.slice(0, 6).toUpperCase()}${index
@@ -25,7 +30,7 @@ function ticketNumber(index: number) {
 function listAs(requesterId: number) {
   return request(app)
     .get('/api/tickets')
-    .set('X-Development-Requester-Id', String(requesterId))
+    .set(sessions.get(requesterId)!.headers)
 }
 
 beforeAll(async () => {
@@ -57,13 +62,13 @@ beforeAll(async () => {
   systemBId = systemB.id
 
   const [requesterA, requesterB] = await Promise.all([
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'List API Owner A',
         email: `list-a-${marker}@example.com`,
       },
     }),
-    prisma.requester.create({
+    prisma.user.create({
       data: {
         name: 'List API Owner B',
         email: `list-b-${marker}@example.com`,
@@ -72,6 +77,8 @@ beforeAll(async () => {
   ])
   requesterAId = requesterA.id
   requesterBId = requesterB.id
+  sessions.set(requesterAId, await createTestSession(requesterAId))
+  sessions.set(requesterBId, await createTestSession(requesterBId))
 
   const [historicalCategory, historicalSystem] = await prisma.$transaction(
     async (transaction) => {
@@ -120,6 +127,7 @@ beforeAll(async () => {
             : index % 2 === 0 ? systemBId : systemAId,
         summary: index <= 3 ? `Deterministic ${marker}` : `Owned item ${index}`,
         requestedPriority: index % 2 === 0 ? 'HIGH' : 'LOW',
+        itPriority: index % 2 === 0 ? 'HIGH' : 'LOW',
         description:
           index === 4
             ? `Secret searchable phrase ${marker}`
@@ -138,16 +146,18 @@ beforeAll(async () => {
       relatedSystemId: systemAId,
       summary: `Other owner ${marker}`,
       requestedPriority: 'URGENT',
+      itPriority: 'URGENT',
       description: `Secret searchable phrase ${marker}`,
     },
   })
 })
 
 afterAll(async () => {
+  await Promise.all([...sessions.values()].map((session) => session.cleanup()))
   await prisma.ticket.deleteMany({
     where: { requesterId: { in: [requesterAId, requesterBId] } },
   })
-  await prisma.requester.deleteMany({
+  await prisma.user.deleteMany({
     where: { id: { in: [requesterAId, requesterBId] } },
   })
   await prisma.category.delete({ where: { id: historicalCategoryId } })

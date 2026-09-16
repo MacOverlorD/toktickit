@@ -6,19 +6,19 @@ import {
   removeAttachment,
   uploadAttachment,
 } from '../../src/api/attachments'
-import { getDevelopmentRequesters } from '../../src/api/development-requesters'
 import { getTicketDetail, type TicketDetail } from '../../src/api/ticket-detail'
-import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
+import { listEntries } from '../../src/api/ticket-workflow'
 
 vi.mock('../../src/api/attachments', () => ({
   getAttachmentContent: vi.fn(),
   removeAttachment: vi.fn(),
   uploadAttachment: vi.fn(),
 }))
-vi.mock('../../src/api/development-requesters', () => ({
-  getDevelopmentRequesters: vi.fn(),
-}))
 vi.mock('../../src/api/ticket-detail', () => ({ getTicketDetail: vi.fn() }))
+vi.mock('../../src/api/ticket-workflow', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../src/api/ticket-workflow')>()),
+  listEntries: vi.fn(),
+}))
 
 const number = 'TKT-20260904-A1B2C3D4'
 const requester = { id: 1, name: 'Anan Wong', email: 'anan@example.test' }
@@ -36,7 +36,7 @@ const detail: TicketDetail = {
   requester, category: { id: 1, name: 'Hardware' },
   relatedSystem: { id: 1, name: 'Laptop' }, summary: 'Attachment test',
   requestedPriority: 'MEDIUM', description: 'Attachment lifecycle test.',
-  status: 'NEW', attachments: [active, removed],
+  status: 'NEW', version: 1, resolutionIndicatedAt: null, attachments: [active, removed],
 }
 const navigatePreview = vi.fn()
 const closePreview = vi.fn()
@@ -47,12 +47,11 @@ const previewWindow = {
 } as unknown as Window
 
 beforeEach(() => {
-  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
   window.history.replaceState({}, '', '/tickets/' + number)
-  vi.mocked(getDevelopmentRequesters).mockResolvedValue([requester])
   vi.mocked(getTicketDetail).mockResolvedValue(detail)
   vi.mocked(getAttachmentContent).mockResolvedValue(new Blob(['pdf']))
   vi.stubGlobal('open', vi.fn(() => previewWindow))
+  vi.mocked(listEntries).mockResolvedValue([])
   Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:test') })
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
 })
@@ -97,10 +96,10 @@ describe('Ticket Detail attachment section', () => {
     })
     expect(await screen.findByText('Attachment uploaded.')).toBeInTheDocument()
     expect(screen.getByText('new.pdf')).toBeInTheDocument()
-    expect(uploadAttachment).toHaveBeenCalledWith(number, 1, expect.any(File))
+    expect(uploadAttachment).toHaveBeenCalledWith(number, expect.any(File))
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview evidence.pdf' }))
-    await waitFor(() => expect(getAttachmentContent).toHaveBeenCalledWith(number, 11, 1, 'inline'))
+    await waitFor(() => expect(getAttachmentContent).toHaveBeenCalledWith(number, 11, 'inline'))
     expect(window.open).toHaveBeenCalledWith('about:blank', '_blank')
     expect(navigatePreview).toHaveBeenCalledWith('blob:test')
   })
@@ -141,7 +140,7 @@ describe('Ticket Detail attachment section', () => {
     })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Remove Attachment' }))
     expect(await screen.findByText('Attachment removed.')).toBeInTheDocument()
-    expect(removeAttachment).toHaveBeenCalledWith(number, 11, 1, 'Uploaded by mistake')
+    expect(removeAttachment).toHaveBeenCalledWith(number, 11, 'Uploaded by mistake')
     expect(screen.queryByRole('button', { name: 'Download evidence.pdf' })).not.toBeInTheDocument()
     expect(screen.getByText(/Uploaded by mistake/)).toBeInTheDocument()
   })

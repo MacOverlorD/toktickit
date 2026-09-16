@@ -6,7 +6,7 @@ import { errorHandler } from '../../src/errors/error-handler.js'
 
 describe('Lab 2 safe JSON error contract', () => {
   it('returns JSON for an unknown API route', async () => {
-    const response = await request(app).get('/api/not-a-real-route')
+    const response = await request(app).get('/not-a-real-route')
 
     expect(response.status).toBe(404)
     expect(response.headers['content-type']).toMatch(/application\/json/)

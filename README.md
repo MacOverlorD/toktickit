@@ -1,6 +1,6 @@
 # TokTickIT
 
-TokTickIT is a full-stack IT service desk project for CPE334. The repository contains a React client and an Express API backed by PostgreSQL through Prisma. Lab 2 requester-ticketing features are being integrated through the `lab2-staging` workflow.
+TokTickIT is a full-stack IT service desk project for CPE334. The repository contains a React client and an Express API backed by PostgreSQL through Prisma. Lab 3 adds authenticated role-based workflows on top of the Lab 2 requester ticket lifecycle.
 
 ## Prerequisites
 
@@ -18,10 +18,15 @@ toktickit/
 |   |-- src/
 |   `-- tests/
 |       |-- lab-01/
-|       `-- lab-02/
+|       |-- lab-02/
+|       `-- lab-03/
+|-- e2e/lab-03/        Authenticated browser and responsive evidence tests
+|-- artifacts/lab-03/  Reviewed Lab 3 screenshots
+|-- output/pdf/        The single Lab 3 submission PDF
 `-- docs/
     |-- lab-01/
-    `-- lab-02/         Engineering contract and evidence
+    |-- lab-02/
+    `-- lab-03/         Engineering contract and evidence
 ```
 
 ## Setup
@@ -61,14 +66,20 @@ toktickit/
    npx playwright install chromium
    ```
 
-4. Apply all database migrations and seed the Lab 2 reference data:
+4. Apply all database migrations and seed the Lab 3 reference data:
 
    ```powershell
-   npm run prisma:migrate --prefix server
+   npm run prisma:generate --prefix server
+   npm run prisma:deploy --prefix server
    npm run prisma:seed --prefix server
    ```
 
-   The repeatable seed maintains the four required Categories, seven Related Systems, four active Development Requesters, and one inactive Development Requester without creating duplicates.
+   The repeatable seed maintains the reference Categories and Related Systems,
+   Requester/IT Staff/Administrator accounts, and realistic Tickets across all
+   eight workflow states without resetting existing user-managed values. For a
+   populated Lab 2 database, backup, migration, verification, and guarded local
+   password setup are documented in
+   [Lab 3 Data Migration and Local Accounts](docs/lab-03/data-migration.md).
 
 ## Development
 
@@ -107,25 +118,18 @@ The client runs at `http://localhost:5173` and the API at `http://localhost:3000
 ]
 ```
 
-### Development Requesters
+### Authentication
 
-`GET /api/development-requesters` returns only active Lab 2 testing identities in
-stable name order. This selector is a development mechanism, not authentication.
+`POST /api/auth/login` accepts an email and password and establishes an opaque
+HttpOnly browser-session cookie. `GET /api/auth/me` restores the current user
+and in-memory CSRF token. `POST /api/auth/change-password` rotates all sessions,
+and `POST /api/auth/logout` invalidates the current session.
 
-Ticket and attachment endpoints use the selected numeric ID in the following
-header and validate that the Requester still exists and is active:
-
-```http
-X-Development-Requester-Id: 1
-```
-
-The client stores only that numeric ID in tab-scoped `sessionStorage` under
-`toktickit.devRequesterId` and revalidates it before showing ticket routes.
-The server requester-context middleware is mounted on `GET /api/tickets` and
-`POST /api/tickets` and
-must also be mounted on every requester-owned ticket and attachment endpoint
-introduced in later Lab 2 Issues. Public reference endpoints remain
-unauthenticated by design.
+Provision local initial passwords after migration with the guarded command
+documented in [Lab 3 Data Migration and Local Accounts](docs/lab-03/data-migration.md).
+Users with an initial password must replace it before using normal application
+routes. Protected mutations require the exact configured Origin and the
+`X-CSRF-Token` returned by login or current-user restoration.
 
 ### Related Systems
 
@@ -135,13 +139,13 @@ ordering contract.
 
 ### Create Ticket
 
-`POST /api/tickets` requires the requester header above and one UUID
-`Idempotency-Key` header. The JSON body accepts only `categoryId`,
+`POST /api/tickets` requires an authenticated Requester session, the CSRF
+headers described above, and one UUID `Idempotency-Key` header. The JSON body accepts only `categoryId`,
 `relatedSystemId`, `summary`, `requestedPriority`, and `description`.
 Requester ownership, Ticket Number, creation date, and initial `NEW` status are
 assigned by the server.
 
-Repeating the same normalized intent with the same requester and key returns
+Repeating the same normalized intent with the same authenticated requester and key returns
 the original Ticket without creating a duplicate. Attachment selection is
 validated by the client in Issue #15; file persistence belongs to Issue #18.
 
@@ -194,13 +198,15 @@ ownership.
 ## Verification
 
 ```powershell
-npm run build
-npm test
 npm run prisma:generate --prefix server
+npm run test:server
+npm run test:client
+npm run build
+npm run test:e2e
 npm run prisma:seed --prefix server
 ```
 
-The root `npm test` command runs server tests, client tests, and the complete
+The root `npm test` command also runs server tests, client tests, and the complete
 Chromium E2E suite. Playwright always starts fresh isolated services at
 `http://localhost:5174` (client) and `http://localhost:3100` (API), using
 `client/.env.e2e` so normal development ports can remain independent. If either
@@ -214,14 +220,14 @@ Cleanup ignores an already-missing attachment file but surfaces every other
 filesystem failure.
 
 Normal runs write temporary visual captures to the ignored
-`artifacts/lab-02/test-results/visual-captures/` directory. Promote a reviewed
+`artifacts/lab-03/test-results/visual-captures/` directory. Promote a reviewed
 visual run to the tracked evidence directory explicitly:
 
 ```powershell
 $env:PROMOTE_E2E_EVIDENCE='1'
-npx playwright test e2e/lab-02/visual-evidence.spec.ts
+npx playwright test e2e/lab-03/visual-evidence.spec.ts
 Remove-Item Env:PROMOTE_E2E_EVIDENCE
 ```
 
-Approved screenshots live in `artifacts/lab-02/screenshots/`; the local HTML
-report is written to `artifacts/lab-02/playwright-report/index.html`.
+Approved screenshots live in `artifacts/lab-03/screenshots/`; the local HTML
+report is written to `artifacts/lab-03/playwright-report/index.html`.

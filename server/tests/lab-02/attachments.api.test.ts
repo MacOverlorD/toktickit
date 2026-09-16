@@ -6,6 +6,10 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
 
 const marker = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()
 const ticketNumber = `TKT-20990301-${marker}`
@@ -17,10 +21,11 @@ let otherId: number
 let ticketId: number
 let limitTicketId: number
 let attachmentId: number
+const sessions = new Map<number, TestSession>()
 
 function api(method: 'get' | 'post' | 'delete', path: string, contextId = ownerId) {
   return request(app)[method](path)
-    .set('X-Development-Requester-Id', String(contextId))
+    .set(sessions.get(contextId)!.headers)
 }
 
 beforeAll(async () => {
@@ -31,19 +36,22 @@ beforeAll(async () => {
     prisma.relatedSystem.findFirstOrThrow({ where: { isActive: true } }),
   ])
   const [owner, other] = await Promise.all([
-    prisma.requester.create({
+    prisma.user.create({
       data: { name: 'Attachment Owner', email: `attachment-${marker}@example.test`.toLowerCase() },
     }),
-    prisma.requester.create({
+    prisma.user.create({
       data: { name: 'Attachment Other', email: `attachment-other-${marker}@example.test`.toLowerCase() },
     }),
   ])
   ownerId = owner.id
   otherId = other.id
+  sessions.set(ownerId, await createTestSession(ownerId))
+  sessions.set(otherId, await createTestSession(otherId))
   const data = (number: string) => ({
     ticketNumber: number, submissionKey: randomUUID(), requesterId: ownerId,
     categoryId: category.id, relatedSystemId: system.id,
     summary: 'Attachment integration ticket', requestedPriority: 'MEDIUM' as const,
+    itPriority: 'MEDIUM' as const,
     description: 'Attachment integration test description.',
   })
   const [ticket, limitTicket] = await Promise.all([
@@ -58,16 +66,17 @@ beforeAll(async () => {
     data: {
       ticketId, originalName: 'baseline.pdf', storedName,
       mimeType: 'application/pdf', sizeBytes: pdf.length,
-      uploadedByRequesterId: ownerId,
+      uploadedByUserId: ownerId,
     },
   })
   attachmentId = baseline.id
 })
 
 afterAll(async () => {
+  await Promise.all([...sessions.values()].map((session) => session.cleanup()))
   await prisma.attachment.deleteMany({ where: { ticketId: { in: [ticketId, limitTicketId] } } })
   await prisma.ticket.deleteMany({ where: { id: { in: [ticketId, limitTicketId] } } })
-  await prisma.requester.deleteMany({ where: { id: { in: [ownerId, otherId] } } })
+  await prisma.user.deleteMany({ where: { id: { in: [ownerId, otherId] } } })
   await prisma.$disconnect()
   await rm(uploadDirectory, { recursive: true, force: true })
   delete process.env.UPLOAD_DIR
@@ -147,7 +156,7 @@ describe('Issue 18 attachment lifecycle API', () => {
       data: {
         ticketId, originalName: 'missing.pdf', storedName: randomUUID() + '.pdf',
         mimeType: 'application/pdf', sizeBytes: pdf.length,
-        uploadedByRequesterId: ownerId,
+        uploadedByUserId: ownerId,
       },
     })
     const response = await api(
@@ -158,19 +167,36 @@ describe('Issue 18 attachment lifecycle API', () => {
     expect(response.body.error.code).toBe('ATTACHMENT_CONTENT_UNAVAILABLE')
   })
 
-  it('uses safe not-found for cross-owner list/upload/content/removal', async () => {
+  it('makes missing and cross-owner attachment operations indistinguishable', async () => {
     const base = `/api/tickets/${ticketNumber}/attachments`
-    const responses = [
-      await api('get', base, otherId),
-      await api('post', base, otherId)
-        .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
-      await api('get', base + '/' + attachmentId + '/content', otherId),
-      await api('delete', base + '/' + attachmentId, otherId)
-        .send({ reason: 'Should not be allowed' }),
+    const missingBase = '/api/tickets/TKT-20991231-FFFFFFFF/attachments'
+    const pairs = [
+      [
+        await api('get', base, otherId),
+        await api('get', missingBase, ownerId),
+      ],
+      [
+        await api('post', base, otherId)
+          .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
+        await api('post', missingBase, ownerId)
+          .attach('file', pdf, { filename: 'private.pdf', contentType: 'application/pdf' }),
+      ],
+      [
+        await api('get', base + '/' + attachmentId + '/content', otherId),
+        await api('get', missingBase + '/' + attachmentId + '/content', ownerId),
+      ],
+      [
+        await api('delete', base + '/' + attachmentId, otherId)
+          .send({ reason: 'Should not be allowed' }),
+        await api('delete', missingBase + '/' + attachmentId, ownerId)
+          .send({ reason: 'Should not be allowed' }),
+      ],
     ]
-    for (const response of responses) {
-      expect(response.status).toBe(404)
-      expect(response.body.error.code).toBe('RESOURCE_NOT_FOUND')
+    for (const [crossOwner, missing] of pairs) {
+      expect(crossOwner.status).toBe(404)
+      expect(missing.status).toBe(404)
+      expect(crossOwner.body).toEqual(missing.body)
+      expect(crossOwner.body.error.code).toBe('RESOURCE_NOT_FOUND')
     }
   })
 
@@ -179,7 +205,7 @@ describe('Issue 18 attachment lifecycle API', () => {
       data: Array.from({ length: 5 }, (_, index) => ({
         ticketId: limitTicketId, originalName: `existing-${index}.pdf`,
         storedName: randomUUID() + '.pdf', mimeType: 'application/pdf',
-        sizeBytes: pdf.length, uploadedByRequesterId: ownerId,
+        sizeBytes: pdf.length, uploadedByUserId: ownerId,
       })),
     })
     const before = await readdir(uploadDirectory)

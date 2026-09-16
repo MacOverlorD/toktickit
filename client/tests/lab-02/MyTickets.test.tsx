@@ -1,22 +1,13 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
-import { getDevelopmentRequesters } from '../../src/api/development-requesters'
 import { getMyTickets, type TicketListResult } from '../../src/api/tickets'
-import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
 
-vi.mock('../../src/api/development-requesters', () => ({
-  getDevelopmentRequesters: vi.fn(),
-}))
 vi.mock('../../src/api/tickets', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../src/api/tickets')>()
   return { ...original, getMyTickets: vi.fn() }
 })
 
-const requesters = [
-  { id: 1, name: 'Anan Wong', email: 'anan@example.test' },
-  { id: 2, name: 'Mali Chaiyasit', email: 'mali@example.test' },
-]
 const ticket = {
   ticketNumber: 'TKT-20260904-A1B2C3D4',
   createdAt: '2026-09-04T10:00:00.000Z',
@@ -65,9 +56,7 @@ function listResult(overrides: Partial<TicketListResult> = {}): TicketListResult
 }
 
 beforeEach(() => {
-  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
   window.history.replaceState({}, '', '/tickets')
-  vi.mocked(getDevelopmentRequesters).mockResolvedValue(requesters)
   vi.mocked(getMyTickets).mockResolvedValue(listResult())
 })
 
@@ -107,8 +96,7 @@ describe('My Tickets', () => {
     expect(screen.getByRole('option', { name: 'Retired System (historical)' }))
       .toHaveValue('10')
     expect(getMyTickets).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, pageSize: 10, sortBy: 'createdAt' }),
-      1,
+      expect.objectContaining({ page: 1, pageSize: 10, sortBy: 'createdAt' })
     )
   })
 
@@ -128,7 +116,7 @@ describe('My Tickets', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
-      expect.objectContaining({ page: 2 }), 1,
+      expect.objectContaining({ page: 2 }),
     ))
 
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search tickets' }), {
@@ -136,14 +124,14 @@ describe('My Tickets', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Search' }))
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
-      expect.objectContaining({ search: 'vpn', page: 1 }), 1,
+      expect.objectContaining({ search: 'vpn', page: 1 }),
     ))
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Category' }), {
       target: { value: '4' },
     })
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
-      expect.objectContaining({ categoryId: 4, page: 1 }), 1,
+      expect.objectContaining({ categoryId: 4, page: 1 }),
     ))
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Related System' }), {
@@ -158,7 +146,7 @@ describe('My Tickets', () => {
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
       expect.objectContaining({
         relatedSystemId: 3, status: 'NEW', priority: 'HIGH', page: 1,
-      }), 1,
+      }),
     ))
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Sort by' }), {
@@ -173,7 +161,7 @@ describe('My Tickets', () => {
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
       expect.objectContaining({
         sortBy: 'summary', sortOrder: 'asc', pageSize: 20, page: 1,
-      }), 1,
+      }),
     ))
   })
 
@@ -191,7 +179,6 @@ describe('My Tickets', () => {
     expect(screen.getByRole('link', { name: 'Create your first ticket' })).toBeInTheDocument()
 
     view.unmount()
-    sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
     vi.mocked(getMyTickets).mockResolvedValue(listResult({
       items: [],
       pagination: {
@@ -209,7 +196,7 @@ describe('My Tickets', () => {
     expect(await screen.findByText('No matching tickets')).toBeInTheDocument()
     fireEvent.click(screen.getAllByRole('button', { name: 'Clear Filters' }).at(-1)!)
     await waitFor(() => expect(getMyTickets).toHaveBeenLastCalledWith(
-      expect.objectContaining({ search: '', page: 1, sortBy: 'createdAt' }), 1,
+      expect.objectContaining({ search: '', page: 1, sortBy: 'createdAt' }),
     ))
   })
 
@@ -258,26 +245,13 @@ describe('My Tickets', () => {
     expect(screen.queryByText(ticket.summary)).not.toBeInTheDocument()
   })
 
-  it('removes the prior requester data and reloads for the newly selected requester', async () => {
-    vi.mocked(getMyTickets).mockImplementation(async (_query, requesterId) =>
-      requesterId === 1
-        ? listResult()
-        : listResult({
-            items: [{ ...ticket, ticketNumber: 'TKT-20260904-EEEEFFFF', summary: 'Printer issue' }],
-          }),
-    )
+  it('uses the authenticated requester without exposing an identity switcher', async () => {
     render(<App />)
+
     expect(await screen.findAllByText(ticket.ticketNumber)).toHaveLength(2)
-
-    fireEvent.click(screen.getByRole('link', { name: /Change Development Requester/ }))
-    const requesterSelect = await screen.findByRole('combobox', {
-      name: /Development Requester/,
-    })
-    fireEvent.change(requesterSelect, { target: { value: '2' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
-
-    expect(await screen.findAllByText('TKT-20260904-EEEEFFFF')).toHaveLength(2)
-    expect(screen.queryByText(ticket.ticketNumber)).not.toBeInTheDocument()
-    expect(getMyTickets).toHaveBeenLastCalledWith(expect.any(Object), 2)
+    expect(
+      screen.queryByRole('link', { name: /Change Development Requester/ }),
+    ).not.toBeInTheDocument()
+    expect(getMyTickets).toHaveBeenCalledWith(expect.any(Object))
   })
 })

@@ -33,7 +33,7 @@ export const getTicketDetail: RequestHandler = async (
       throw invalidTicketNumber()
     }
 
-    const requester = response.locals.developmentRequester as { id: number }
+    const requester = response.locals.requester as { id: number }
     const ticket = await prisma.ticket.findFirst({
       where: {
         ticketNumber,
@@ -46,6 +46,8 @@ export const getTicketDetail: RequestHandler = async (
         requestedPriority: true,
         description: true,
         status: true,
+        version: true,
+        resolutionIndicatedAt: true,
         requester: { select: { id: true, name: true, email: true } },
         category: { select: { id: true, name: true } },
         relatedSystem: { select: { id: true, name: true } },
@@ -76,6 +78,8 @@ export const getTicketDetail: RequestHandler = async (
       requestedPriority: ticket.requestedPriority,
       description: ticket.description,
       status: ticket.status,
+      version: ticket.version,
+      resolutionIndicatedAt: ticket.resolutionIndicatedAt?.toISOString() ?? null,
       attachments: ticket.attachments.map((attachment) => ({
         ...attachment,
         isRemoved: attachment.removedAt !== null,

@@ -1,9 +1,24 @@
 import request from 'supertest'
-import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
+import {
+  createTestSession,
+  type TestSession,
+} from '../helpers/auth-session.js'
+
+let session: TestSession
+
+beforeAll(async () => {
+  const user = await prisma.user.findFirstOrThrow({
+    where: { isActive: true, role: 'REQUESTER' },
+    select: { id: true },
+  })
+  session = await createTestSession(user.id)
+})
 
 afterAll(async () => {
+  await session.cleanup()
   await prisma.$disconnect()
 })
 
@@ -13,7 +28,7 @@ afterEach(() => {
 
 describe('GET /api/categories', () => {
   it('returns the seeded categories in ID order', async () => {
-    const response = await request(app).get('/api/categories')
+    const response = await request(app).get('/api/categories').set(session.headers)
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual([
@@ -29,7 +44,7 @@ describe('GET /api/categories', () => {
       new Error('Database unavailable'),
     )
 
-    const response = await request(app).get('/api/categories')
+    const response = await request(app).get('/api/categories').set(session.headers)
 
     expect(response.status).toBe(500)
     expect(response.headers['content-type']).toMatch(/json/)

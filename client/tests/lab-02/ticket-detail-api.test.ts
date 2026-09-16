@@ -16,6 +16,8 @@ const validResponse = {
   requestedPriority: 'HIGH',
   description: 'The VPN client cannot establish a connection.',
   status: 'NEW',
+  version: 1,
+  resolutionIndicatedAt: null,
   attachments: [
     {
       id: 11,
@@ -45,17 +47,35 @@ beforeEach(() => {
 })
 
 describe('Ticket Detail API client', () => {
+  it.each([
+    'NEW',
+    'OPEN',
+    'IN_PROGRESS',
+    'WAITING_FOR_REQUESTER',
+    'RESOLVED',
+    'CLOSED',
+    'REOPENED',
+    'CANCELLED',
+  ] as const)('accepts the migrated %s ticket status', async (status) => {
+    vi.mocked(apiFetch).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ ...validResponse, status }),
+    } as unknown as Response)
+
+    await expect(getTicketDetail(validResponse.ticketNumber))
+      .resolves.toMatchObject({ status })
+  })
+
   it('requests the encoded ticket route with requester context', async () => {
     vi.mocked(apiFetch).mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue(validResponse),
     } as unknown as Response)
 
-    await expect(getTicketDetail('TKT-20260904-A1B2C3D4', 9))
+    await expect(getTicketDetail('TKT-20260904-A1B2C3D4'))
       .resolves.toMatchObject({ ticketNumber: validResponse.ticketNumber })
     expect(apiFetch).toHaveBeenCalledWith(
       '/api/tickets/TKT-20260904-A1B2C3D4',
-      { headers: { 'X-Development-Requester-Id': '9' } },
     )
   })
 
@@ -74,7 +94,7 @@ describe('Ticket Detail API client', () => {
       }),
     } as unknown as Response)
 
-    const ticket = await getTicketDetail(validResponse.ticketNumber, 1)
+    const ticket = await getTicketDetail(validResponse.ticketNumber)
 
     expect(ticket).not.toHaveProperty('requesterId')
     expect(ticket).not.toHaveProperty('internalNotes')
@@ -90,7 +110,7 @@ describe('Ticket Detail API client', () => {
       }),
     } as unknown as Response)
 
-    await expect(getTicketDetail(validResponse.ticketNumber, 2)).rejects.toMatchObject({
+    await expect(getTicketDetail(validResponse.ticketNumber)).rejects.toMatchObject({
       code: 'RESOURCE_NOT_FOUND',
       message: 'Ticket was not found.',
     })
@@ -113,7 +133,7 @@ describe('Ticket Detail API client', () => {
     },
     {
       name: 'unexpected ticket status',
-      response: { ...validResponse, status: 'IN_PROGRESS' },
+      response: { ...validResponse, status: 'ESCALATED' },
     },
     {
       name: 'malformed response ticket number',
@@ -125,7 +145,7 @@ describe('Ticket Detail API client', () => {
       json: vi.fn().mockResolvedValue(response),
     } as unknown as Response)
 
-    await expect(getTicketDetail(validResponse.ticketNumber, 1)).rejects.toMatchObject({
+    await expect(getTicketDetail(validResponse.ticketNumber)).rejects.toMatchObject({
       code: 'INVALID_RESPONSE',
     })
   })

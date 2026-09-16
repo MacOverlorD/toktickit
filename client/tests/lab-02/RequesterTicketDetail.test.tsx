@@ -1,21 +1,12 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
-import { getDevelopmentRequesters } from '../../src/api/development-requesters'
 import { getTicketDetail, type TicketDetail } from '../../src/api/ticket-detail'
-import { getMyTickets, TicketApiError } from '../../src/api/tickets'
-import { DEVELOPMENT_REQUESTER_STORAGE_KEY } from '../../src/requesters/RequesterContext'
+import { TicketApiError } from '../../src/api/tickets'
 
-vi.mock('../../src/api/development-requesters', () => ({
-  getDevelopmentRequesters: vi.fn(),
-}))
 vi.mock('../../src/api/ticket-detail', () => ({
   getTicketDetail: vi.fn(),
 }))
-vi.mock('../../src/api/tickets', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../src/api/tickets')>()
-  return { ...original, getMyTickets: vi.fn() }
-})
 
 const ticketNumber = 'TKT-20260904-A1B2C3D4'
 const requesters = [
@@ -32,6 +23,8 @@ const detail: TicketDetail = {
   requestedPriority: 'HIGH',
   description: 'The VPN client reports an error.\nRestarting does not help.',
   status: 'NEW',
+  version: 1,
+  resolutionIndicatedAt: null,
   attachments: [
     {
       id: 11,
@@ -57,22 +50,8 @@ const detail: TicketDetail = {
 }
 
 beforeEach(() => {
-  sessionStorage.setItem(DEVELOPMENT_REQUESTER_STORAGE_KEY, '1')
   window.history.replaceState({}, '', `/tickets/${ticketNumber}`)
-  vi.mocked(getDevelopmentRequesters).mockResolvedValue(requesters)
   vi.mocked(getTicketDetail).mockResolvedValue(detail)
-  vi.mocked(getMyTickets).mockResolvedValue({
-    items: [],
-    pagination: {
-      page: 1, pageSize: 10, totalItems: 0, totalPages: 0,
-      hasPreviousPage: false, hasNextPage: false,
-    },
-    query: {
-      search: null, categoryId: null, relatedSystemId: null, status: null,
-      priority: null, sortBy: 'createdAt', sortOrder: 'desc',
-    },
-    filterOptions: { categories: [], relatedSystems: [] },
-  })
 })
 
 afterEach(() => {
@@ -86,7 +65,7 @@ describe('Requester Ticket Detail', () => {
     render(<App />)
 
     expect(await screen.findByRole('heading', { name: ticketNumber })).toBeInTheDocument()
-    expect(getTicketDetail).toHaveBeenCalledWith(ticketNumber, 1)
+    expect(getTicketDetail).toHaveBeenCalledWith(ticketNumber)
     expect(screen.getByText('Read-only')).toBeInTheDocument()
     expect(screen.getByText(detail.summary)).toBeInTheDocument()
     const description = screen.getByText(/The VPN client reports an error/)
@@ -143,20 +122,13 @@ describe('Requester Ticket Detail', () => {
     expect(getTicketDetail).toHaveBeenCalledTimes(2)
   })
 
-  it('clears old detail and returns to the new requester My Tickets after switching', async () => {
+  it('keeps ticket ownership bound to the authenticated requester', async () => {
     render(<App />)
+
     expect(await screen.findByText(detail.summary)).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('link', { name: /Change Development Requester/ }))
-    const requesterSelect = await screen.findByRole('combobox', {
-      name: /Development Requester/,
-    })
-    fireEvent.change(requesterSelect, { target: { value: '2' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
-
-    expect(await screen.findByRole('heading', { name: 'My Tickets' })).toBeInTheDocument()
-    expect(screen.queryByText(detail.summary)).not.toBeInTheDocument()
-    expect(getMyTickets).toHaveBeenCalledWith(expect.any(Object), 2)
-    await waitFor(() => expect(window.location.pathname).toBe('/tickets'))
+    expect(
+      screen.queryByRole('link', { name: /Change Development Requester/ }),
+    ).not.toBeInTheDocument()
+    expect(getTicketDetail).toHaveBeenCalledWith(ticketNumber)
   })
 })

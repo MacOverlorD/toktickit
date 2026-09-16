@@ -1,30 +1,68 @@
-import { List, Menu, TicketPlus, UserRound, X } from 'lucide-react'
+import {
+  KeyRound,
+  List,
+  LogOut,
+  Menu,
+  TicketPlus,
+  UserRound,
+  Users,
+  X,
+} from 'lucide-react'
 import { useEffect, useState, type MouseEvent } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
 import { useRequester } from '../../requesters/RequesterContext'
 import { zenGreenCssProperties } from '../../styles/tokens'
 
 function navigationClass({ isActive }: { isActive: boolean }) {
-  return `app-nav-link${isActive ? ' is-active' : ''}`
+  return 'app-nav-link' + (isActive ? ' is-active' : '')
+}
+
+function roleLabel(role: string) {
+  return role
+    .toLowerCase()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [logoutBusy, setLogoutBusy] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
   const location = useLocation()
+  const navigate = useNavigate()
+  const { logout, state } = useAuth()
   const {
     contextVersion,
     confirmTicketNavigation,
     isTicketSubmitting,
-    selectedRequester,
   } = useRequester()
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  if (state.status !== 'authenticated') return null
+  const user = state.payload.user
 
   function guardTicketNavigation(event: MouseEvent<HTMLAnchorElement>) {
     if (!confirmTicketNavigation()) event.preventDefault()
   }
 
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname])
+  async function signOut() {
+    if (!confirmTicketNavigation()) return
+    setLogoutBusy(true)
+    setLogoutError('')
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      setLogoutError('Sign out failed. Try again.')
+    } finally {
+      setLogoutBusy(false)
+    }
+  }
 
   return (
     <div className={'app-shell'} style={zenGreenCssProperties}>
@@ -60,50 +98,76 @@ function AppShell() {
           </button>
 
           <div
-            className={`topbar-content${menuOpen ? ' is-open' : ''}`}
+            className={'topbar-content' + (menuOpen ? ' is-open' : '')}
             id={'primary-navigation'}
           >
             <nav className={'app-navigation'} aria-label={'Primary navigation'}>
-              <NavLink
-                className={navigationClass}
-                to={'/tickets'}
-                end
-                aria-disabled={isTicketSubmitting || undefined}
-                onClick={guardTicketNavigation}
-              >
-                <List aria-hidden={'true'} />
-                <span>My Tickets</span>
-              </NavLink>
-              <NavLink className={navigationClass} to={'/tickets/new'}>
-                <TicketPlus aria-hidden={'true'} />
-                <span>Create Ticket</span>
-              </NavLink>
+              {user.role === 'REQUESTER' && (
+                <>
+                  <NavLink
+                    className={navigationClass}
+                    to={'/tickets'}
+                    end
+                    aria-disabled={isTicketSubmitting || undefined}
+                    onClick={guardTicketNavigation}
+                  >
+                    <List aria-hidden={'true'} />
+                    <span>My Tickets</span>
+                  </NavLink>
+                  <NavLink
+                    className={navigationClass}
+                    to={'/tickets/new'}
+                    aria-disabled={isTicketSubmitting || undefined}
+                    onClick={guardTicketNavigation}
+                  >
+                    <TicketPlus aria-hidden={'true'} />
+                    <span>Create Ticket</span>
+                  </NavLink>
+                </>
+              )}
+              {(user.role === 'IT_STAFF' || user.role === 'ADMINISTRATOR') && (
+                <NavLink className={navigationClass} to={'/staff/tickets'}>
+                  <List aria-hidden={'true'} />
+                  <span>Ticket Queue</span>
+                </NavLink>
+              )}
+              {user.role === 'ADMINISTRATOR' && (
+                <NavLink className={navigationClass} to={'/admin/users'}>
+                  <Users aria-hidden={'true'} />
+                  <span>Users</span>
+                </NavLink>
+              )}
             </nav>
 
             <div className={'requester-identity'}>
               <UserRound aria-hidden={'true'} />
               <span className={'requester-copy'}>
-                <span className={'requester-label'}>Lab 2 testing user</span>
-                <span className={'requester-name'}>
-                  {selectedRequester?.name ?? 'Not selected'}
+                <span className={'requester-label'}>
+                  {roleLabel(user.role)}
                 </span>
+                <span className={'requester-name'}>{user.name}</span>
               </span>
               <Link
                 className={'requester-action'}
-                to={'/select-requester'}
-                aria-label={
-                  selectedRequester
-                    ? `Change Development Requester. Current requester: ${selectedRequester.name}`
-                    : 'Select Development Requester'
-                }
-                aria-disabled={isTicketSubmitting || undefined}
+                to={'/change-password'}
                 onClick={guardTicketNavigation}
               >
-                {selectedRequester ? 'Change requester' : 'Select requester'}
+                <KeyRound aria-hidden={'true'} />
+                Change password
               </Link>
+              <button
+                className={'requester-action auth-logout'}
+                disabled={logoutBusy}
+                type={'button'}
+                onClick={() => void signOut()}
+              >
+                <LogOut aria-hidden={'true'} />
+                {logoutBusy ? 'Signing out...' : 'Log out'}
+              </button>
             </div>
           </div>
         </div>
+        {logoutError && <p className={'topbar-error'} role={'alert'}>{logoutError}</p>}
       </header>
 
       <main id={'main-content'} tabIndex={-1} key={contextVersion}>
