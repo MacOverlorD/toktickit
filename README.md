@@ -20,6 +20,9 @@ toktickit/
 |       |-- lab-01/
 |       |-- lab-02/
 |       `-- lab-03/
+|-- e2e/lab-03/        Authenticated browser and responsive evidence tests
+|-- artifacts/lab-03/  Reviewed Lab 3 screenshots
+|-- output/pdf/        The single Lab 3 submission PDF
 `-- docs/
     |-- lab-01/
     |-- lab-02/
@@ -195,13 +198,15 @@ ownership.
 ## Verification
 
 ```powershell
-npm run build
-npm test
 npm run prisma:generate --prefix server
+npm run test:server
+npm run test:client
+npm run build
+npm run test:e2e
 npm run prisma:seed --prefix server
 ```
 
-The root `npm test` command runs server tests, client tests, and the complete
+The root `npm test` command also runs server tests, client tests, and the complete
 Chromium E2E suite. Playwright always starts fresh isolated services at
 `http://localhost:5174` (client) and `http://localhost:3100` (API), using
 `client/.env.e2e` so normal development ports can remain independent. If either
@@ -215,14 +220,14 @@ Cleanup ignores an already-missing attachment file but surfaces every other
 filesystem failure.
 
 Normal runs write temporary visual captures to the ignored
-`artifacts/lab-02/test-results/visual-captures/` directory. Promote a reviewed
+`artifacts/lab-03/test-results/visual-captures/` directory. Promote a reviewed
 visual run to the tracked evidence directory explicitly:
 
 ```powershell
 $env:PROMOTE_E2E_EVIDENCE='1'
-npx playwright test e2e/lab-02/visual-evidence.spec.ts
+npx playwright test e2e/lab-03/visual-evidence.spec.ts
 Remove-Item Env:PROMOTE_E2E_EVIDENCE
 ```
 
-Approved screenshots live in `artifacts/lab-02/screenshots/`; the local HTML
-report is written to `artifacts/lab-02/playwright-report/index.html`.
+Approved screenshots live in `artifacts/lab-03/screenshots/`; the local HTML
+report is written to `artifacts/lab-03/playwright-report/index.html`.

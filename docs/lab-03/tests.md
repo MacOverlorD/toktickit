@@ -1,6 +1,6 @@
 # Lab 3 Test Plan and Traceability
 
-Status: Integrated verification completed on 2026-09-15 at evidence commit `dc72914`; peer-review fixes were verified on 2026-09-16 at `2eb9d7e`. Server, client, production build and browser suites pass; 37 responsive screenshots cover all major role surfaces, validation states and the 320px overflow boundary. Final-main release verification remains for Issue #41.
+Status: Integrated verification completed on 2026-09-15 at evidence commit `dc72914`; peer-review fixes were verified on 2026-09-16 at `2eb9d7e`. The Issue #41 release candidate was verified again on 2026-09-16: server 144, client 134, production build, and Playwright 10/10 pass. Thirty-seven responsive screenshots cover all major role surfaces, validation states and the 320px overflow boundary. Final-main release verification remains pending until the release PR is reviewed and merged.
 Paths marked Planned are proposed targets. Paths marked Passed exist and have been executed. The scenarios below
 are mandatory cases to implement alongside features and expand when new defects arise.
 
@@ -29,7 +29,7 @@ are mandatory cases to implement alongside features and expand when new defects 
 | E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/ticket-workflow.spec.ts | Real Requester indication/comment to Staff claim/priority/status/public/private flow and Requester private-note isolation | Passed (1 test) |
 | E2E-03 | E2E | AC-11, AC-12, AC-13 | e2e/lab-03/user-administration.spec.ts | User lifecycle and safety rules | Passed (1 test) |
 | VIS-01 | Responsive/accessibility/visual | AC-15, AC-16 | e2e/lab-03/visual-evidence.spec.ts | Complete keyboard target/focus-indicator traversal, mobile navigation, responsive editor placement, validation focus, labels, overflow and visual inspection | Passed (4 tests; 37 screenshots) |
-| REL-01 | Release verification | AC-17 | docs/lab-03/reviewer.md; final-main CI/command evidence | Passing suites, peer reviews, traceability and nine-part PDF review | Planned |
+| REL-01 | Release verification | AC-17 | docs/lab-03/reviewer.md; final-main CI/command evidence | Passing release-candidate suites, peer reviews, traceability and nine-part PDF review; final-main rerun remains required | In progress |
 
 ## Existing commands
 
@@ -41,6 +41,18 @@ are mandatory cases to implement alongside features and expand when new defects 
 Confirm Lab 3 test discovery and E2E setup during implementation. Existing E2E
 uses local PostgreSQL and creates/deletes scoped test records; do not reset the
 development database to obtain evidence. Issue #34 uses isolated temporary PostgreSQL schemas and removes them after each migration case.
+
+## Issue #41 release-candidate evidence
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-16 | `npm run prisma:generate --prefix server` | Prisma Client generated successfully before TypeScript and test discovery. |
+| 2026-09-16 | `npm run test:server` | 24 files, 144 tests passed. |
+| 2026-09-16 | `npm run test:client` | 17 files, 134 tests passed. The rerun includes deterministic global fetch isolation and an explicit communication mock for the inherited Attachment UI suite. |
+| 2026-09-16 | `npm run build` | Server and client TypeScript checks plus the Vite production build passed. |
+| 2026-09-16 | `npm run test:e2e` | 10 Playwright tests passed in 2.3 minutes against isolated ports 3100/5174. |
+
+The first client run was affected by a development API already listening on port 3000: an unmocked communication request received a real 401 and dispatched the application's unauthenticated event. The test setup now rejects unexpected network calls deterministically, and the affected Attachment suite explicitly mocks its communication dependency. This is a test-isolation correction, not a product behavior change.
 
 ## Issue #34 execution evidence
 

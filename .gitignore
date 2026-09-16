@@ -16,3 +16,7 @@ skills-lock.json
 /tmp/
 artifacts/lab-03/playwright-report/
 artifacts/lab-03/test-results/
+
+# Keep exactly one generated Lab 3 submission PDF.
+output/pdf/*
+!output/pdf/TokTickIT_Lab3_Submission.pdf
