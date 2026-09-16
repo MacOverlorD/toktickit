@@ -551,6 +551,11 @@ a[aria-disabled='true'] {
   border: 0;
 }
 
+.visually-hidden:focus-visible + label {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .create-ticket-form {
   width: min(100%, var(--form-width));
   padding: 24px;

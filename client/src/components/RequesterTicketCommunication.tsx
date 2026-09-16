@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TicketDetail } from "../api/ticket-detail";
 import {
   appendEntry,
@@ -29,6 +29,7 @@ export default function RequesterTicketCommunication({
   onTicketChange: (ticket: TicketDetail) => void;
   onReload: () => Promise<TicketDetail>;
 }) {
+  const draftRef = useRef<HTMLTextAreaElement>(null);
   const [items, setItems] = useState<Entry[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState("");
@@ -54,10 +55,12 @@ export default function RequesterTicketCommunication({
   async function comment() {
     if (Array.from(draft.trim()).length > 5000) {
       setError("A public comment must contain at most 5000 characters.");
+      draftRef.current?.focus();
       return;
     }
     if (!draft.trim()) {
       setError("Enter a public comment.");
+      draftRef.current?.focus();
       return;
     }
     setBusy("comment");
@@ -189,6 +192,8 @@ export default function RequesterTicketCommunication({
         </label>
         <textarea
           id={"requester-public-comment"}
+          ref={draftRef}
+          aria-invalid={error ? "true" : undefined}
           className={"text-field communication-draft"}
           value={draft}
           disabled={!!busy}

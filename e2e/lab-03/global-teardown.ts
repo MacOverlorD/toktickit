@@ -1,5 +1,5 @@
 import { cleanupE2EData, database } from '../lab-02/database.js'
-import { E2E_AUTH_FIXTURE_KEY, E2E_REQUESTER_USERS, E2E_STAFF_USER, E2E_ADMIN_USER, E2E_MANAGED_EMAIL } from './values.js'
+import { E2E_AUTH_FIXTURE_KEY, E2E_REQUESTER_USERS, E2E_STAFF_USER, E2E_ADMIN_USER, E2E_MANAGED_EMAIL, E2E_VISUAL_AUTH_USER } from './values.js'
 
 export default async function globalTeardown() {
   await cleanupE2EData()
@@ -8,6 +8,7 @@ export default async function globalTeardown() {
     E2E_AUTH_FIXTURE_KEY,
     E2E_STAFF_USER.fixtureKey,
     E2E_ADMIN_USER.fixtureKey,
+    E2E_VISUAL_AUTH_USER.fixtureKey,
     ...E2E_REQUESTER_USERS.map(({ fixtureKey }) => fixtureKey),
   ]
   const users = await prisma.user.findMany({

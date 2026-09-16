@@ -326,10 +326,6 @@ function TicketDetailContent({
             <span>{ticket.attachments.length} total</span>
           </div>
           <div className={'attachment-toolbar'}>
-            <label className={'app-button app-button-secondary'} htmlFor={'detail-attachment-upload'}>
-              <Upload aria-hidden={'true'} />
-              <span>{busy ? 'Working...' : 'Add attachments'}</span>
-            </label>
             <input
               className={'visually-hidden'}
               id={'detail-attachment-upload'}
@@ -339,6 +335,10 @@ function TicketDetailContent({
               disabled={busy || activeCount >= MAX_ATTACHMENT_COUNT}
               onChange={(event) => void handleUpload(event)}
             />
+            <label className={'app-button app-button-secondary'} htmlFor={'detail-attachment-upload'}>
+              <Upload aria-hidden={'true'} />
+              <span>{busy ? 'Working...' : 'Add attachments'}</span>
+            </label>
             <span>
               {activeCount} of {MAX_ATTACHMENT_COUNT} active
               {activeCount >= MAX_ATTACHMENT_COUNT && ' - limit reached'}

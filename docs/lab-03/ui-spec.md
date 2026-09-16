@@ -1,6 +1,6 @@
 # Lab 3 UI Contract
 
-Status: Ready for Issue #33 PR review; application implementation is outside this PR.
+Status: Implemented and inspected on Issue #40 evidence commit `dc72914`; final-main confirmation remains for Issue #41.
 Reuse [Lab 2 design tokens and components](../lab-02/ui-spec.md) without a new
 visual system. Primary #006B3C, secondary #0B7A46, pale green #EAF6EF,
 page #F5F7F6, surface white, text #18211D; retain semantic error/warning tokens.
@@ -101,3 +101,26 @@ Capture authentication, staff-queue, staff-ticket-detail and user-management
 folders under artifacts/lab-03/screenshots/, plus Requester regression evidence.
 Test IDs: UI-01-07, STYLE-01, VIS-01 and corresponding E2E cases in tests.md.
 Do not claim screenshots or visual checks exist until executed in Issue 8.
+
+
+## Issue #40 visual evidence record
+
+The automated inspection checks every visible input, select and textarea for a
+programmatic label, traverses every expected keyboard target, and asserts
+`:focus-visible` plus a rendered outline. It separately checks the opened mobile
+navigation and confirms that the Administrator editor heading and first field are
+inside the viewport at 1440x900, 820x1180, 390x844 and 320x844. Page-level
+horizontal overflow is rejected at every viewport.
+
+Thirty-seven screenshots cover Login and mandatory password change, Requester
+list/detail, Staff Queue/Detail and Administrator list/create. New 320px captures
+show Login, Change Password, Requester/Staff communication and Staff operation
+validation with first-invalid focus. The four Create User validation captures use
+the current viewport after the editor is focused and scrolled into view. Images
+are stored in the documented `artifacts/lab-03/screenshots/` role folders.
+
+Manual inspection of the new validation and responsive editor images found no
+clipped controls, inaccessible actions, private-note leakage, credential values
+or ambiguous editable/read-only treatment. The native Login email validation
+bubble, inline field messages, focused invalid controls, Zen Green navigation,
+borders and badges remain legible. Repeat this checklist on final `main` in Issue #41.

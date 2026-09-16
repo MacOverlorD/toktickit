@@ -172,6 +172,24 @@ describe("Staff Ticket Detail", () => {
       expect.objectContaining({ status: "CANCELLED", confirmed: true }),
     );
   });
+  it("focuses the operation control rejected by the server", async () => {
+    vi.mocked(workflow.updateOperation).mockRejectedValueOnce(
+      new workflow.WorkflowError("OWNER_REQUIRED", "owner required"),
+    );
+    render(<App initialAuth={staff} />);
+    await screen.findByRole("heading", { name: detail.ticketNumber });
+    fireEvent.click(screen.getByRole("button", { name: "Change Status" }));
+    expect(
+      await screen.findByText("Assign an eligible owner before this action."),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Next Status")).toHaveFocus(),
+    );
+    expect(screen.getByLabelText("Next Status")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+  });
   it("preserves a failed comment draft and reports stale operation feedback", async () => {
     vi.mocked(workflow.appendEntry).mockRejectedValue(new Error("offline"));
     vi.mocked(workflow.updateOperation).mockRejectedValue(

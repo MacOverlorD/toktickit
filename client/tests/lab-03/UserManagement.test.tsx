@@ -81,9 +81,10 @@ describe("User Management", () => {
       target: { value: "Initial password 2026!" },
     });
     fireEvent.click(screen.getAllByRole("button", { name: "Create User" })[1]);
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "canonical email",
-    );
+    expect(
+      await screen.findByText("That canonical email is already in use."),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText("Email")).toHaveFocus());
   });
   it("preserves edits and offers Reload latest on stale save", async () => {
     vi.mocked(api.editAccount).mockRejectedValue(
@@ -197,5 +198,31 @@ describe("User Management", () => {
     await act(async () => oldResolve([{ ...item, email: "old@example.test" }]));
     expect(screen.getByText("new@example.test")).toBeInTheDocument();
     expect(screen.queryByText("old@example.test")).not.toBeInTheDocument();
+  });
+  it("focuses and scrolls the responsive editor into view when opened", async () => {
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({ matches: true })),
+    );
+    try {
+      render(<App initialAuth={admin} />);
+      await screen.findByText("user@example.test");
+      fireEvent.click(screen.getByRole("button", { name: "Create User" }));
+      const heading = screen.getByRole("heading", { name: "Create User" });
+      await waitFor(() => expect(heading).toHaveFocus());
+      expect(scrollIntoView).toHaveBeenCalledWith({
+        block: "start",
+        behavior: "auto",
+      });
+    } finally {
+      vi.unstubAllGlobals();
+      delete (HTMLElement.prototype as { scrollIntoView?: unknown })
+        .scrollIntoView;
+    }
   });
 });

@@ -70,6 +70,26 @@ focused API/UI tests and a three-viewport Playwright check with screenshots.
 For Issue #38, implemented the Staff Ticket Detail API/UI, transactionally revalidated owner/priority/status operations, exact eight-state transitions and optimistic versions, Requester resolution indication, operational attachment reads, and append-only Public Comments/Internal Notes with strict visibility. Added API/domain/UI/browser coverage and repeatable E2E cleanup, and verified the cross-role workflow against a disposable PostgreSQL container.
  For Issue #39, implemented Administrator-only account list/search/filter/create/edit/reset endpoints and a responsive User Management screen. Added strict canonical-email/name/role/boolean/version validation, current-actor transaction checks, serializable last-admin safeguards, optimistic account versions, session invalidation, atomic owner unassignment with Ticket version increments, field-specific conflict recovery and self-session navigation. Verified focused and complete API/UI suites, production build, and a real Administrator browser flow against disposable PostgreSQL.
 
+
+For Issue #40, used Codex to inventory the merged test/evidence state, add an
+independent visual-authentication fixture, build four responsive browser evidence
+cases, and run the complete integrated suites against a disposable PostgreSQL
+container. The first integrated E2E run exposed an inherited assertion for a
+heading that the Staff Detail page does not render; the assertion was corrected
+to the visible ticket-number heading and rerun. Codex assembled a contact sheet
+for manual inspection after the direct image and Computer Use paths were blocked
+by Windows ACL/runtime errors.
+
+After peer review on PR #50, Codex converted the single-Tab smoke check into
+complete keyboard target/focus-indicator traversal, added explicit mobile
+navigation and responsive Administrator editor viewport checks, implemented
+first-invalid focus for password, account, communication and Staff operation
+errors, and regenerated 37 screenshots with dedicated validation evidence. The
+client, production build and complete Playwright suites were rerun.
+
+The student reflection below remains intentionally
+student-owned.
+
 ## My Reflection
 
 Pending the student's own reflection on specification-agent and coding-agent
