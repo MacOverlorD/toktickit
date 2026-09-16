@@ -135,7 +135,7 @@ story += [table([
     ["#38", "Detail/workflow/communication", link("PR #48 - fixes merged", f"{REPO}/pull/48")],
     ["#39", "User management", link("PR #49 - fixes merged", f"{REPO}/pull/49")],
     ["#40", "Integrated verification", link("PR #50 - reviewer merged", f"{REPO}/pull/50")],
-    ["#41", "Release and evidence", "This release-candidate branch"],
+    ["#41", "Release and evidence", link("PR #51 - review requested", f"{REPO}/pull/51")],
 ], [19 * mm, 66 * mm, 80 * mm])]
 story += [p("Review evidence", "Section")]
 story += bullets([

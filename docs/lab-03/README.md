@@ -1,6 +1,6 @@
 # Lab 3 Sprint Setup
 
-Status: Issues 01-08 (#33-#40) are merged into `lab3-staging`; Issue 09 (#41) is in progress on `feature/3-09-release-submission`.
+Status: Issues 01-08 (#33-#40) are merged into `lab3-staging`; Issue 09 (#41) is in peer review in [PR #51](https://github.com/MacOverlorD/toktickit/pull/51).
 
 ## Workflow
 
