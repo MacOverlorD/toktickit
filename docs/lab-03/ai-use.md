@@ -94,7 +94,11 @@ development API exposed an unmocked client-test request; Codex made the suite
 deterministic by rejecting unexpected fetches globally and explicitly mocking
 the Attachment communication dependency. Codex then updated traceability,
 review evidence and the nine-part submission PDF without claiming a formal
-approval that GitHub does not record.
+approval that GitHub does not record. After PR #51 review, Codex mapped all four
+findings to Section 14, replaced unreadable full-page scaling with purpose-specific
+crops, rendered the complete rubric evidence inside the PDF, corrected table-header
+construction, removed feature-branch links, and retained the honest post-merge
+final-main verification gate.
 
 The student reflection below is a Codex-assisted draft based on the recorded
 work. The student must confirm that it matches their experience before submission.

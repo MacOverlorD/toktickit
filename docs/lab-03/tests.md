@@ -51,6 +51,7 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-16 | `npm run test:client` | 17 files, 134 tests passed. The rerun includes deterministic global fetch isolation and an explicit communication mock for the inherited Attachment UI suite. |
 | 2026-09-16 | `npm run build` | Server and client TypeScript checks plus the Vite production build passed. |
 | 2026-09-16 | `npm run test:e2e` | 10 Playwright tests passed in 2.3 minutes against isolated ports 3100/5174. |
+| 2026-09-16 | PDF structure/link/render QA after PR #51 review | 24 pages; Answer Part 1-9 each occurs once in order; one output PDF; 12 link annotations; zero feature-branch links; purpose-specific crops and all rendered pages inspected. Stable `main` document links require the reviewed final release before they resolve. |
 
 The first client run was affected by a development API already listening on port 3000: an unmocked communication request received a real 401 and dispatched the application's unauthenticated event. The test setup now rejects unexpected network calls deterministically, and the affected Attachment suite explicitly mocks its communication dependency. This is a test-isolation correction, not a product behavior change.
 
