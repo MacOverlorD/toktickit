@@ -1,6 +1,6 @@
 # Lab 3 Sprint Setup
 
-Status: Setup complete; Issue 01 (#33) approved and merged. Issues 02-09 are Backlog.
+Status: Issues 01-08 (#33-#40) are merged into `lab3-staging`; Issue 09 (#41) is in peer review in [PR #51](https://github.com/MacOverlorD/toktickit/pull/51).
 
 ## Workflow
 
@@ -46,3 +46,14 @@ Maintain reviewer.md and ai-use.md as the sprint progresses. Feature issues own
 their tests; Issue 08 verifies the integrated product. Issue 09 collects genuine
 final-main and review evidence into exactly one PDF, Answer Part 1 through
 Answer Part 9. Do not mark Issue 09 Done until its final deliverables exist.
+
+## Release submission
+
+The release-candidate evidence is maintained in:
+
+- [test traceability and execution](./tests.md)
+- [peer-review record](./reviewer.md)
+- [AI-use log and reflection](./ai-use.md)
+- `output/pdf/TokTickIT_Lab3_Submission.pdf` (generated submission artifact)
+
+The release PR must be reviewed and merged before REL-01 can record the final-main rerun and Issue #41 can move to Done.

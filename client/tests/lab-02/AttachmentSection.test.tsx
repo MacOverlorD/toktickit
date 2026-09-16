@@ -7,6 +7,7 @@ import {
   uploadAttachment,
 } from '../../src/api/attachments'
 import { getTicketDetail, type TicketDetail } from '../../src/api/ticket-detail'
+import { listEntries } from '../../src/api/ticket-workflow'
 
 vi.mock('../../src/api/attachments', () => ({
   getAttachmentContent: vi.fn(),
@@ -14,6 +15,10 @@ vi.mock('../../src/api/attachments', () => ({
   uploadAttachment: vi.fn(),
 }))
 vi.mock('../../src/api/ticket-detail', () => ({ getTicketDetail: vi.fn() }))
+vi.mock('../../src/api/ticket-workflow', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../src/api/ticket-workflow')>()),
+  listEntries: vi.fn(),
+}))
 
 const number = 'TKT-20260904-A1B2C3D4'
 const requester = { id: 1, name: 'Anan Wong', email: 'anan@example.test' }
@@ -46,6 +51,7 @@ beforeEach(() => {
   vi.mocked(getTicketDetail).mockResolvedValue(detail)
   vi.mocked(getAttachmentContent).mockResolvedValue(new Blob(['pdf']))
   vi.stubGlobal('open', vi.fn(() => previewWindow))
+  vi.mocked(listEntries).mockResolvedValue([])
   Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:test') })
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
 })

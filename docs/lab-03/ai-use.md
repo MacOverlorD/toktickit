@@ -1,7 +1,7 @@
 # Lab 3 AI Use
 
-Status: Live record initialized during Issue #33.
-Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deployed variant not exposed).
+Status: Updated through the Issue #41 release candidate on 2026-09-16.
+Assistant: OpenAI Codex (exact deployed model variant not exposed to the repository).
 
 ## Selected prompts recorded so far
 
@@ -14,7 +14,7 @@ Assistant: OpenAI Codex (GPT-6 family as identified by the session; exact deploy
 7. User requested continuing with Issue 2 after Issue 1 was merged.
 8. User requested addressing the peer's requested changes, updating Lab 3 documentation, and resubmitting PR #44 for approval.
 9. After the reviewed PR was merged, the user requested continuing with the next Lab 3 issue.
-10. User requested addressing all PR #45 review findings, rerunning complete verification, and resubmitting for approval.
+10. User requested running the complete front end and back end, confirming the remaining issue, and completing the Lab 3 release-submission work.
 
 These are English summaries, not verbatim quotations. Maintain 6-10 selected
 key prompts by submission, including meaningful specification and coding work.
@@ -87,10 +87,29 @@ first-invalid focus for password, account, communication and Staff operation
 errors, and regenerated 37 screenshots with dedicated validation evidence. The
 client, production build and complete Playwright suites were rerun.
 
-The student reflection below remains intentionally
-student-owned.
+For Issue #41, Codex created an isolated release worktree from the merged
+`lab3-staging` baseline, installed dependencies, generated Prisma Client, and
+ran the complete server, client, build and browser verification. A live
+development API exposed an unmocked client-test request; Codex made the suite
+deterministic by rejecting unexpected fetches globally and explicitly mocking
+the Attachment communication dependency. Codex then updated traceability,
+review evidence and the nine-part submission PDF without claiming a formal
+approval that GitHub does not record. After PR #51 review, Codex mapped all four
+findings to Section 14, replaced unreadable full-page scaling with purpose-specific
+crops, rendered the complete rubric evidence inside the PDF, corrected table-header
+construction, removed feature-branch links, and retained the honest post-merge
+final-main verification gate.
+
+The student reflection below is a Codex-assisted draft based on the recorded
+work. The student must confirm that it matches their experience before submission.
 
 ## My Reflection
 
-Pending the student's own reflection on specification-agent and coding-agent
-use, choices challenged, verification performed and limitations encountered.
+AI was most useful for turning the Lab 3 handout into traceable requirements,
+implementing repetitive API/UI tests, and checking the same behavior across
+roles and screen sizes. I did not treat generated work or self-review as proof:
+I used executable server, client, build and browser checks, inspected visual
+evidence, and kept the collaborator's formal review state separate from positive
+comments. The main limitation was environment sensitivity, demonstrated when a
+running development API changed a unit-test result; isolating network access and
+rerunning the complete suites was necessary before trusting the evidence.
