@@ -1,6 +1,6 @@
 # Lab 3 UI Contract
 
-Status: Implemented and inspected on Issue #40 evidence commit `dc72914`; final-main confirmation remains for Issue #41.
+Status: Implemented, inspected, and confirmed on final `main` commit `f8d5307` on 2026-09-17.
 Reuse [Lab 2 design tokens and components](../lab-02/ui-spec.md) without a new
 visual system. Primary #006B3C, secondary #0B7A46, pale green #EAF6EF,
 page #F5F7F6, surface white, text #18211D; retain semantic error/warning tokens.
@@ -123,4 +123,4 @@ Manual inspection of the new validation and responsive editor images found no
 clipped controls, inaccessible actions, private-note leakage, credential values
 or ambiguous editable/read-only treatment. The native Login email validation
 bubble, inline field messages, focused invalid controls, Zen Green navigation,
-borders and badges remain legible. Repeat this checklist on final `main` in Issue #41.
+borders and badges remain legible. The checklist was repeated through the final-main Playwright 10/10 run and final PDF render inspection on 2026-09-17.
