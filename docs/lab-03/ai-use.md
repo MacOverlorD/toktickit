@@ -1,6 +1,6 @@
 # Lab 3 AI Use
 
-Status: Updated through the Issue #41 release candidate on 2026-09-16.
+Status: Finalized through the approved main release and final-main verification on 2026-09-17.
 Assistant: OpenAI Codex (exact deployed model variant not exposed to the repository).
 
 ## Selected prompts recorded so far
@@ -98,7 +98,7 @@ approval that GitHub does not record. After PR #51 review, Codex mapped all four
 findings to Section 14, replaced unreadable full-page scaling with purpose-specific
 crops, rendered the complete rubric evidence inside the PDF, corrected table-header
 construction, removed feature-branch links, and retained the honest post-merge
-final-main verification gate.
+final-main verification gate. After PR #52 received formal peer approval and merged, Codex checked out the exact main merge commit in an isolated worktree, restored the local PostgreSQL service after the first server run exposed it as offline, reran all suites, pinned PDF links to the immutable main SHA, and updated the final evidence without changing the student's unrelated Lab 2 worktree.
 
 The student reflection below is a Codex-assisted draft based on the recorded
 work. The student must confirm that it matches their experience before submission.

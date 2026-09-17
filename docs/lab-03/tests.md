@@ -1,6 +1,6 @@
 # Lab 3 Test Plan and Traceability
 
-Status: Integrated verification completed on 2026-09-15 at evidence commit `dc72914`; peer-review fixes were verified on 2026-09-16 at `2eb9d7e`. The Issue #41 release candidate was verified again on 2026-09-16: server 144, client 134, production build, and Playwright 10/10 pass. Thirty-seven responsive screenshots cover all major role surfaces, validation states and the 320px overflow boundary. Final-main release verification remains pending until the release PR is reviewed and merged.
+Status: Final-main verification completed on 2026-09-17 at merge commit `f8d5307fc5bbc4213d4ca65d41805c358ace1aea`. Server 144, client 134, production build, and Playwright 10/10 pass. Thirty-seven responsive screenshots cover all major role surfaces, validation states and the 320px overflow boundary.
 Paths marked Planned are proposed targets. Paths marked Passed exist and have been executed. The scenarios below
 are mandatory cases to implement alongside features and expand when new defects arise.
 
@@ -29,7 +29,7 @@ are mandatory cases to implement alongside features and expand when new defects 
 | E2E-02 | E2E | AC-05, AC-06, AC-07, AC-08, AC-09, AC-10 | e2e/lab-03/ticket-workflow.spec.ts | Real Requester indication/comment to Staff claim/priority/status/public/private flow and Requester private-note isolation | Passed (1 test) |
 | E2E-03 | E2E | AC-11, AC-12, AC-13 | e2e/lab-03/user-administration.spec.ts | User lifecycle and safety rules | Passed (1 test) |
 | VIS-01 | Responsive/accessibility/visual | AC-15, AC-16 | e2e/lab-03/visual-evidence.spec.ts | Complete keyboard target/focus-indicator traversal, mobile navigation, responsive editor placement, validation focus, labels, overflow and visual inspection | Passed (4 tests; 37 screenshots) |
-| REL-01 | Release verification | AC-17 | docs/lab-03/reviewer.md; final-main CI/command evidence | Passing release-candidate suites, peer reviews, traceability and nine-part PDF review; final-main rerun remains required | In progress |
+| REL-01 | Release verification | AC-17 | docs/lab-03/reviewer.md; final-main command evidence | Formal release approval, merge to main, passing final-main suites, traceability, immutable links and nine-part PDF review | Passed |
 
 ## Existing commands
 
@@ -44,6 +44,8 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 
 ## Issue #41 release-candidate evidence
 
+The release-candidate results below are retained for history. The authoritative final-main results follow.
+
 | Date | Command | Result |
 |---|---|---|
 | 2026-09-16 | `npm run prisma:generate --prefix server` | Prisma Client generated successfully before TypeScript and test discovery. |
@@ -54,6 +56,19 @@ development database to obtain evidence. Issue #34 uses isolated temporary Postg
 | 2026-09-16 | PDF structure/link/render QA after PR #51 review | 24 pages; Answer Part 1-9 each occurs once in order; one output PDF; 12 link annotations; zero feature-branch links; purpose-specific crops and all rendered pages inspected. Stable `main` document links require the reviewed final release before they resolve. |
 
 The first client run was affected by a development API already listening on port 3000: an unmocked communication request received a real 401 and dispatched the application's unauthenticated event. The test setup now rejects unexpected network calls deterministically, and the affected Attachment suite explicitly mocks its communication dependency. This is a test-isolation correction, not a product behavior change.
+
+## Final-main verification evidence
+
+| Date | Commit / command | Result |
+|---|---|---|
+| 2026-09-17 | `main` at `f8d5307fc5bbc4213d4ca65d41805c358ace1aea` | Exact merge commit from formally approved PR #52. |
+| 2026-09-17 | `npm run prisma:generate --prefix server` | Prisma Client generated successfully. |
+| 2026-09-17 | `npm run prisma:status --prefix server` | PostgreSQL reachable; five migrations found; schema up to date. |
+| 2026-09-17 | `npm run test:server` | 24 files / 144 tests passed in 149.56 seconds. The first attempt found PostgreSQL offline; after starting the existing labeled container and confirming migration status, the complete rerun passed. |
+| 2026-09-17 | `npm run test:client` | 17 files / 134 tests passed in 116.31 seconds. |
+| 2026-09-17 | `npm run build` | Server TypeScript, client typecheck, and Vite production build passed. |
+| 2026-09-17 | `npm run test:e2e` | 10/10 Playwright tests passed in 2.7 minutes on isolated ports 3100/5174. |
+| 2026-09-17 | Final PDF QA | Answer Part 1-9 occur once each in order; all pages rendered and inspected; one output PDF; repository links pin the immutable final-main SHA. |
 
 ## Issue #34 execution evidence
 
@@ -255,8 +270,7 @@ these ACs. Keep final statuses Planned until commands actually execute.
   (AC-15). Apply equivalent owner/status feedback in UI-06.
 
 The added cases are covered by the final 144-test server, 134-test client and
-10-test Playwright suites except REL-01, which remains assigned to Issue #41 for
-verification on final `main`.
+10-test Playwright suites. REL-01 is complete with the formally approved release, final-main rerun, and final PDF evidence.
 
 ## PR #49 peer-review regression verification
 
