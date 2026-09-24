@@ -8,7 +8,7 @@ Status: awaiting peer review.
 - Pull request: [#63](https://github.com/MacOverlorD/toktickit/pull/63), targeting `lab4-staging`.
 - Reviewer: not assigned/recorded yet.
 - Approval: not received.
-- Review head at handoff: `f98e852`; no reviewer decision is recorded yet.
+- Initial contract commit: `f98e852`; the exact reviewed head will be recorded when a reviewer acts. No reviewer decision is recorded yet.
 
 ## Required review focus
 
