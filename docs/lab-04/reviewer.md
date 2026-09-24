@@ -5,10 +5,10 @@ Status: awaiting peer review.
 ## Contract review
 
 - Issue: [#54](https://github.com/MacOverlorD/toktickit/issues/54)
-- Pull request: not opened at initial setup.
+- Pull request: [#63](https://github.com/MacOverlorD/toktickit/pull/63), targeting `lab4-staging`.
 - Reviewer: not assigned/recorded yet.
 - Approval: not received.
-- Reviewed commit: not available yet.
+- Review head at handoff: `f98e852`; no reviewer decision is recorded yet.
 
 ## Required review focus
 

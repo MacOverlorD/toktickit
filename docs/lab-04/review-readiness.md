@@ -1,6 +1,6 @@
 # Issue #54 Review Readiness
 
-Status: initial authoring complete; peer review pending.
+Status: initial authoring complete in [PR #63](https://github.com/MacOverlorD/toktickit/pull/63); peer review pending.
 
 ## Handout coverage audit
 
