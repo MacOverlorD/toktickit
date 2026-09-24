@@ -1,6 +1,6 @@
 # Lab 4 Data and Migration Contract
 
-Status: proposed for peer approval in Issue #54; normative for Issue #55.
+Status: approved in PR #63 and normative for Issue #55.
 
 ## 1. Exact schema changes
 

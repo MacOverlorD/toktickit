@@ -1,6 +1,6 @@
 # Issue #54 Review Readiness
 
-Status: initial authoring complete in [PR #63](https://github.com/MacOverlorD/toktickit/pull/63); peer review pending.
+Status: review complete; `Ohmmykung09` approved commit `f38ae64` and merged PR #63 as `51af4c3`.
 
 ## Handout coverage audit
 

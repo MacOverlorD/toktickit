@@ -1,6 +1,6 @@
 # Lab 4 UI Specification
 
-Status: proposed for Issue #54.
+Status: approved in PR #63 and normative for implementation.
 
 ## 1. Shared design behavior
 
@@ -28,7 +28,7 @@ Ticket Detail presents only transitions currently permitted by role/state, with 
 
 ## 4. Requester Dashboard
 
-Route: proposed `/dashboard`. Requester navigation label: “Dashboard”. Content order:
+Route: `/dashboard`. Requester navigation label: “Dashboard”. Content order:
 
 1. concise welcome/context;
 2. metric cards for open, waiting for you, and resolved in the last 7 days;
@@ -39,7 +39,7 @@ Every meaningful metric/list entry links to My Tickets with supported filters or
 
 ## 5. Operational Dashboard
 
-Route: proposed `/staff/dashboard`. Content order:
+Route: `/staff/dashboard`. Content order:
 
 1. unassigned and owned-by-me metric cards;
 2. status and IT-priority summaries;

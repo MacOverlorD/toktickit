@@ -1,6 +1,6 @@
 # Lab 4 API Contract
 
-Status: proposed for Issue #54 peer approval. DTO names, fields, statuses, validation and errors below are normative for implementation.
+Status: approved in PR #63; DTO names, fields, statuses, validation and errors below are normative for implementation.
 
 ## 1. Common rules
 

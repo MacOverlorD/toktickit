@@ -1,6 +1,6 @@
 # Lab 4 Sprint Setup
 
-Status: setup complete and [PR #63](https://github.com/MacOverlorD/toktickit/pull/63) is ready for peer review. Issue [#54](https://github.com/MacOverlorD/toktickit/issues/54) is in PR Review; Issues #55-#62 are Backlog. No peer approval or runtime completion is claimed yet.
+Status: Issue [#54](https://github.com/MacOverlorD/toktickit/issues/54) contract was approved and [PR #63](https://github.com/MacOverlorD/toktickit/pull/63) merged into `lab4-staging` as `51af4c3`. Issues #55-#62 remain implementation/release work; no runtime completion is claimed yet.
 
 ## Workflow
 

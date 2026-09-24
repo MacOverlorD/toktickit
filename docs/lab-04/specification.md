@@ -1,6 +1,6 @@
 # Lab 4 Product Specification
 
-Status: proposed engineering contract for Issue #54. Peer approval is required before implementation issues are considered Specified.
+Status: approved by `Ohmmykung09` on PR #63 at commit `f38ae64`; merged to `lab4-staging` as `51af4c3`.
 
 ## 1. Purpose
 
@@ -132,4 +132,4 @@ An issue is Done only when its acceptance criteria, tests, docs, review findings
 
 ## 11. Risks, decisions, and approval
 
-The primary risks are ambiguous visibility, conflating performer with assignee, resolution bypass, stale dashboard definitions, migration damage, and fabricated evidence. Proposed resolutions are tracked in [decisions.md](./decisions.md). Until real peer approval is recorded in [reviewer.md](./reviewer.md), this contract remains proposed.
+The primary risks are ambiguous visibility, conflating performer with assignee, resolution bypass, stale dashboard definitions, migration damage, and fabricated evidence. Approved resolutions are tracked in [decisions.md](./decisions.md), and the completed review is recorded in [reviewer.md](./reviewer.md). Later contract changes require an explicit decision update and review.
