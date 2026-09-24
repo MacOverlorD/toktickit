@@ -14,23 +14,32 @@ In scope: Actions Taken, resolution prerequisite, Requester and operational dash
 
 ## 3. Roles and authorization
 
+An **accessible Ticket** is defined exactly as follows: a Requester may access a Ticket only when `ticket.requesterId` equals the authenticated user ID; IT Staff and Administrators may access every Ticket, including unassigned Tickets and Tickets owned by another operational user. Ticket ownership does not grant or remove operational authorization. All checks use the authenticated active user inside the mutation transaction; client-supplied actor, Requester, creator, performer, or current-user IDs never grant authority.
+
+| Action operation | Requester | IT Staff | Administrator | Ticket/Action state rule |
+|---|---|---|---|---|
+| List/get | Owned Ticket, shared-safe projection | Any Ticket, operational projection | Any Ticket, operational projection | Allowed in every Ticket and Action state |
+| Create | No | Any Ticket | Any Ticket | Ticket must be NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, or REOPENED; creates PLANNED |
+| Edit fields | No | Any Ticket | Any Ticket | Active Ticket; Action PLANNED or IN_PROGRESS only |
+| Assign/unassign | No | Any Ticket | Any Ticket | Active Ticket; Action PLANNED or IN_PROGRESS; target active IT Staff/Admin or null |
+| Start | No | Any Ticket | Any Ticket | Active Ticket; PLANNED -> IN_PROGRESS |
+| Complete | No | Any Ticket | Any Ticket | Active Ticket; PLANNED/IN_PROGRESS -> COMPLETED |
+| Cancel | No | Any Ticket | Any Ticket | Active Ticket; PLANNED/IN_PROGRESS -> CANCELLED |
+
+For this matrix, active Ticket states are NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, and REOPENED. RESOLVED, CLOSED, and CANCELLED Tickets are read-only for Actions. Requesters always receive 403 `FORBIDDEN` for an Action mutation after authentication and before resource lookup. A missing Ticket/Action, an Action nested under the wrong Ticket, and a Requester's cross-owner read all return the identical 404 `RESOURCE_NOT_FOUND` body. An inactive/expired session returns 401 `UNAUTHENTICATED`. Operational reads and writes do not require the actor to own the Ticket or be the Action assignee.
+
 | Capability | Requester | IT Staff | Administrator |
 |---|---|---|---|
-| Read owned Ticket | Yes | Yes | Yes |
-| Read Actions on accessible Ticket | Proposed: shared-safe view on owned Ticket | Yes | Yes |
-| Create/update/assign/transition Action | No | Yes | Yes |
-| Formally resolve or close Ticket | No | Yes, when workflow permits | Yes, when workflow permits |
+| Formal Ticket transition | No | Any Ticket, subject to matrix | Any Ticket, subject to matrix |
 | Requester dashboard | Own data only | No | No |
 | Operational dashboard | No | Yes | Yes |
 | User administration | No | No | Yes |
-
-All protected API decisions are based on the authenticated session. Client-supplied actor, Requester, performer, or current-user identifiers are ignored or rejected as defined by the API contract.
 
 ## 4. Functional requirements
 
 - **FR-01 Actions list:** An accessible Ticket exposes its Actions Taken in deterministic newest-first order with an ID tie-breaker.
 - **FR-02 Actions lifecycle:** Authorized operational users can create, assign, edit, start, complete, and cancel an Action under the approved state rules.
-- **FR-03 Action fields:** Each Action records action date/time, description, result, performer, follow-up flag, conditional follow-up note, and attachment notes.
+- **FR-03 Action fields:** Each Action records action date/time, description, result, immutable creator, completion-time performer, optional assignee, follow-up flag, conditional follow-up note, and attachment notes.
 - **FR-04 Resolution gate:** A Ticket cannot enter the formal Resolved state until the approved qualifying Action prerequisite is satisfied.
 - **FR-05 Final workflow:** The eight Lab 3 Ticket statuses and permitted role transitions remain backend-enforced, including reopen and cancel behavior.
 - **FR-06 Requester dashboard:** A Requester sees only own open, waiting, recently updated, and recently resolved Ticket information with useful drill-downs.
@@ -42,25 +51,53 @@ All protected API decisions are based on the authenticated session. Client-suppl
 ## 5. Business rules
 
 - **BR-01:** An Action belongs to exactly one Ticket and cannot be moved to another Ticket.
-- **BR-02:** `performedBy` is assigned by the backend from the authenticated creator and is never client-selectable.
-- **BR-03:** `assignedTo` is distinct from `performedBy`; only an active IT Staff or Administrator may be assigned.
-- **BR-04:** Proposed Action states are `PLANNED`, `IN_PROGRESS`, `COMPLETED`, and `CANCELLED`.
-- **BR-05:** Proposed transitions are PLANNED -> IN_PROGRESS/COMPLETED/CANCELLED and IN_PROGRESS -> COMPLETED/CANCELLED. Terminal states do not transition.
+- **BR-02:** `createdBy` is the authenticated creator, set by the backend at create and immutable. `performedBy` is null until completion, then is set by the backend to the authenticated user who successfully completes the Action and becomes immutable. A cancelled Action has no performer.
+- **BR-03:** `assignedTo` is distinct from creator and performer; it may be null or an active IT Staff/Administrator. Assignment expresses responsibility but does not authorize or prove performance.
+- **BR-04:** Action states are `PLANNED`, `IN_PROGRESS`, `COMPLETED`, and `CANCELLED`.
+- **BR-05:** Transitions are PLANNED -> IN_PROGRESS/COMPLETED/CANCELLED and IN_PROGRESS -> COMPLETED/CANCELLED. COMPLETED and CANCELLED are terminal and immutable.
 - **BR-06:** Description is required after trimming. Result is required on completion. Follow-up note is required exactly when follow-up is true.
 - **BR-07:** Server time is authoritative for created/updated/completed/cancelled timestamps; action date/time is validated but may represent the actual work time.
-- **BR-08:** Completed or cancelled Actions are immutable except through an explicitly approved correction policy; the proposed policy is no edits to terminal Actions.
+- **BR-08:** Completed or cancelled Actions are immutable. A correction is a new Action whose description references the prior Action ID; history is never overwritten.
 - **BR-09:** Every Action update uses optimistic concurrency. A stale version returns conflict and does not overwrite newer data.
 - **BR-10:** Duplicate create submissions using the same actor, Ticket, and idempotency key return the original result.
-- **BR-11:** Proposed Requester visibility is a shared-safe projection of every Action on an owned Ticket, excluding assignment/internal control metadata. This resolves the handout's broad “all actions” wording without exposing operational-only fields.
-- **BR-12:** Formal resolution requires at least one completed, non-cancelled Action with a nonblank result on the Ticket.
-- **BR-13:** The Requester's “problem appears resolved” indication remains advisory and cannot perform the formal resolution transition.
+- **BR-11:** A Requester receives the shared-safe projection of every Action on an owned Ticket, including creator and performer display names; assignee, versions, idempotency data, work-cycle/control fields, and user IDs are omitted.
+- **BR-12:** Formal resolution requires at least one COMPLETED Action with a trimmed nonblank result whose `ticketWorkCycle` equals the Ticket's current `workCycle`.
+- **BR-13:** REOPENED atomically increments Ticket.workCycle and clears resolvedAt and the Requester resolution indication, so prior-cycle Actions cannot satisfy a later resolution. The Requester indication remains advisory and never performs a formal transition.
 - **BR-14:** Dashboard identity and all aggregates are derived on the backend from the authenticated actor and a single query-time timestamp.
-- **BR-15:** “Recent” means the latest ten accessible records ordered by `updatedAt DESC, id DESC`; the display uses Asia/Bangkok while stored instants remain UTC.
+- **BR-15:** Recent lists contain at most ten records ordered by updatedAt descending then ID descending. Seven-day metrics use one server asOf instant and an inclusive 604800000 ms window. Storage is UTC; display is Asia/Bangkok.
 - **BR-16:** Dashboard zero states are successful empty results, never errors.
 - **BR-17:** Migration is additive, transactional where supported, preserves all Lab 1-3 rows/relations, and documents recovery before execution.
 - **BR-18:** Seed execution is idempotent and does not overwrite user-managed state.
 - **BR-19:** Errors do not disclose credentials, session tokens, stack traces, internal notes, cross-owner existence, or database details.
 - **BR-20:** Historical audit/communication records remain append-only; no feature hard-deletes them.
+
+### 5.1 Final Ticket transition matrix
+
+Both operational roles (IT Staff and Administrator) may execute every permitted edge on any Ticket. Requesters execute none. `Owner required` means the Ticket must have an active IT Staff/Administrator owner at transaction time; the actor need not be that owner. `Confirm` means `confirmed: true` is mandatory. Every omitted edge, including self-transitions, is rejected with 409 `INVALID_TRANSITION` and no write.
+
+| Source | Target | Roles | Owner required | Confirm | Additional effect/gate |
+|---|---|---|---|---|---|
+| NEW | OPEN | Staff/Admin | No | No | Preserve work cycle |
+| NEW | CANCELLED | Staff/Admin | No | Yes | Terminal; Actions become read-only |
+| OPEN | IN_PROGRESS | Staff/Admin | Yes | No | Preserve work cycle |
+| OPEN | WAITING_FOR_REQUESTER | Staff/Admin | Yes | No | Clear Requester resolution indication |
+| OPEN | CANCELLED | Staff/Admin | No | Yes | Terminal; Actions become read-only |
+| IN_PROGRESS | WAITING_FOR_REQUESTER | Staff/Admin | Yes | No | Clear Requester resolution indication |
+| IN_PROGRESS | RESOLVED | Staff/Admin | Yes | Yes | Require current-cycle qualifying Action; set `resolvedAt=now` |
+| IN_PROGRESS | CANCELLED | Staff/Admin | No | Yes | Terminal; Actions become read-only |
+| WAITING_FOR_REQUESTER | IN_PROGRESS | Staff/Admin | Yes | No | Preserve work cycle |
+| WAITING_FOR_REQUESTER | RESOLVED | Staff/Admin | Yes | Yes | Require current-cycle qualifying Action; set `resolvedAt=now` |
+| WAITING_FOR_REQUESTER | CANCELLED | Staff/Admin | No | Yes | Terminal; Actions become read-only |
+| RESOLVED | CLOSED | Staff/Admin | Yes | Yes | Preserve `resolvedAt` and work cycle |
+| RESOLVED | REOPENED | Staff/Admin | No | Yes | Increment work cycle; clear `resolvedAt` and indication |
+| CLOSED | REOPENED | Staff/Admin | No | Yes | Increment work cycle; clear `resolvedAt` and indication |
+| REOPENED | OPEN | Staff/Admin | No | No | Preserve new work cycle |
+| REOPENED | IN_PROGRESS | Staff/Admin | Yes | No | Preserve new work cycle |
+| REOPENED | WAITING_FOR_REQUESTER | Staff/Admin | Yes | No | Clear indication |
+| REOPENED | CANCELLED | Staff/Admin | No | Yes | Terminal; Actions become read-only |
+| CANCELLED | REOPENED | Staff/Admin | No | Yes | Increment work cycle; clear `resolvedAt` and indication |
+
+Resolution eligibility is evaluated inside the same transaction as the Ticket update. A qualifying Action has status COMPLETED, nonblank `result`, non-null `performedById` and `completedAt`, and `ticketWorkCycle = Ticket.workCycle`. Historical Actions remain visible after reopen but never qualify a later cycle. Status mutations retain the Lab 3 positive `expectedVersion` rule; stale writes return 409 `STALE_RESOURCE` before state/gate details are disclosed.
 
 ## 6. Acceptance criteria
 
@@ -79,7 +116,7 @@ All protected API decisions are based on the authenticated session. Client-suppl
 
 ## 7. Data and migration summary
 
-The proposed `ActionTaken` record has: ID, Ticket relation, actionAt, description, result, status, performedBy relation, optional assignedTo relation, followUpRequired, optional followUpNote, optional attachmentNotes, version, createdAt, updatedAt, completedAt, and cancelledAt. Indexes support Ticket ordering, assignee/status work lists, performer recency, and dashboard queries. Exact Prisma names and nullability are finalized in Issue #54 and implemented in #55.
+The normative [data and migration contract](./data-migration.md) fixes every Prisma field/type/nullability, relation and `onDelete: Restrict` rule; ordered indexes; database checks; work-cycle and resolved-time changes; idempotency-key fingerprint storage; populated-database backup, deploy, verification and recovery steps; and repeatable seed fixtures. Legacy Tickets begin at work cycle 1 with zero Actions and no invented `resolvedAt` value.
 
 ## 8. API and UI summary
 

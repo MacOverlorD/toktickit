@@ -14,11 +14,11 @@ The Actions section appears after the Ticket summary and before or alongside com
 
 - a heading and Action count;
 - operational “Add action” control for Staff/Admin only;
-- deterministic Action cards/timeline entries showing work time, status, description, result, performer, follow-up information, and attachment notes;
+- deterministic Action cards/timeline entries showing work time, status, description, result, creator, assignee (operational view), actual performer, follow-up information, and attachment notes;
 - role-safe Requester projection with no edit/assignment controls;
 - operational controls allowed by the current Action state and current version.
 
-Create/edit uses labeled date-time, description, result, assignee, follow-up checkbox, conditional follow-up note, and attachment-notes controls. Performer is visibly read-only. Result becomes required for completion. Terminal records are visibly read-only under D-04.
+Create/edit uses labeled date-time, description, result, assignee, follow-up checkbox, conditional follow-up note, and attachment-notes controls. Creator is the signed-in user and read-only; performer displays Not completed until completion and is then the completing user. Completion states that the signed-in user will be recorded as performer. Result becomes required for completion. Terminal records are visibly read-only under D-04.
 
 Required modes: loading, empty, view, create, edit, assigning, starting, completing, cancelling, submitting, validation error, success, stale conflict, forbidden, missing, and safe unexpected failure. Draft values survive recoverable failure. Submit controls disable while pending and repeated activation uses the same idempotency key.
 
@@ -31,7 +31,7 @@ Ticket Detail presents only transitions currently permitted by role/state, with 
 Route: proposed `/dashboard`. Requester navigation label: “Dashboard”. Content order:
 
 1. concise welcome/context;
-2. metric cards for open, waiting for you, and recently resolved;
+2. metric cards for open, waiting for you, and resolved in the last 7 days;
 3. attention list;
 4. recently updated Tickets.
 
@@ -43,7 +43,7 @@ Route: proposed `/staff/dashboard`. Content order:
 
 1. unassigned and owned-by-me metric cards;
 2. status and IT-priority summaries;
-3. my assigned/performed Actions with explicit labels;
+3. separate Assigned to me and Completed by me in the last 7 days figures plus the assigned-Action list;
 4. recent/urgent work list;
 5. optional Administrator account summary.
 

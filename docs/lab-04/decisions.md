@@ -5,13 +5,15 @@ Status: proposed; peer review pending.
 | ID | Decision | Rationale | State |
 |---|---|---|---|
 | D-01 | Use Action states PLANNED, IN_PROGRESS, COMPLETED, CANCELLED. | Supports assign/edit/status/complete/cancel rubric behavior without overloading Ticket status. | Proposed |
-| D-02 | Separate immutable backend-derived `performedBy` from optional mutable `assignedTo`. | The person recording work and the person responsible for next work are different domain concepts. | Proposed |
+| D-02 | Store immutable backend-derived `createdBy`; keep `performedBy` null until the authenticated completer is recorded; keep optional mutable `assignedTo` for responsibility. | Creator, responsible user, and actual performer are distinct audit facts. | Proposed |
 | D-03 | Requesters receive a shared-safe projection of all Actions on owned Tickets; operational metadata is omitted. | Reconciles the handout's Requester visibility statements while preserving privacy. | Proposed |
 | D-04 | Terminal Actions cannot be edited. Corrections require a new Action that references the prior record in its description. | Preserves auditability and avoids silent history rewriting. | Proposed |
-| D-05 | Formal resolution requires at least one COMPLETED Action with a trimmed nonblank result. | Makes the resolution prerequisite objectively testable and enforced at the backend. | Proposed |
+| D-05 | Formal resolution requires a qualifying COMPLETED Action from the Ticket's current work cycle; REOPENED increments the cycle. | Prevents historical work from satisfying resolution of a reopened problem. | Proposed |
 | D-06 | Dashboard “recent” uses ten records and one server-captured `now`; storage is UTC and display is Asia/Bangkok. | Prevents inconsistent counts at time boundaries and makes tests deterministic. | Proposed |
 | D-07 | Administrator uses the operational dashboard and may also see concise account counts. | Avoids a redundant dashboard while matching the Administrator's operational visibility. | Proposed |
-| D-08 | Action mutations use integer optimistic versions; create uses an idempotency key scoped to actor and Ticket. | Prevents lost updates and repeated-submit duplicates. | Proposed |
-| D-09 | Migration is additive with no Action backfill; legacy Tickets validly begin with zero Actions. | Inventing historical work would be misleading and unnecessary. | Proposed |
+| D-08 | Action mutations use integer optimistic versions; create uses a UUID key scoped to Ticket/creator and a SHA-256 canonical-payload fingerprint. | Prevents lost updates, duplicate writes, and silent reuse of a key for different data. | Proposed |
+| D-09 | Migration is additive: legacy Tickets begin at cycle 1 with zero Actions and null `resolvedAt`; backup/restore and populated-data verification are mandatory. | Inventing historical work/time would be misleading; recovery must be deterministic. | Proposed |
+| D-10 | Staff/Admin may operate on any active Ticket regardless of owner/Action assignee; terminal Tickets expose Actions read-only. | Matches the Lab 3 operational authorization model and gives every Action endpoint a testable rule. | Proposed |
+| D-11 | Dashboard formulas, seven-day inclusive window, caps, ordering, zero states, and drill-down destinations are normative in `api-spec.md`. | Prevents client/server metric drift and ambiguous boundary results. | Proposed |
 
 Peer review must either approve each decision or record a replacement and affected FR/BR/AC/tests before implementation begins.

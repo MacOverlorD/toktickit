@@ -35,6 +35,7 @@ Issues #59 and #60 may proceed in parallel only after their shared contract and 
 - [API contract](./api-spec.md)
 - [UI contract](./ui-spec.md)
 - [Test and traceability plan](./tests.md)
+- [Data and migration contract](./data-migration.md)
 - [Decision log](./decisions.md)
 - [Glossary](./glossary.md)
 - [Review readiness](./review-readiness.md)
