@@ -38,6 +38,9 @@ model User {
   removedAttachments    Attachment[]    @relation("AttachmentRemover")
   publicComments        PublicComment[]
   internalNotes         InternalNote[]
+  createdActions        ActionTaken[]   @relation("ActionCreator")
+  performedActions      ActionTaken[]   @relation("ActionPerformer")
+  assignedActions       ActionTaken[]   @relation("ActionAssignee")
   sessions              Session[]
 
   @@index([role, isActive, id])
@@ -80,6 +83,8 @@ model Ticket {
   description             String
   status                  TicketStatus      @default(NEW)
   version                 Int               @default(1)
+  workCycle               Int               @default(1)
+  resolvedAt              DateTime?         @db.Timestamptz(3)
   resolutionIndicatedAt   DateTime?         @db.Timestamptz(3)
   resolutionIndicatedById Int?
   createdAt               DateTime          @default(now())
@@ -92,6 +97,7 @@ model Ticket {
   attachments             Attachment[]
   publicComments          PublicComment[]
   internalNotes           InternalNote[]
+  actions                 ActionTaken[]
 
   @@unique([requesterId, submissionKey])
   @@index([requesterId, createdAt, id])
@@ -101,6 +107,42 @@ model Ticket {
   @@index([requesterId, requestedPriority])
   @@index([status, itPriority, updatedAt, id])
   @@index([ownerId, updatedAt, id])
+  @@index([requesterId, status, resolvedAt, id])
+  @@index([status, ownerId, updatedAt, id])
+}
+
+model ActionTaken {
+  id                 Int          @id @default(autoincrement())
+  fixtureKey         String?      @unique @db.VarChar(64)
+  ticketId           Int
+  ticketWorkCycle    Int
+  status             ActionStatus @default(PLANNED)
+  actionAt           DateTime?    @db.Timestamptz(3)
+  description        String       @db.VarChar(2000)
+  result             String?      @db.VarChar(4000)
+  createdById        Int
+  performedById      Int?
+  assignedToId       Int?
+  followUpRequired   Boolean      @default(false)
+  followUpNote       String?      @db.VarChar(1000)
+  attachmentNotes    String?      @db.VarChar(1000)
+  idempotencyKey     String       @db.Uuid
+  requestFingerprint String       @db.Char(64)
+  version            Int          @default(1)
+  createdAt          DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+  completedAt        DateTime?    @db.Timestamptz(3)
+  cancelledAt        DateTime?    @db.Timestamptz(3)
+  ticket             Ticket       @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  createdBy          User         @relation("ActionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  performedBy        User?        @relation("ActionPerformer", fields: [performedById], references: [id], onDelete: Restrict)
+  assignedTo         User?        @relation("ActionAssignee", fields: [assignedToId], references: [id], onDelete: Restrict)
+
+  @@unique([ticketId, createdById, idempotencyKey])
+  @@index([ticketId, ticketWorkCycle, createdAt, id])
+  @@index([assignedToId, status, updatedAt, id])
+  @@index([performedById, completedAt, id])
+  @@index([status, updatedAt, id])
 }
 
 model Attachment {
@@ -167,5 +209,12 @@ enum TicketStatus {
   RESOLVED
   CLOSED
   REOPENED
+  CANCELLED
+}
+
+enum ActionStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
   CANCELLED
 }
