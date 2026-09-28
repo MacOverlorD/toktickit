@@ -233,10 +233,16 @@ describe('Lab 4 Actions Taken API', () => {
     const edited = await api(sessions[2], 'patch', `/api/staff/tickets/${ticketNumber}/actions/${id}`, {
       description: 'Updated diagnostic work',
       followUpRequired: false,
-      followUpNote: null,
       expectedVersion: 1,
     })
-    expect(edited.body.item).toEqual(expect.objectContaining({ description: 'Updated diagnostic work', version: 2 }))
+    expect(edited.body.item).toEqual(
+      expect.objectContaining({
+        description: 'Updated diagnostic work',
+        followUpRequired: false,
+        followUpNote: null,
+        version: 2,
+      }),
+    )
 
     const assigned = await api(sessions[2], 'patch', `/api/staff/tickets/${ticketNumber}/actions/${id}/assignment`, {
       assignedToUserId: adminId,

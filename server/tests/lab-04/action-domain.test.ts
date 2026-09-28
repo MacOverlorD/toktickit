@@ -63,6 +63,9 @@ describe('Lab 4 Action domain validation', () => {
     expect(errorCode(() => validateCreateAction({ description: 'x', followUpRequired: false, followUpNote: 'unexpected' }, key, now)).fieldErrors?.followUpNote).toBeDefined()
     expect(errorCode(() => validateCreateAction({ description: 'x', followUpRequired: false, assignedToUserId: 0 }, key, now)).fieldErrors?.assignedToUserId).toBeDefined()
     expect(errorCode(() => validateCreateAction({ description: 'x', followUpRequired: false, actionAt: '2026-09-28T00:05:00.001Z' }, key, now)).fieldErrors?.actionAt).toBeDefined()
+    for (const actionAt of ['2026-09-28', '09/28/2026 00:00:00', '2026-09-28T00:00:00'])
+      expect(errorCode(() => validateCreateAction({ description: 'x', followUpRequired: false, actionAt }, key, now)).fieldErrors?.actionAt).toBeDefined()
+    expect(errorCode(() => validateCreateAction({ description: 'x', followUpRequired: false, actionAt: '2026-02-30T00:00:00Z' }, key, now)).fieldErrors?.actionAt).toBeDefined()
     expect(validateCreateAction({ description: '😀'.repeat(2000), followUpRequired: false, actionAt: '2026-09-28T00:05:00.000Z' }, key, now).description).toHaveLength(4000)
     expect(errorCode(() => validateCreateAction({ description: 'x'.repeat(2001), followUpRequired: false }, key, now)).fieldErrors?.description).toBeDefined()
     expect(validateCreateAction({ description: 'x', result: 'r'.repeat(4000), followUpRequired: false }, key, now).result).toHaveLength(4000)
@@ -82,7 +85,7 @@ describe('Lab 4 Action domain validation', () => {
       followUpNote: 'Existing note',
       attachmentNotes: null,
     }
-    expect(validateEditAction({ followUpRequired: false, followUpNote: null, expectedVersion: 2 }, current, now)).toMatchObject({
+    expect(validateEditAction({ followUpRequired: false, expectedVersion: 2 }, current, now)).toMatchObject({
       expectedVersion: 2,
       data: { followUpRequired: false, followUpNote: null },
     })

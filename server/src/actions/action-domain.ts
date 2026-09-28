@@ -18,6 +18,7 @@ export const EDITABLE_ACTION_STATUSES = new Set<ActionStatus>([
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const INVALID_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/u
+const ISO_INSTANT_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?(?:Z|[+-](\d{2}):(\d{2}))$/
 
 export interface ActionTextState {
   actionAt: Date | null
@@ -65,8 +66,31 @@ function optionalInstant(value: unknown, now: Date) {
   if (value === null) return null
   if (typeof value !== 'string')
     throw validation({ actionAt: 'Action date/time must be an ISO-8601 instant or null.' })
+  const match = ISO_INSTANT_PATTERN.exec(value)
+  if (!match)
+    throw validation({ actionAt: 'Action date/time must be an ISO-8601 instant with a timezone.' })
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, offsetHourText, offsetMinuteText] = match
+  const year = Number(yearText)
+  const month = Number(monthText)
+  const day = Number(dayText)
+  const hour = Number(hourText)
+  const minute = Number(minuteText)
+  const second = Number(secondText)
+  const offsetHour = offsetHourText === undefined ? 0 : Number(offsetHourText)
+  const offsetMinute = offsetMinuteText === undefined ? 0 : Number(offsetMinuteText)
+  const daysInMonth = month >= 1 && month <= 12 ? new Date(Date.UTC(year, month, 0)).getUTCDate() : 0
+  const structurallyValid =
+    year >= 1 &&
+    day >= 1 &&
+    day <= daysInMonth &&
+    hour <= 23 &&
+    minute <= 59 &&
+    second <= 59 &&
+    offsetHour <= 14 &&
+    offsetMinute <= 59 &&
+    (offsetHour < 14 || offsetMinute === 0)
   const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime()) || parsed.getTime() > now.getTime() + 5 * 60_000)
+  if (!structurallyValid || Number.isNaN(parsed.getTime()) || parsed.getTime() > now.getTime() + 5 * 60_000)
     throw validation({ actionAt: 'Action date/time must be valid and no more than five minutes in the future.' })
   return parsed
 }
@@ -163,17 +187,23 @@ export function validateEditAction(body: unknown, current: ActionTextState, now:
     throw validation({ body: 'Provide at least one editable field.' })
   if (value.followUpRequired !== undefined && typeof value.followUpRequired !== 'boolean')
     throw validation({ followUpRequired: 'Follow-up Required must be true or false.' })
+  const followUpRequired = value.followUpRequired === undefined ? current.followUpRequired : value.followUpRequired
+  const providedFollowUpNote = text(value.followUpNote, 'followUpNote', 1000, { nullable: true })
+  const followUpNote = providedFollowUpNote === undefined
+    ? followUpRequired
+      ? current.followUpNote
+      : null
+    : providedFollowUpNote
   const next = {
     actionAt: optionalInstant(value.actionAt, now) ?? current.actionAt,
     description: (text(value.description, 'description', 2000) ?? current.description) as string,
     result: (text(value.result, 'result', 4000, { nullable: true }) ?? current.result) as string | null,
-    followUpRequired: value.followUpRequired === undefined ? current.followUpRequired : value.followUpRequired,
-    followUpNote: (text(value.followUpNote, 'followUpNote', 1000, { nullable: true }) ?? current.followUpNote) as string | null,
+    followUpRequired,
+    followUpNote: followUpNote as string | null,
     attachmentNotes: (text(value.attachmentNotes, 'attachmentNotes', 1000, { nullable: true }) ?? current.attachmentNotes) as string | null,
   }
   if (value.actionAt === null) next.actionAt = null
   if (value.result === null) next.result = null
-  if (value.followUpNote === null) next.followUpNote = null
   if (value.attachmentNotes === null) next.attachmentNotes = null
   validateFollowUp(next.followUpRequired, next.followUpNote)
   return { expectedVersion: positiveVersion(value.expectedVersion), data: next }
