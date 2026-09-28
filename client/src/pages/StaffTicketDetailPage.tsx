@@ -20,6 +20,7 @@ import {
   IconButton,
   TicketBadge,
 } from "../components/ui";
+import ActionsTakenSection from "../components/ActionsTakenSection";
 import { useAuth } from "../auth/AuthContext";
 import type { RequestedPriority, TicketStatus } from "../api/tickets";
 import type { TicketAttachmentMetadata } from "../api/ticket-detail";
@@ -552,6 +553,11 @@ export default function StaffTicketDetailPage() {
             </AppButton>
           </div>
         </section>
+        <ActionsTakenSection
+          ticketNumber={ticketNumber}
+          mode={"staff"}
+          assignees={owners}
+        />
         <section className={"detail-section"}>
           <div className={"detail-section-heading"}>
             <h2>

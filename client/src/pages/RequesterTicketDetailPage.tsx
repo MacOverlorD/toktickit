@@ -14,6 +14,7 @@ import {
 } from '../api/attachments'
 import { AppButton, FeedbackState, IconButton, TicketBadge } from '../components/ui'
 import RequesterTicketCommunication from '../components/RequesterTicketCommunication'
+import ActionsTakenSection from '../components/ActionsTakenSection'
 import { useRequester } from '../requesters/RequesterContext'
 import {
   formatFileSize,
@@ -317,6 +318,8 @@ function TicketDetailContent({
             <DetailField label={'Email'}>{ticket.requester.email}</DetailField>
           </dl>
         </section>
+
+        <ActionsTakenSection ticketNumber={ticket.ticketNumber} mode={'requester'} />
 
         <section className={'detail-section'} aria-labelledby={'attachments-heading'}>
           <div className={'detail-section-heading'}>
