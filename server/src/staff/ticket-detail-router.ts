@@ -32,6 +32,7 @@ const detailSelect = {
   itPriority: true,
   description: true,
   status: true,
+  workCycle: true,
   version: true,
   resolutionIndicatedAt: true,
   requester: { select: { id: true, name: true, email: true } },

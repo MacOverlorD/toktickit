@@ -557,6 +557,8 @@ export default function StaffTicketDetailPage() {
           ticketNumber={ticketNumber}
           mode={"staff"}
           assignees={owners}
+          ticketStatus={detail.status}
+          currentWorkCycle={detail.workCycle}
         />
         <section className={"detail-section"}>
           <div className={"detail-section-heading"}>

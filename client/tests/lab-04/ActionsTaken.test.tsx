@@ -1,6 +1,9 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import ActionsTakenSection from '../../src/components/ActionsTakenSection'
+import ActionsTakenSection, {
+  bangkokInputToInstant,
+  toBangkokInputValue,
+} from '../../src/components/ActionsTakenSection'
 import * as api from '../../src/api/actions-taken'
 
 vi.mock('../../src/api/actions-taken', async (importOriginal) => ({
@@ -62,7 +65,7 @@ describe('Actions Taken Ticket Detail UI', () => {
       { ...base, id: 13, description: 'Newest work', createdBy: { name: 'Mali' }, assignedTo: undefined, version: undefined },
       { ...base, id: 12, description: 'Older work', createdBy: { name: 'Suda' }, assignedTo: undefined, version: undefined },
     ])
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'requester'} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'requester'} ticketStatus={'OPEN'} />)
 
     expect(await screen.findByText('Newest work')).toBeInTheDocument()
     const cards = screen.getAllByRole('article')
@@ -76,7 +79,7 @@ describe('Actions Taken Ticket Detail UI', () => {
 
   it('requires and focuses Follow-up Note exactly when selected', async () => {
     vi.mocked(api.listActionsTaken).mockResolvedValue([])
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} ticketStatus={'OPEN'} currentWorkCycle={1} />)
     await screen.findByText('No Actions Taken yet')
     fireEvent.click(screen.getByRole('button', { name: 'Add Action Taken' }))
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Check router' } })
@@ -103,7 +106,7 @@ describe('Actions Taken Ticket Detail UI', () => {
     vi.mocked(api.createActionTaken)
       .mockRejectedValueOnce(new Error('offline'))
       .mockResolvedValueOnce({ ...base, id: 14, description: 'Preserved draft' })
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} ticketStatus={'OPEN'} currentWorkCycle={1} />)
     await screen.findByText('No Actions Taken yet')
     fireEvent.click(screen.getByRole('button', { name: 'Add Action Taken' }))
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Preserved draft' } })
@@ -121,7 +124,7 @@ describe('Actions Taken Ticket Detail UI', () => {
     vi.mocked(api.listActionsTaken).mockResolvedValue([])
     let finish!: (value: api.ActionTaken) => void
     vi.mocked(api.createActionTaken).mockReturnValue(new Promise((resolve) => { finish = resolve }))
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} ticketStatus={'OPEN'} currentWorkCycle={1} />)
     await screen.findByText('No Actions Taken yet')
     fireEvent.click(screen.getByRole('button', { name: 'Add Action Taken' }))
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'One request only' } })
@@ -137,7 +140,7 @@ describe('Actions Taken Ticket Detail UI', () => {
     vi.mocked(api.completeActionTaken).mockRejectedValueOnce(
       new api.ActionsTakenError('STALE_RESOURCE', 'stale'),
     )
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} ticketStatus={'OPEN'} currentWorkCycle={1} assignees={[
       { id: 9, name: 'Suda', role: 'IT_STAFF' },
       { id: 10, name: 'Mali', role: 'ADMINISTRATOR' },
     ]} />)
@@ -158,7 +161,7 @@ describe('Actions Taken Ticket Detail UI', () => {
 
   it('connects edit, start, and confirmed cancel controls to version-bound API calls', async () => {
     vi.stubGlobal('confirm', vi.fn(() => true))
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]} ticketStatus={'OPEN'} currentWorkCycle={1} />)
     await screen.findByText(base.description)
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
@@ -181,10 +184,72 @@ describe('Actions Taken Ticket Detail UI', () => {
     vi.mocked(api.listActionsTaken)
       .mockRejectedValueOnce(new Error('database hostname leaked'))
       .mockResolvedValueOnce([])
-    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'requester'} />)
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'requester'} ticketStatus={'OPEN'} />)
     expect(await screen.findByText(/failed safely/)).toHaveAttribute('role', 'status')
     expect(screen.queryByText('database hostname leaked')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Retry Actions Taken' }))
     expect(await screen.findByText('No Actions Taken yet')).toBeInTheDocument()
+  })
+
+  it('keeps terminal Tickets and Actions from older work cycles read-only', async () => {
+    const view = render(
+      <ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]}
+        ticketStatus={'RESOLVED'} currentWorkCycle={1} />,
+    )
+    await screen.findByText(base.description)
+    expect(screen.queryByRole('button', { name: 'Add Action Taken' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    expect(screen.getByText(/parent Ticket is resolved/)).toBeInTheDocument()
+
+    view.rerender(
+      <ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]}
+        ticketStatus={'OPEN'} currentWorkCycle={2} />,
+    )
+    expect(screen.getByRole('button', { name: 'Add Action Taken' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    expect(screen.getByText(/historical work cycle/)).toBeInTheDocument()
+  })
+
+  it('resets local form state when the editor kind or Action target changes', async () => {
+    vi.mocked(api.listActionsTaken).mockResolvedValue([
+      { ...base, id: 12, description: 'First Action', result: 'First result' },
+      { ...base, id: 13, description: 'Second Action', result: 'Second result' },
+    ])
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]}
+      ticketStatus={'OPEN'} currentWorkCycle={1} />)
+    const cards = await screen.findAllByRole('article')
+    fireEvent.click(within(cards[0]).getByRole('button', { name: 'Edit' }))
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Unsaved first draft' } })
+    fireEvent.click(within(cards[1]).getByRole('button', { name: 'Complete' }))
+    expect(screen.getByLabelText(/^Result/)).toHaveValue('Second result')
+    expect(screen.queryByDisplayValue('Unsaved first draft')).not.toBeInTheDocument()
+  })
+
+  it('focuses invalid Bangkok action date/time and rejects whitespace-only optional text', async () => {
+    vi.mocked(api.listActionsTaken).mockResolvedValue([])
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} assignees={[]}
+      ticketStatus={'OPEN'} currentWorkCycle={1} />)
+    await screen.findByText('No Actions Taken yet')
+    fireEvent.click(screen.getByRole('button', { name: 'Add Action Taken' }))
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Validate fields' } })
+    const actionAt = screen.getByLabelText(/Action date\/time/)
+    fireEvent.change(actionAt, { target: { value: '2099-01-01T12:00' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create Action' }))
+    await waitFor(() => expect(actionAt).toHaveFocus())
+    expect(actionAt).toHaveAttribute('aria-invalid', 'true')
+
+    fireEvent.change(actionAt, { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText(/^Result/), { target: { value: '   ' } })
+    fireEvent.change(screen.getByLabelText(/Evidence notes/), { target: { value: '   ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create Action' }))
+    await waitFor(() => expect(screen.getByLabelText(/^Result/)).toHaveFocus())
+    expect(screen.getByText('Result cannot contain only whitespace.')).toBeInTheDocument()
+    expect(screen.getByText('Evidence notes cannot contain only whitespace.')).toBeInTheDocument()
+    expect(api.createActionTaken).not.toHaveBeenCalled()
+  })
+
+  it('round-trips datetime-local values explicitly in Asia/Bangkok', () => {
+    expect(toBangkokInputValue('2026-09-28T00:15:00.000Z')).toBe('2026-09-28T07:15')
+    expect(bangkokInputToInstant('2026-09-28T07:15')).toBe('2026-09-28T00:15:00.000Z')
   })
 })

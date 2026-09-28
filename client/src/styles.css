@@ -2004,6 +2004,18 @@ a[aria-disabled='true'] {
   border-top: 1px solid var(--color-border);
 }
 
+.action-readonly-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-readonly);
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
 .action-assignment-control {
   display: grid;
   grid-template-columns: minmax(10rem, 1fr) auto;

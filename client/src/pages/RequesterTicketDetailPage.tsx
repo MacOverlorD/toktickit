@@ -319,7 +319,11 @@ function TicketDetailContent({
           </dl>
         </section>
 
-        <ActionsTakenSection ticketNumber={ticket.ticketNumber} mode={'requester'} />
+        <ActionsTakenSection
+          ticketNumber={ticket.ticketNumber}
+          mode={'requester'}
+          ticketStatus={ticket.status}
+        />
 
         <section className={'detail-section'} aria-labelledby={'attachments-heading'}>
           <div className={'detail-section-heading'}>

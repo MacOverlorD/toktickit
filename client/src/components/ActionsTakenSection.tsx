@@ -12,6 +12,7 @@ import {
   type ActionTaken,
 } from '../api/actions-taken'
 import type { SafeOwner } from '../api/ticket-workflow'
+import type { TicketStatus } from '../api/tickets'
 import { AppButton } from './ui'
 
 type Mode = 'staff' | 'requester'
@@ -19,9 +20,14 @@ type Editor = { kind: 'create' } | { kind: 'edit'; action: ActionTaken } | { kin
 
 const count = (value: string) => Array.from(value).length
 const editable = (action: ActionTaken) => ['PLANNED', 'IN_PROGRESS'].includes(action.status)
+const activeTicketStatuses = new Set<TicketStatus>(['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'REOPENED'])
 const formatDate = (value: string | null | undefined) =>
   value
-    ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+    ? new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Asia/Bangkok',
+      }).format(new Date(value))
     : 'Not recorded'
 
 function newKey() {
@@ -42,15 +48,23 @@ function friendlyError(error: unknown) {
   return error.message
 }
 
-function toLocalDateTime(value: string | null) {
+export function toBangkokInputValue(value: string | null) {
   if (!value) return ''
-  const date = new Date(value)
-  const offset = date.getTimezoneOffset() * 60_000
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(value))
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? ''
+  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}`
 }
 
-function toInstant(value: string) {
-  return value ? new Date(value).toISOString() : null
+export function bangkokInputToInstant(value: string) {
+  return value ? new Date(`${value}:00+07:00`).toISOString() : null
 }
 
 interface ActionFormProps {
@@ -68,19 +82,21 @@ function ActionForm({ editor, assignees, busy, serverError, fieldErrors, onCance
   const completing = editor.kind === 'complete'
   const [description, setDescription] = useState(action?.description ?? '')
   const [result, setResult] = useState(action?.result ?? '')
-  const [actionAt, setActionAt] = useState(toLocalDateTime(action?.actionAt ?? null))
+  const [actionAt, setActionAt] = useState(toBangkokInputValue(action?.actionAt ?? null))
   const [assignedToUserId, setAssignedToUserId] = useState(action?.assignedTo?.id ? String(action.assignedTo.id) : '')
   const [followUpRequired, setFollowUpRequired] = useState(action?.followUpRequired ?? false)
   const [followUpNote, setFollowUpNote] = useState(action?.followUpNote ?? '')
   const [attachmentNotes, setAttachmentNotes] = useState(action?.attachmentNotes ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const descriptionRef = useRef<HTMLTextAreaElement>(null)
+  const actionAtRef = useRef<HTMLInputElement>(null)
   const resultRef = useRef<HTMLTextAreaElement>(null)
   const followUpRef = useRef<HTMLTextAreaElement>(null)
   const attachmentRef = useRef<HTMLTextAreaElement>(null)
   const assigneeRef = useRef<HTMLSelectElement>(null)
   const refs: Record<string, React.RefObject<HTMLElement | null>> = {
     description: descriptionRef,
+    actionAt: actionAtRef,
     result: resultRef,
     followUpNote: followUpRef,
     attachmentNotes: attachmentRef,
@@ -96,13 +112,16 @@ function ActionForm({ editor, assignees, busy, serverError, fieldErrors, onCance
     const next: Record<string, string> = {}
     if (!completing && (!description.trim() || count(description.trim()) > 2000))
       next.description = 'Description must contain 1 to 2000 characters.'
-    if (result && count(result.trim()) > 4000) next.result = 'Result must contain at most 4000 characters.'
+    if (result.length > 0 && !result.trim()) next.result = 'Result cannot contain only whitespace.'
+    else if (result && count(result.trim()) > 4000) next.result = 'Result must contain at most 4000 characters.'
     if (completing && !result.trim()) next.result = 'Result is required to complete an Action.'
     if (followUpRequired && (!followUpNote.trim() || count(followUpNote.trim()) > 1000))
       next.followUpNote = 'Follow-up Note is required and must contain 1 to 1000 characters.'
-    if (attachmentNotes && count(attachmentNotes.trim()) > 1000)
+    if (attachmentNotes.length > 0 && !attachmentNotes.trim())
+      next.attachmentNotes = 'Evidence notes cannot contain only whitespace.'
+    else if (attachmentNotes && count(attachmentNotes.trim()) > 1000)
       next.attachmentNotes = 'Evidence notes must contain at most 1000 characters.'
-    if (actionAt && new Date(actionAt).getTime() > Date.now() + 5 * 60_000)
+    if (actionAt && new Date(`${actionAt}:00+07:00`).getTime() > Date.now() + 5 * 60_000)
       next.actionAt = 'Action date/time cannot be more than five minutes in the future.'
     setErrors(next)
     const first = Object.keys(next)[0]
@@ -114,12 +133,12 @@ function ActionForm({ editor, assignees, busy, serverError, fieldErrors, onCance
     if (!validate()) return
     await onSubmit({
       description: description.trim(),
-      result: result.trim() || null,
-      actionAt: toInstant(actionAt),
+      result: result === '' ? null : result.trim(),
+      actionAt: bangkokInputToInstant(actionAt),
       assignedToUserId: assignedToUserId ? Number(assignedToUserId) : null,
       followUpRequired,
       followUpNote: followUpRequired ? followUpNote.trim() : null,
-      attachmentNotes: attachmentNotes.trim() || null,
+      attachmentNotes: attachmentNotes === '' ? null : attachmentNotes.trim(),
     } as ActionDraft & { result: string })
   }
 
@@ -140,7 +159,7 @@ function ActionForm({ editor, assignees, busy, serverError, fieldErrors, onCance
       <div className={'action-form-grid'}>
         <div>
           <label className={'field-label'} htmlFor={'action-at'}>Action date/time <span>(optional)</span></label>
-          <input id={'action-at'} className={'text-field'} type={'datetime-local'} value={actionAt}
+          <input id={'action-at'} ref={actionAtRef} className={'text-field'} type={'datetime-local'} value={actionAt}
             aria-invalid={!!errorFor('actionAt')} onChange={(event) => setActionAt(event.target.value)} disabled={busy} />
           {errorFor('actionAt') && <p className={'field-error'} role={'alert'}>{errorFor('actionAt')}</p>}
         </div>
@@ -197,9 +216,17 @@ interface Props {
   ticketNumber: string
   mode: Mode
   assignees?: SafeOwner[]
+  ticketStatus: TicketStatus
+  currentWorkCycle?: number
 }
 
-export default function ActionsTakenSection({ ticketNumber, mode, assignees = [] }: Props) {
+export default function ActionsTakenSection({
+  ticketNumber,
+  mode,
+  assignees = [],
+  ticketStatus,
+  currentWorkCycle,
+}: Props) {
   const [items, setItems] = useState<ActionTaken[]>([])
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [editor, setEditor] = useState<Editor | null>(null)
@@ -210,6 +237,7 @@ export default function ActionsTakenSection({ ticketNumber, mode, assignees = []
   const [success, setSuccess] = useState('')
   const [idempotencyKey, setIdempotencyKey] = useState(newKey)
   const [assignments, setAssignments] = useState<Record<number, string>>({})
+  const ticketIsEditable = mode === 'staff' && activeTicketStatuses.has(ticketStatus)
 
   const load = useCallback(async () => {
     setState('loading')
@@ -295,7 +323,7 @@ export default function ActionsTakenSection({ ticketNumber, mode, assignees = []
       <p className={'action-visibility-note'}>{mode === 'requester'
         ? 'Work updates shared with you. Assignment, internal control data, and cancellation audit details are private.'
         : 'Formal work history. Public Comments and Internal Notes remain separate communication channels.'}</p>
-      {mode === 'staff' && !editor && state === 'ready' && (
+      {ticketIsEditable && !editor && state === 'ready' && (
         <AppButton onClick={() => { setError(''); setFieldErrors({}); setEditor({ kind: 'create' }) }}><Plus aria-hidden={'true'} /> Add Action Taken</AppButton>
       )}
       {success && <p className={'attachment-action-success'} role={'status'}><CheckCircle2 aria-hidden={'true'} /> {success}</p>}
@@ -303,7 +331,8 @@ export default function ActionsTakenSection({ ticketNumber, mode, assignees = []
       {(error.includes('Reload latest') || error.includes('read-only')) && (
         <AppButton variant={'secondary'} disabled={busy} onClick={() => { setEditor(null); void load() }}><RotateCw aria-hidden={'true'} /> Reload latest</AppButton>
       )}
-      {editor && <ActionForm editor={editor} assignees={assignees} busy={busy} serverError={error}
+      {editor && <ActionForm key={`${editor.kind}-${editor.kind === 'create' ? 'new' : editor.action.id}`}
+        editor={editor} assignees={assignees} busy={busy} serverError={error}
         fieldErrors={fieldErrors} onCancel={() => { setEditor(null); setError(''); setFieldErrors({}) }} onSubmit={submit} />}
       {state === 'loading' && <p className={'actions-loading'} role={'status'}>Loading Actions Taken...</p>}
       {state === 'error' && (
@@ -328,7 +357,16 @@ export default function ActionsTakenSection({ ticketNumber, mode, assignees = []
                   <div><dt>Evidence notes (shared text)</dt><dd>{action.attachmentNotes || 'None'}</dd></div>
                   {mode === 'staff' && <><div><dt>Assigned to</dt><dd>{action.assignedTo?.name ?? 'Unassigned'}</dd></div><div><dt>Work cycle / version</dt><dd>{action.ticketWorkCycle} / {action.version}</dd></div></>}
                 </dl>
-                {mode === 'staff' && editable(action) && (
+                {mode === 'staff' && !(ticketIsEditable && editable(action) && action.ticketWorkCycle === currentWorkCycle) && (
+                  <p className={'action-readonly-note'}>
+                    <LockKeyhole aria-hidden={'true'} /> Read-only — {!ticketIsEditable
+                      ? `parent Ticket is ${ticketStatus.replaceAll('_', ' ').toLowerCase()}`
+                      : action.ticketWorkCycle !== currentWorkCycle
+                        ? 'historical work cycle'
+                        : 'terminal Action'}
+                  </p>
+                )}
+                {ticketIsEditable && editable(action) && action.ticketWorkCycle === currentWorkCycle && (
                   <div className={'action-controls'}>
                     <div className={'action-assignment-control'}>
                       <label className={'field-label'} htmlFor={`action-assignee-${action.id}`}>Reassign Action #{action.id}</label>

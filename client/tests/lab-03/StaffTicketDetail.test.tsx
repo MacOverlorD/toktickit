@@ -46,6 +46,7 @@ const detail: workflow.StaffTicketDetail = {
   requestedPriority: "HIGH",
   itPriority: "MEDIUM",
   status: "OPEN",
+  workCycle: 1,
   owner: null,
   resolutionIndicatedAt: null,
   resolutionIndicatedBy: null,
