@@ -64,20 +64,46 @@ describe('Lab 4 Actions Taken data foundation', () => {
       for (const migration of migrationFiles.slice(0, 5)) executeMigration(databaseUrl, migration)
       await client.$executeRawUnsafe(`INSERT INTO "Category" ("id","name","displayOrder") VALUES (1,'Hardware',1)`)
       await client.$executeRawUnsafe(`INSERT INTO "RelatedSystem" ("id","name","displayOrder") VALUES (1,'Laptop',1)`)
-      await client.$executeRawUnsafe(`INSERT INTO "User" ("id","name","email","role","isActive") VALUES (1,'Legacy User','legacy@example.test','REQUESTER',true)`)
-      await client.$executeRawUnsafe(`INSERT INTO "Ticket" ("id","ticketNumber","submissionKey","requesterId","categoryId","relatedSystemId","summary","requestedPriority","itPriority","description","status") VALUES (1,'TKT-20260924-ABCDEF01','50000000-0000-4000-8000-000000000001',1,1,1,'Preserve me','HIGH','HIGH','Existing Lab 3 ticket','RESOLVED')`)
+      await client.$executeRawUnsafe(`INSERT INTO "User" ("id","name","email","role","isActive") VALUES (1,'Legacy Requester','requester@example.test','REQUESTER',true),(2,'Legacy Staff','staff@example.test','IT_STAFF',true)`)
+      await client.$executeRawUnsafe(`INSERT INTO "Ticket" ("id","ticketNumber","submissionKey","requesterId","ownerId","categoryId","relatedSystemId","summary","requestedPriority","itPriority","description","status","resolutionIndicatedAt","resolutionIndicatedById") VALUES (1,'TKT-20260924-ABCDEF01','50000000-0000-4000-8000-000000000001',1,2,1,1,'Preserve me','HIGH','HIGH','Existing Lab 3 ticket','RESOLVED',CURRENT_TIMESTAMP,1)`)
+      await client.$executeRawUnsafe(`INSERT INTO "Attachment" ("id","ticketId","originalName","storedName","mimeType","sizeBytes","uploadedByUserId","removedAt","removalReason","removedByUserId") VALUES (1,1,'legacy.txt','legacy-stored.txt','text/plain',128,1,CURRENT_TIMESTAMP,'Superseded',2)`)
       await client.$executeRawUnsafe(`INSERT INTO "PublicComment" ("ticketId","authorId","content") VALUES (1,1,'Preserve this comment')`)
+      await client.$executeRawUnsafe(`INSERT INTO "InternalNote" ("ticketId","authorId","content") VALUES (1,2,'Preserve this private note')`)
+      await client.$executeRawUnsafe(`INSERT INTO "Session" ("tokenHash","userId","csrfToken","expiresAt") VALUES ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',1,'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',CURRENT_TIMESTAMP + INTERVAL '1 hour')`)
+
+      const readLegacyState = async () => {
+        const [counts, ticketRelations, attachmentRelations, commentRelations, noteRelations, sessionRelations] = await Promise.all([
+          client.$queryRawUnsafe<Array<Record<string, number>>>(`SELECT
+            (SELECT COUNT(*)::int FROM "Category") AS categories,
+            (SELECT COUNT(*)::int FROM "RelatedSystem") AS systems,
+            (SELECT COUNT(*)::int FROM "User") AS users,
+            (SELECT COUNT(*)::int FROM "Ticket") AS tickets,
+            (SELECT COUNT(*)::int FROM "Attachment") AS attachments,
+            (SELECT COUNT(*)::int FROM "PublicComment") AS comments,
+            (SELECT COUNT(*)::int FROM "InternalNote") AS notes,
+            (SELECT COUNT(*)::int FROM "Session") AS sessions`),
+          client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT "id","requesterId","ownerId","categoryId","relatedSystemId","resolutionIndicatedById","status","itPriority" FROM "Ticket" ORDER BY "id"`),
+          client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT "id","ticketId","uploadedByUserId","removedByUserId" FROM "Attachment" ORDER BY "id"`),
+          client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT "ticketId","authorId" FROM "PublicComment" ORDER BY "id"`),
+          client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT "ticketId","authorId" FROM "InternalNote" ORDER BY "id"`),
+          client.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT "tokenHash","userId" FROM "Session" ORDER BY "tokenHash"`),
+        ])
+        return { counts: counts[0], ticketRelations, attachmentRelations, commentRelations, noteRelations, sessionRelations }
+      }
+
+      const before = await readLegacyState()
 
       executeMigration(databaseUrl, migrationFiles[5]!)
 
-      const [tickets, actions, comments] = await Promise.all([
+      const [after, tickets, actions] = await Promise.all([
+        readLegacyState(),
         client.$queryRawUnsafe<Array<Record<string, unknown>>>('SELECT "id","requesterId","status","workCycle","resolvedAt" FROM "Ticket"'),
         client.$queryRawUnsafe<Array<{ count: bigint }>>('SELECT COUNT(*)::bigint AS count FROM "ActionTaken"'),
-        client.$queryRawUnsafe<Array<{ count: bigint }>>('SELECT COUNT(*)::bigint AS count FROM "PublicComment"'),
       ])
+      expect(before.counts).toEqual({ categories: 1, systems: 1, users: 2, tickets: 1, attachments: 1, comments: 1, notes: 1, sessions: 1 })
+      expect(after).toEqual(before)
       expect(tickets).toEqual([expect.objectContaining({ id: 1, requesterId: 1, status: 'RESOLVED', workCycle: 1, resolvedAt: null })])
       expect(actions[0]?.count).toBe(0n)
-      expect(comments[0]?.count).toBe(1n)
     })
   }, 60_000)
 
@@ -109,17 +135,21 @@ describe('Lab 4 Actions Taken data foundation', () => {
   it('rolls back all Lab 4 structural changes when its transaction fails', async () => {
     await withTemporarySchema('lab4_atomic', async (client, databaseUrl, schema) => {
       for (const migration of migrationFiles.slice(0, 5)) executeMigration(databaseUrl, migration)
-      await client.$executeRawUnsafe(`CREATE TYPE "ActionStatus" AS ENUM ('BLOCKER')`)
-      expect(() => executeMigration(databaseUrl, migrationFiles[5]!)).toThrow(/ActionStatus.*already exists/s)
+      await client.$executeRawUnsafe(`CREATE INDEX "Ticket_status_ownerId_updatedAt_id_idx" ON "Ticket"("id")`)
+      expect(() => executeMigration(databaseUrl, migrationFiles[5]!)).toThrow(/Ticket_status_ownerId_updatedAt_id_idx.*already exists/s)
 
-      const [tables, columns, indexes] = await Promise.all([
+      const [types, tables, columns, createdIndexes, preexistingIndexes] = await Promise.all([
+        client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='${schema}' AND t.typname='ActionStatus'`),
         client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM information_schema.tables WHERE table_schema='${schema}' AND table_name='ActionTaken'`),
         client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM information_schema.columns WHERE table_schema='${schema}' AND table_name='Ticket' AND column_name IN ('workCycle','resolvedAt')`),
-        client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM pg_indexes WHERE schemaname='${schema}' AND indexname LIKE 'ActionTaken_%'`),
+        client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM pg_indexes WHERE schemaname='${schema}' AND indexname IN ('Ticket_requesterId_status_resolvedAt_id_idx')`),
+        client.$queryRawUnsafe<Array<{ count: bigint }>>(`SELECT COUNT(*)::bigint AS count FROM pg_indexes WHERE schemaname='${schema}' AND indexname='Ticket_status_ownerId_updatedAt_id_idx'`),
       ])
+      expect(types[0]?.count).toBe(0n)
       expect(tables[0]?.count).toBe(0n)
       expect(columns[0]?.count).toBe(0n)
-      expect(indexes[0]?.count).toBe(0n)
+      expect(createdIndexes[0]?.count).toBe(0n)
+      expect(preexistingIndexes[0]?.count).toBe(1n)
     })
   }, 60_000)
 

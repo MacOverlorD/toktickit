@@ -23,9 +23,9 @@ Scope: Actions Taken data model, transactional migration, repeatable seed data, 
 | `npm run build` | Passed |
 | `npx vitest run tests/lab-04/migration.test.ts` | 1 file passed; 4 tests passed |
 | `npx vitest run tests/lab-03/auth.api.test.ts` | 1 file passed; 8 tests passed |
-| `npm test` | 25 files passed; 148 tests passed; 0 failed; 0 skipped; 299.11 seconds |
+| `npm test` | 25 files passed; 148 tests passed; 0 failed; 0 skipped; 250.15 seconds on the review-fix commit |
 
-The Lab 4 migration suite verifies populated Lab 3 preservation, no invented historical Actions or resolution timestamps, repeatable seeds without overwriting a user-edited fixture, zero/one/many and reopened-cycle fixtures, complete transactional rollback after a forced failure, contracted indexes, checks, and restrictive relationships. The full server suite supplies the Labs 1-3 regression evidence.
+The Lab 4 migration suite verifies populated Lab 3 preservation across Ticket workflow/ownership, Attachments, Public Comments, Internal Notes, and Sessions; no invented historical Actions or resolution timestamps; repeatable seeds without overwriting a user-edited fixture; zero/one/many and reopened-cycle fixtures; complete transactional rollback after a deliberately late DDL failure; contracted indexes, checks, and restrictive relationships. The full server suite supplies the Labs 1-3 regression evidence.
 
 ## Recovery result
 
