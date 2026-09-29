@@ -107,7 +107,7 @@ export default async function globalSetup() {
   }
   await prisma.ticket.upsert({
     where: { ticketNumber: E2E_WORKFLOW_TICKET },
-    update: { requesterId: workflowRequester.id, ownerId: null, categoryId: category.id, relatedSystemId: relatedSystem.id, summary: '[E2E] Shared workflow ticket', requestedPriority: 'HIGH', itPriority: 'MEDIUM', description: '[E2E] Exercises staff workflow and communication.', status: 'OPEN', resolutionIndicatedAt: null, resolutionIndicatedById: null, version: { increment: 1 } },
+    update: { requesterId: workflowRequester.id, ownerId: null, categoryId: category.id, relatedSystemId: relatedSystem.id, summary: '[E2E] Shared workflow ticket', requestedPriority: 'HIGH', itPriority: 'MEDIUM', description: '[E2E] Exercises staff workflow and communication.', status: 'OPEN', workCycle: 1, resolvedAt: null, resolutionIndicatedAt: null, resolutionIndicatedById: null, version: { increment: 1 } },
     create: { ticketNumber: E2E_WORKFLOW_TICKET, submissionKey: randomUUID(), requesterId: workflowRequester.id, categoryId: category.id, relatedSystemId: relatedSystem.id, summary: '[E2E] Shared workflow ticket', requestedPriority: 'HIGH', itPriority: 'MEDIUM', description: '[E2E] Exercises staff workflow and communication.', status: 'OPEN' },
   })
 

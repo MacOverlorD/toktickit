@@ -88,6 +88,8 @@ function message(error: unknown) {
     return "Choose an active IT Staff or Administrator owner.";
   if (error.code === "OWNER_REQUIRED")
     return "Assign an eligible owner before this action.";
+  if (error.code === "RESOLUTION_ACTION_REQUIRED")
+    return "Complete an Action Taken in the current work cycle before resolving this ticket.";
   if (error.code === "INVALID_TRANSITION")
     return "This status change is no longer available. Reload latest.";
   return error.message;
@@ -454,6 +456,10 @@ export default function StaffTicketDetailPage() {
                 ? `${detail.resolutionIndicatedBy?.name ?? "Requester"} at ${date(detail.resolutionIndicatedAt)}`
                 : "Not indicated"}
             </Field>
+            <Field label={"Work cycle"}>{detail.workCycle}</Field>
+            <Field label={"Resolved"}>
+              {detail.resolvedAt ? date(detail.resolvedAt) : "Not resolved"}
+            </Field>
           </dl>
         </section>
         <section className={"detail-section staff-operation-grid"}>
@@ -519,6 +525,11 @@ export default function StaffTicketDetailPage() {
                 </option>
               ))}
             </select>
+            {status === "RESOLVED" && (
+              <p className={"field-help"}>
+                Requires a completed Action Taken from work cycle {detail.workCycle}.
+              </p>
+            )}
             <AppButton
               busy={busy === "priority"}
               onClick={() => void update("priority", { itPriority: priority })}
