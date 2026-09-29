@@ -30,6 +30,7 @@ export interface StaffTicketDetail {
   requestedPriority: RequestedPriority;
   itPriority: RequestedPriority;
   status: TicketStatus;
+  workCycle: number;
   owner: SafeOwner | null;
   resolutionIndicatedAt: string | null;
   resolutionIndicatedBy: { id: number; name: string } | null;

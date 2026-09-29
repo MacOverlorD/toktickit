@@ -101,6 +101,7 @@ export default async function globalSetup() {
   const relatedSystem = await prisma.relatedSystem.findFirstOrThrow({ where: { name: 'Corporate Laptop' } })
   const previousWorkflowTicket = await prisma.ticket.findUnique({ where: { ticketNumber: E2E_WORKFLOW_TICKET }, select: { id: true } })
   if (previousWorkflowTicket) {
+    await prisma.actionTaken.deleteMany({ where: { ticketId: previousWorkflowTicket.id } })
     await prisma.publicComment.deleteMany({ where: { ticketId: previousWorkflowTicket.id } })
     await prisma.internalNote.deleteMany({ where: { ticketId: previousWorkflowTicket.id } })
   }
