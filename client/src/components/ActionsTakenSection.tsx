@@ -1,5 +1,5 @@
 import { CheckCircle2, ClipboardList, LockKeyhole, Plus, RotateCw } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type Ref } from 'react'
 import {
   ActionsTakenError,
   assignActionTaken,
@@ -218,6 +218,7 @@ interface Props {
   assignees?: SafeOwner[]
   ticketStatus: TicketStatus
   currentWorkCycle?: number
+  sectionRef?: Ref<HTMLElement>
 }
 
 export default function ActionsTakenSection({
@@ -226,6 +227,7 @@ export default function ActionsTakenSection({
   assignees = [],
   ticketStatus,
   currentWorkCycle,
+  sectionRef,
 }: Props) {
   const [items, setItems] = useState<ActionTaken[]>([])
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -315,7 +317,12 @@ export default function ActionsTakenSection({
   }
 
   return (
-    <section className={'detail-section actions-taken-section'} aria-labelledby={'actions-taken-heading'}>
+    <section
+      ref={sectionRef}
+      className={'detail-section actions-taken-section'}
+      aria-labelledby={'actions-taken-heading'}
+      tabIndex={-1}
+    >
       <div className={'detail-section-heading'}>
         <h2 id={'actions-taken-heading'}><ClipboardList aria-hidden={'true'} /> Actions Taken</h2>
         <span>{mode === 'requester' ? <><LockKeyhole aria-hidden={'true'} /> Shared read-only history</> : `${items.length} recorded`}</span>

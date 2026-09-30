@@ -1,7 +1,12 @@
 import { constants } from "node:fs";
 import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { Prisma, RequestedPriority, TicketStatus } from "@prisma/client";
+import {
+  Prisma as PrismaNamespace,
+  type Prisma,
+  type RequestedPriority,
+  type TicketStatus,
+} from "@prisma/client";
 import { Router } from "express";
 import { authSession, requireRole } from "../auth/auth-middleware.js";
 import { ApiError } from "../errors/api-error.js";
@@ -33,6 +38,7 @@ const detailSelect = {
   description: true,
   status: true,
   workCycle: true,
+  resolvedAt: true,
   version: true,
   resolutionIndicatedAt: true,
   requester: { select: { id: true, name: true, email: true } },
@@ -49,6 +55,7 @@ function detailDto(ticket: any) {
     createdAt: undefined,
     createdAtValue: undefined,
     updatedAt: ticket.updatedAt.toISOString(),
+    resolvedAt: ticket.resolvedAt?.toISOString() ?? null,
     resolutionIndicatedAt: ticket.resolutionIndicatedAt?.toISOString() ?? null,
   };
 }
@@ -58,6 +65,8 @@ function operationDto(ticket: any) {
     owner: ticket.owner,
     itPriority: ticket.itPriority,
     status: ticket.status,
+    workCycle: ticket.workCycle,
+    resolvedAt: ticket.resolvedAt?.toISOString() ?? null,
     version: ticket.version,
     updatedAt: ticket.updatedAt.toISOString(),
     resolutionIndicatedAt: ticket.resolutionIndicatedAt?.toISOString() ?? null,
@@ -73,8 +82,13 @@ async function serializable<T>(
         isolationLevel: "Serializable",
       });
     } catch (error: any) {
-      if (error?.code !== "P2034" || attempt === 2)
-        throw error?.code === "P2034"
+      const databaseCode = error?.meta?.code;
+      const conflict =
+        error?.code === "P2034" ||
+        (error?.code === "P2010" &&
+          (databaseCode === "40001" || databaseCode === "40P01"));
+      if (!conflict || attempt === 2)
+        throw conflict
           ? new ApiError(
               409,
               "CONCURRENT_UPDATE",
@@ -101,17 +115,22 @@ async function mutate(
   const actorId = authSession(response).user.id;
   return serializable(async (transaction) => {
     await requireOperationalActor(transaction, actorId);
-    const ticket = await transaction.ticket.findUnique({
-      where: { ticketNumber: number },
+    const locked = await transaction.$queryRaw<Array<{ id: number }>>(
+      PrismaNamespace.sql`SELECT "id" FROM "Ticket" WHERE "ticketNumber" = ${number} FOR UPDATE`,
+    );
+    if (!locked[0]) throw notFound();
+    const ticket = await transaction.ticket.findUniqueOrThrow({
+      where: { id: locked[0].id },
       select: {
         id: true,
         ownerId: true,
         status: true,
         itPriority: true,
+        workCycle: true,
+        resolvedAt: true,
         version: true,
       },
     });
-    if (!ticket) throw notFound();
     const body = requireExactBody(request.body, allowed);
     const expectedVersion = positiveVersion(body.expectedVersion);
     if (
@@ -228,6 +247,8 @@ async function mutate(
               owner: { select: ownerSelect },
               itPriority: true,
               status: true,
+              workCycle: true,
+              resolvedAt: true,
               version: true,
               updatedAt: true,
               resolutionIndicatedAt: true,
@@ -246,6 +267,8 @@ async function mutate(
             owner: { select: ownerSelect },
             itPriority: true,
             status: true,
+            workCycle: true,
+            resolvedAt: true,
             version: true,
             updatedAt: true,
             resolutionIndicatedAt: true,
@@ -289,12 +312,40 @@ async function mutate(
           "This status requires an eligible owner.",
         );
     }
+    if (status === "RESOLVED") {
+      const qualifying = await transaction.$queryRaw<Array<{ id: number }>>(
+        PrismaNamespace.sql`
+          SELECT "id"
+          FROM "ActionTaken"
+          WHERE "ticketId" = ${ticket.id}
+            AND "ticketWorkCycle" = ${ticket.workCycle}
+            AND "status" = 'COMPLETED'::"ActionStatus"
+            AND "result" IS NOT NULL
+            AND LENGTH(BTRIM("result")) > 0
+            AND "performedById" IS NOT NULL
+            AND "completedAt" IS NOT NULL
+          ORDER BY "completedAt" DESC, "id" DESC
+          LIMIT 1
+        `,
+      );
+      if (!qualifying[0])
+        throw new ApiError(
+          409,
+          "RESOLUTION_ACTION_REQUIRED",
+          "Complete an Action Taken in the current work cycle before resolving this ticket.",
+        );
+    }
+    const now = new Date();
     return operationDto(
       await transaction.ticket.update({
         where: { id: ticket.id },
         data: {
           status,
           version: { increment: 1 },
+          ...(status === "RESOLVED" ? { resolvedAt: now } : {}),
+          ...(status === "REOPENED"
+            ? { workCycle: { increment: 1 }, resolvedAt: null }
+            : {}),
           ...(["REOPENED", "WAITING_FOR_REQUESTER"].includes(status)
             ? { resolutionIndicatedAt: null, resolutionIndicatedById: null }
             : {}),
@@ -304,6 +355,8 @@ async function mutate(
           owner: { select: ownerSelect },
           itPriority: true,
           status: true,
+          workCycle: true,
+          resolvedAt: true,
           version: true,
           updatedAt: true,
           resolutionIndicatedAt: true,
