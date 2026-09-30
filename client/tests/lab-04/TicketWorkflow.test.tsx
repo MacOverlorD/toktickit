@@ -77,6 +77,19 @@ describe("Lab 4 final Ticket workflow UI", () => {
     expect(options).not.toContain("Reopened");
   });
 
+  it("hides owner-required transitions when the current owner is no longer eligible", async () => {
+    vi.mocked(workflow.getStaffTicketDetail).mockResolvedValue({
+      ...detail,
+      status: "OPEN",
+    });
+    vi.mocked(workflow.getOwners).mockResolvedValue([]);
+    render(<App initialAuth={staff} />);
+    const select = await screen.findByLabelText("Next Status");
+    expect(
+      within(select).getAllByRole("option").map((item) => item.textContent),
+    ).toEqual(["Cancelled"]);
+  });
+
   it("explains a backend resolution-gate rejection and preserves the current summary", async () => {
     vi.mocked(workflow.updateOperation).mockRejectedValueOnce(
       new workflow.WorkflowError(
@@ -90,6 +103,10 @@ describe("Lab 4 final Ticket workflow UI", () => {
     expect(
       screen.getByText("Requires a completed Action Taken from work cycle 1."),
     ).toBeInTheDocument();
+    expect(select).toHaveAttribute("aria-describedby", "resolution-status-help");
+    expect(select.parentElement).toContainElement(
+      screen.getByText("Requires a completed Action Taken from work cycle 1."),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Change Status" }));
     expect(window.confirm).toHaveBeenCalled();
     expect(
@@ -98,7 +115,31 @@ describe("Lab 4 final Ticket workflow UI", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("In Progress")).toBeInTheDocument();
-    await waitFor(() => expect(select).toHaveFocus());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("region", { name: "Actions Taken" }),
+      ).toHaveFocus(),
+    );
+  });
+
+  it("treats an exhausted concurrent transaction as a reloadable conflict", async () => {
+    vi.mocked(workflow.updateOperation).mockRejectedValueOnce(
+      new workflow.WorkflowError(
+        "CONCURRENT_UPDATE",
+        "The ticket changed concurrently. Try again.",
+      ),
+    );
+    render(<App initialAuth={staff} />);
+    await screen.findByLabelText("Next Status");
+    fireEvent.click(screen.getByRole("button", { name: "Change Status" }));
+    expect(
+      await screen.findByText(
+        "This ticket changed. Reload latest before trying again.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reload latest" }),
+    ).toBeInTheDocument();
   });
 
   it("refreshes status, version, work cycle, and resolved summary after reopening", async () => {

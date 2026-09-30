@@ -177,6 +177,10 @@ describe("Staff Ticket Detail", () => {
     );
   });
   it("focuses the operation control rejected by the server", async () => {
+    vi.mocked(workflow.getStaffTicketDetail).mockResolvedValueOnce({
+      ...detail,
+      owner: { id: 9, name: "Suda", role: "IT_STAFF" },
+    });
     vi.mocked(workflow.updateOperation).mockRejectedValueOnce(
       new workflow.WorkflowError("OWNER_REQUIRED", "owner required"),
     );

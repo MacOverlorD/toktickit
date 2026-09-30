@@ -54,6 +54,23 @@ const confirmed = new Set<TicketStatus>([
   "CANCELLED",
   "REOPENED",
 ]);
+const ownerRequiredTransitions = new Set<TicketStatus>([
+  "IN_PROGRESS",
+  "WAITING_FOR_REQUESTER",
+  "RESOLVED",
+  "CLOSED",
+]);
+function permittedTransitions(
+  current: TicketStatus,
+  owner: SafeOwner | null,
+  eligibleOwners: SafeOwner[],
+) {
+  const hasEligibleOwner =
+    owner !== null && eligibleOwners.some(({ id }) => id === owner.id);
+  return transitions[current].filter(
+    (target) => !ownerRequiredTransitions.has(target) || hasEligibleOwner,
+  );
+}
 const priorities: RequestedPriority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 const label = (value: string) =>
   value
@@ -82,7 +99,10 @@ function Field({
 }
 function message(error: unknown) {
   if (!(error instanceof WorkflowError)) return "The action failed. Try again.";
-  if (error.code === "STALE_RESOURCE")
+  if (
+    error.code === "STALE_RESOURCE" ||
+    error.code === "CONCURRENT_UPDATE"
+  )
     return "This ticket changed. Reload latest before trying again.";
   if (error.code === "INELIGIBLE_OWNER")
     return "Choose an active IT Staff or Administrator owner.";
@@ -221,6 +241,7 @@ export default function StaffTicketDetailPage() {
   const ownerRef = useRef<HTMLSelectElement>(null);
   const priorityRef = useRef<HTMLSelectElement>(null);
   const statusRef = useRef<HTMLSelectElement>(null);
+  const actionsSectionRef = useRef<HTMLElement>(null);
   const operationRefs = {
     owner: ownerRef,
     priority: priorityRef,
@@ -250,7 +271,9 @@ export default function StaffTicketDetailPage() {
       setNotes(privateItems);
       setOwnerId(next.owner ? String(next.owner.id) : "");
       setPriority(next.itPriority);
-      setStatus(transitions[next.status][0] ?? next.status);
+      setStatus(
+        permittedTransitions(next.status, next.owner, eligible)[0] ?? next.status,
+      );
       setState("ready");
     } catch (value) {
       setState(
@@ -312,12 +335,23 @@ export default function StaffTicketDetailPage() {
       setOperationVersion(next.version);
       setOwnerId(next.owner ? String(next.owner.id) : "");
       setPriority(next.itPriority);
-      setStatus(transitions[next.status][0] ?? next.status);
+      setStatus(
+        permittedTransitions(next.status, next.owner, owners)[0] ?? next.status,
+      );
       setFeedback("Ticket updated.");
     } catch (value) {
       setError(message(value));
       setErrorKind(kind);
-      window.setTimeout(() => operationRefs[kind].current?.focus(), 0);
+      const resolutionGate =
+        value instanceof WorkflowError &&
+        value.code === "RESOLUTION_ACTION_REQUIRED";
+      window.setTimeout(
+        () =>
+          resolutionGate
+            ? actionsSectionRef.current?.focus()
+            : operationRefs[kind].current?.focus(),
+        0,
+      );
     } finally {
       setBusy("");
     }
@@ -388,6 +422,11 @@ export default function StaffTicketDetailPage() {
         />
       </div>
     );
+  const statusOptions = permittedTransitions(
+    detail.status,
+    detail.owner,
+    owners,
+  );
   return (
     <div className={"page-container ticket-detail-page"}>
       <header className={"ticket-detail-header"}>
@@ -525,11 +564,6 @@ export default function StaffTicketDetailPage() {
                 </option>
               ))}
             </select>
-            {status === "RESOLVED" && (
-              <p className={"field-help"}>
-                Requires a completed Action Taken from work cycle {detail.workCycle}.
-              </p>
-            )}
             <AppButton
               busy={busy === "priority"}
               onClick={() => void update("priority", { itPriority: priority })}
@@ -545,19 +579,27 @@ export default function StaffTicketDetailPage() {
               id={"status"}
               ref={statusRef}
               aria-invalid={errorKind === "status" ? "true" : undefined}
+              aria-describedby={
+                status === "RESOLVED" ? "resolution-status-help" : undefined
+              }
               className={"select-field"}
               value={status}
               onChange={(e) => setStatus(e.target.value as TicketStatus)}
             >
-              {transitions[detail.status].map((item) => (
+              {statusOptions.map((item) => (
                 <option key={item} value={item}>
                   {label(item)}
                 </option>
               ))}
             </select>
+            {status === "RESOLVED" && (
+              <p id={"resolution-status-help"} className={"field-help"}>
+                Requires a completed Action Taken from work cycle {detail.workCycle}.
+              </p>
+            )}
             <AppButton
               busy={busy === "status"}
-              disabled={transitions[detail.status].length === 0}
+              disabled={statusOptions.length === 0}
               onClick={() => void update("status", { status })}
             >
               Change Status
@@ -565,6 +607,7 @@ export default function StaffTicketDetailPage() {
           </div>
         </section>
         <ActionsTakenSection
+          sectionRef={actionsSectionRef}
           ticketNumber={ticketNumber}
           mode={"staff"}
           assignees={owners}
