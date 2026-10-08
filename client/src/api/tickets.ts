@@ -44,6 +44,8 @@ export interface TicketListQuery {
   categoryId: number | null
   relatedSystemId: number | null
   status: TicketStatus | null
+  scope?: 'open' | 'recently-resolved' | null
+  asOf?: string | null
   priority: RequestedPriority | null
   sortBy: TicketSortField
   sortOrder: TicketSortOrder
@@ -302,6 +304,8 @@ export async function getMyTickets(
     parameters.set('relatedSystemId', String(query.relatedSystemId))
   }
   if (query.status !== null) parameters.set('status', query.status)
+  if (query.scope) parameters.set('scope', query.scope)
+  if (query.asOf) parameters.set('asOf', query.asOf)
   if (query.priority !== null) parameters.set('priority', query.priority)
 
   const response = await apiFetch(`/api/tickets?${parameters.toString()}`)

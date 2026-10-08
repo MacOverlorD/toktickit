@@ -15,6 +15,7 @@ import RouteFoundationPage from './pages/RouteFoundationPage'
 import StaffTicketDetailPage from './pages/StaffTicketDetailPage'
 import UserManagementPage from './pages/UserManagementPage'
 import StaffTicketQueuePage from './pages/StaffTicketQueuePage'
+import RequesterDashboardPage from './pages/RequesterDashboardPage'
 import { RequesterProvider } from './requesters/RequesterContext'
 
 export function AppRoutes() {
@@ -27,6 +28,7 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route index element={<HomeRedirect />} />
           <Route element={<RequireRole roles={['REQUESTER']} />}>
+            <Route path={'dashboard'} element={<RequesterDashboardPage />} />
             <Route path={'tickets'} element={<MyTicketsPage />} />
             <Route path={'tickets/new'} element={<CreateTicketPage />} />
             <Route
