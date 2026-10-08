@@ -19,6 +19,15 @@ export interface AssignedActionSummary {
   updatedAt: string
 }
 
+export interface PerformedActionSummary {
+  id: number
+  ticketNumber: string
+  description: string
+  status: 'COMPLETED'
+  performedBy: { id: number; name: string; role: 'IT_STAFF' | 'ADMINISTRATOR' }
+  completedAt: string
+}
+
 export interface OperationsDashboardResult {
   asOf: string
   counts: {
@@ -30,6 +39,7 @@ export interface OperationsDashboardResult {
   byStatus: Record<TicketStatus, number>
   byPriority: Record<RequestedPriority, number>
   myActions: AssignedActionSummary[]
+  myPerformedActions: PerformedActionSummary[]
   recentTickets: OperationsTicket[]
   urgentTickets: OperationsTicket[]
   administration?: {
@@ -79,6 +89,14 @@ function isAction(value: unknown): value is AssignedActionSummary {
     isPerson(action.assignedTo) && isDate(action.updatedAt)
 }
 
+function isPerformedAction(value: unknown): value is PerformedActionSummary {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  const action = value as Record<string, unknown>
+  return Number.isSafeInteger(action.id) && typeof action.ticketNumber === 'string' &&
+    typeof action.description === 'string' && action.status === 'COMPLETED' &&
+    isPerson(action.performedBy) && isDate(action.completedAt)
+}
+
 function hasCounts(value: unknown, keys: string[]) {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
   const counts = value as Record<string, unknown>
@@ -92,6 +110,7 @@ function isResult(value: unknown): value is OperationsDashboardResult {
     hasCounts(result.counts, ['unassigned', 'ownedByMe', 'myAssignedActions', 'myPerformedLast7Days']) &&
     hasCounts(result.byStatus, statuses) && hasCounts(result.byPriority, priorities) &&
     Array.isArray(result.myActions) && result.myActions.every(isAction) &&
+    Array.isArray(result.myPerformedActions) && result.myPerformedActions.every(isPerformedAction) &&
     Array.isArray(result.recentTickets) && result.recentTickets.every(isTicket) &&
     Array.isArray(result.urgentTickets) && result.urgentTickets.every(isTicket) &&
     (result.administration === undefined || hasCounts(result.administration, [

@@ -3,6 +3,7 @@ import type { RequestedPriority, TicketStatus } from './tickets'
 
 export type QueueSortField = 'createdAt' | 'updatedAt' | 'ticketNumber' | 'summary' | 'itPriority'
 export interface StaffQueueQuery {
+  scope: 'active' | null
   search: string
   categoryId: number | null
   relatedSystemId: number | null
@@ -44,7 +45,7 @@ export interface StaffQueueResult {
 }
 
 export const DEFAULT_STAFF_QUEUE_QUERY: StaffQueueQuery = {
-  search: '', categoryId: null, relatedSystemId: null, status: null,
+  scope: null, search: '', categoryId: null, relatedSystemId: null, status: null,
   requestedPriority: null, itPriority: null, ownerId: null,
   sortBy: 'updatedAt', sortOrder: 'desc', page: 1, pageSize: 10,
 }

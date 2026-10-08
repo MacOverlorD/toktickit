@@ -164,6 +164,7 @@ beforeAll(async () => {
         itPriority: 'URGENT',
         description: 'Must never be included',
         status: 'WAITING_FOR_REQUESTER',
+        updatedAt: new Date(fixedAsOf.getTime() - 20 * 60 * 1000),
       },
       {
         ticketNumber: numberFor(17),
@@ -442,6 +443,12 @@ describe('Issue 60 operational dashboard API', () => {
     const response = await request(app)
       .get('/api/dashboard/operations')
       .set(session.headers)
+    const [unassignedQueue, ownedQueue, ...priorityQueues] = await Promise.all([
+      request(app).get('/api/staff/tickets?scope=active&ownerId=unassigned&pageSize=50').set(session.headers),
+      request(app).get('/api/staff/tickets?scope=active&ownerId=me&pageSize=50').set(session.headers),
+      ...(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const).map((priority) =>
+        request(app).get(`/api/staff/tickets?scope=active&itPriority=${priority}&pageSize=50`).set(session.headers)),
+    ])
     vi.useRealTimers()
 
     expect(response.status).toBe(200)
@@ -451,6 +458,7 @@ describe('Issue 60 operational dashboard API', () => {
       'byStatus',
       'counts',
       'myActions',
+      'myPerformedActions',
       'recentTickets',
       'urgentTickets',
     ])
@@ -471,6 +479,22 @@ describe('Issue 60 operational dashboard API', () => {
         assignedTo: expect.objectContaining({ id: staffId, role: 'IT_STAFF' }),
       }),
     ])
+    expect(response.body.myPerformedActions).toEqual([
+      expect.objectContaining({
+        ticketNumber: numberFor(20),
+        description: 'Completed exactly at the inclusive boundary',
+        status: 'COMPLETED',
+        performedBy: expect.objectContaining({ id: staffId, role: 'IT_STAFF' }),
+        completedAt: new Date(fixedAsOf.getTime() - sevenDaysMs).toISOString(),
+      }),
+    ])
+    expect(unassignedQueue.body.pagination.totalItems).toBe(response.body.counts.unassigned)
+    expect(ownedQueue.body.pagination.totalItems).toBe(response.body.counts.ownedByMe)
+    ;(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const).forEach((priority, index) => {
+      expect(priorityQueues[index].body.pagination.totalItems).toBe(response.body.byPriority[priority])
+      expect(priorityQueues[index].body.items.every((ticket: { status: string }) =>
+        !['RESOLVED', 'CLOSED', 'CANCELLED'].includes(ticket.status))).toBe(true)
+    })
     expect(response.body.recentTickets).toHaveLength(10)
     expect(response.body.urgentTickets).toEqual(expect.arrayContaining([
       expect.objectContaining({ ticketNumber: numberFor(20), itPriority: 'URGENT' }),

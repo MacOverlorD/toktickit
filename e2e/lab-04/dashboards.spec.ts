@@ -10,13 +10,49 @@ import { database } from '../lab-02/database.js'
 
 test.beforeEach(async () => {
   const prisma = await database()
-  await prisma.ticket.update({
+  const ticket = await prisma.ticket.update({
     where: { ticketNumber: E2E_WORKFLOW_TICKET },
     data: {
       status: 'OPEN',
       resolvedAt: null,
       resolutionIndicatedAt: null,
       resolutionIndicatedById: null,
+    },
+    select: { id: true, workCycle: true },
+  })
+  const staff = await prisma.user.findUniqueOrThrow({
+    where: { fixtureKey: E2E_STAFF_USER.fixtureKey },
+    select: { id: true },
+  })
+  const completedAt = new Date()
+  await prisma.actionTaken.upsert({
+    where: { fixtureKey: 'lab4-dashboard-performed-action' },
+    update: {
+      ticketId: ticket.id,
+      ticketWorkCycle: ticket.workCycle,
+      description: 'E2E completed dashboard Action',
+      result: 'E2E completion verified',
+      status: 'COMPLETED',
+      actionAt: completedAt,
+      createdById: staff.id,
+      performedById: staff.id,
+      assignedToId: null,
+      completedAt,
+      cancelledAt: null,
+    },
+    create: {
+      fixtureKey: 'lab4-dashboard-performed-action',
+      ticketId: ticket.id,
+      ticketWorkCycle: ticket.workCycle,
+      description: 'E2E completed dashboard Action',
+      result: 'E2E completion verified',
+      status: 'COMPLETED',
+      actionAt: completedAt,
+      createdById: staff.id,
+      performedById: staff.id,
+      completedAt,
+      idempotencyKey: '70000000-0000-4000-8000-000000000060',
+      requestFingerprint: 'd'.repeat(64),
     },
   })
   await prisma.$disconnect()
@@ -86,8 +122,20 @@ test('Staff operational dashboard drills into the unassigned queue and remains r
 
   const unassignedCard = page.locator('.dashboard-metric-card').filter({ hasText: 'Unassigned tickets' })
   await unassignedCard.getByRole('link', { name: 'View queue' }).click()
-  await expect(page).toHaveURL(/\/staff\/tickets\?ownerId=unassigned$/)
+  await expect(page).toHaveURL(/\/staff\/tickets\?scope=active&ownerId=unassigned$/)
+  await expect(page.getByLabel('Ticket Scope')).toHaveValue('active')
   await expect(page.getByLabel('Owner')).toHaveValue('unassigned')
+
+  await page.goto('/staff/dashboard')
+  const performedLink = page.locator('#my-performed-actions').getByRole('link', {
+    name: new RegExp(E2E_WORKFLOW_TICKET),
+  }).first()
+  const performedHref = await performedLink.getAttribute('href')
+  expect(performedHref).toMatch(/#action-\d+$/)
+  await performedLink.click()
+  await expect(page).toHaveURL(new RegExp(`/staff/tickets/${E2E_WORKFLOW_TICKET}#action-\\d+$`))
+  const actionTarget = page.locator(`#${performedHref!.split('#')[1]}`)
+  await expect(actionTarget).toBeFocused()
 
   for (const viewport of [
     { width: 1440, height: 900 },

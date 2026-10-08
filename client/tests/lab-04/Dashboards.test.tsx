@@ -98,6 +98,16 @@ const operationsDashboard: operationsApi.OperationsDashboardResult = {
       updatedAt: '2026-10-08T11:30:00.000Z',
     },
   ],
+  myPerformedActions: [
+    {
+      id: 43,
+      ticketNumber: 'TKT-20261008-OPS00003',
+      description: 'Confirmed the recovery result',
+      status: 'COMPLETED',
+      performedBy: { id: 9, name: 'Suda Staff', role: 'IT_STAFF' },
+      completedAt: '2026-10-08T11:15:00.000Z',
+    },
+  ],
   urgentTickets: [
     {
       ticketNumber: 'TKT-20261008-OPS00002',
@@ -212,14 +222,22 @@ describe('Issue 60 Operational Dashboard', () => {
     expect(screen.getByLabelText('Completed by me in 7 days: 7')).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: /View queue/ }).find(
       (link) => link.getAttribute('href')?.includes('ownerId=unassigned'),
-    )).toHaveAttribute('href', '/staff/tickets?ownerId=unassigned')
+    )).toHaveAttribute('href', '/staff/tickets?scope=active&ownerId=unassigned')
     expect(screen.getByRole('link', { name: /View my tickets/ })).toHaveAttribute(
       'href',
-      '/staff/tickets?ownerId=me',
+      '/staff/tickets?scope=active&ownerId=me',
     )
     expect(screen.getByRole('link', { name: /Action #42/ })).toHaveAttribute(
       'href',
       '/staff/tickets/TKT-20261008-OPS00001#action-42',
+    )
+    expect(screen.getByRole('link', { name: /Action #43/ })).toHaveAttribute(
+      'href',
+      '/staff/tickets/TKT-20261008-OPS00003#action-43',
+    )
+    expect(screen.getByRole('link', { name: 'View completed Actions' })).toHaveAttribute(
+      'href',
+      '#my-performed-actions',
     )
     expect(screen.getByText('Production network unavailable')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Account summary' })).not.toBeInTheDocument()
@@ -250,6 +268,7 @@ describe('Issue 60 Operational Dashboard', () => {
       .mockResolvedValueOnce({
         ...operationsDashboard,
         myActions: [],
+        myPerformedActions: [],
         urgentTickets: [],
         recentTickets: [],
       })
@@ -260,6 +279,7 @@ describe('Issue 60 Operational Dashboard', () => {
     expect(screen.queryByText('private database detail')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
     expect(await screen.findByText('No active Actions are assigned to you.')).toBeInTheDocument()
+    expect(screen.getByText('You have not completed any Actions in this window.')).toBeInTheDocument()
     expect(screen.getByText('No active urgent tickets.')).toBeInTheDocument()
     expect(screen.getByText('No tickets are available.')).toBeInTheDocument()
     await waitFor(() => expect(operationsApi.getOperationsDashboard).toHaveBeenCalledTimes(2))

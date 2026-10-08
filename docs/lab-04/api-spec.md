@@ -79,23 +79,26 @@ My Tickets adds allowlisted `scope=open|recently-resolved`; `scope` cannot combi
 
 ### GET `/api/dashboard/operations`
 
-IT Staff and Administrator only; no body/query and current-user identity is session-derived. Returns 200 `{asOf,counts,byStatus,byPriority,myActions,recentTickets,urgentTickets,administration?}`. `counts` is `{unassigned,ownedByMe,myAssignedActions,myPerformedLast7Days}`. `byStatus` has all eight Ticket enum keys; `byPriority` has LOW/MEDIUM/HIGH/URGENT. `myActions` items are `{id,ticketNumber,description,status,assignedTo,updatedAt}`; Ticket-list items are `{ticketNumber,summary,status,itPriority,owner,updatedAt}`. Administrator receives `administration:{activeRequesters,activeStaff,activeAdministrators,inactiveAccounts}`; Staff omits it.
+IT Staff and Administrator only; no body/query and current-user identity is session-derived. Returns 200 `{asOf,counts,byStatus,byPriority,myActions,myPerformedActions,recentTickets,urgentTickets,administration?}`. `counts` is `{unassigned,ownedByMe,myAssignedActions,myPerformedLast7Days}`. `byStatus` has all eight Ticket enum keys; `byPriority` has LOW/MEDIUM/HIGH/URGENT. `myActions` items are `{id,ticketNumber,description,status,assignedTo,updatedAt}`; `myPerformedActions` items are `{id,ticketNumber,description,status,performedBy,completedAt}`; Ticket-list items are `{ticketNumber,summary,status,itPriority,owner,updatedAt}`. Administrator receives `administration:{activeRequesters,activeStaff,activeAdministrators,inactiveAccounts}`; Staff omits it.
 
 Operational formulas use active Ticket states NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, REOPENED unless stated otherwise:
 
 | Value | Authoritative predicate/order | Empty/drill-down |
 |---|---|---|
-| `unassigned` | active status and `ownerId IS NULL` | 0; queue `ownerId=unassigned` |
-| `ownedByMe` | active status and `ownerId=actor.id` | 0; queue `ownerId=me`, resolved by server |
+| `unassigned` | active status and `ownerId IS NULL` | 0; queue `scope=active&ownerId=unassigned` |
+| `ownedByMe` | active status and `ownerId=actor.id` | 0; queue `scope=active&ownerId=me`, resolved by server |
 | `byStatus` | all Tickets grouped by exact status | all keys 0; queue exact status |
-| `byPriority` | active Tickets grouped by `itPriority` | all keys 0; queue exact priority |
+| `byPriority` | active Tickets grouped by `itPriority` | all keys 0; queue `scope=active` plus exact priority |
 | `myAssignedActions` | current-cycle PLANNED/IN_PROGRESS Actions with `assignedToId=actor.id` and active parent Ticket | 0; scroll to `myActions` |
 | `myPerformedLast7Days` | COMPLETED with `performedById=actor.id` and `completedAt >= asOf-7d AND <= asOf` | 0; rows link to Action anchors |
 | `myActions` | same assigned predicate, Action updatedAt DESC,id DESC, limit 10 | `[]`; each -> `/staff/tickets/:number#action-:id` |
+| `myPerformedActions` | same performed predicate, completedAt DESC,id DESC, limit 10 | `[]`; each -> `/staff/tickets/:number#action-:id` |
 | `recentTickets` | all Tickets with `updatedAt <= asOf`, order updatedAt DESC,id DESC, limit 10 | `[]`; each -> Staff Ticket Detail |
-| `urgentTickets` | active status and `itPriority=URGENT`, same order, limit 10 | `[]`; queue `itPriority=URGENT` |
+| `urgentTickets` | active status and `itPriority=URGENT`, same order, limit 10 | `[]`; queue `scope=active&itPriority=URGENT` |
 
 Administration counts group all Users by active state/role in the same database snapshot; absent groups return zero.
+
+Staff Queue adds allowlisted `scope=active`, defined by the same five active Ticket statuses. It may combine with owner and priority filters, but not with an exact `status`; selecting one clears the other in the UI.
 
 ## 6. Dashboard definitions
 

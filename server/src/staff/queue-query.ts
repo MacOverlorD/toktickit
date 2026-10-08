@@ -3,6 +3,7 @@ import { ApiError } from '../errors/api-error.js'
 
 export const QUEUE_SORT_FIELDS = ['createdAt', 'updatedAt', 'ticketNumber', 'summary', 'itPriority'] as const
 export interface QueueQuery {
+  scope: 'active' | null
   search: string | null
   categoryId: number | null
   relatedSystemId: number | null
@@ -17,7 +18,7 @@ export interface QueueQuery {
 }
 
 export function parseQueueQuery(query: Record<string, unknown>): QueueQuery {
-  const allowed = ['search', 'categoryId', 'relatedSystemId', 'status', 'requestedPriority', 'itPriority', 'ownerId', 'sortBy', 'sortOrder', 'page', 'pageSize']
+  const allowed = ['scope', 'search', 'categoryId', 'relatedSystemId', 'status', 'requestedPriority', 'itPriority', 'ownerId', 'sortBy', 'sortOrder', 'page', 'pageSize']
   function invalid(): never { throw new ApiError(400, 'INVALID_QUERY', 'Check the ticket queue query parameters and try again.') }
   if (Object.keys(query).some(key => !allowed.includes(key))) invalid()
   function scalar(key: string): string | null {
@@ -45,11 +46,15 @@ export function parseQueueQuery(query: Record<string, unknown>): QueueQuery {
     : integer('ownerId', null)
   const pageSize = integer('pageSize', 10)
   if (![10, 20, 50].includes(pageSize!)) invalid()
+  const scope = enumeration('scope', ['active'] as const)
+  const status = enumeration('status', Object.values(TicketStatus))
+  if (scope !== null && status !== null) invalid()
   return {
+    scope,
     search,
     categoryId: integer('categoryId', null),
     relatedSystemId: integer('relatedSystemId', null),
-    status: enumeration('status', Object.values(TicketStatus)),
+    status,
     requestedPriority: enumeration('requestedPriority', Object.values(RequestedPriority)),
     itPriority: enumeration('itPriority', Object.values(RequestedPriority)),
     ownerId,

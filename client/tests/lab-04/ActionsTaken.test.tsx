@@ -57,9 +57,26 @@ beforeEach(() => {
 afterEach(() => {
   vi.clearAllMocks()
   vi.unstubAllGlobals()
+  window.history.replaceState({}, '', '/')
 })
 
 describe('Actions Taken Ticket Detail UI', () => {
+  it('focuses and scrolls to an Action hash after the asynchronous list renders', async () => {
+    const scrollIntoView = vi.fn()
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    })
+    window.history.replaceState({}, '', `/staff/tickets/${ticketNumber}#action-12`)
+
+    render(<ActionsTakenSection ticketNumber={ticketNumber} mode={'staff'} ticketStatus={'OPEN'} currentWorkCycle={1} />)
+
+    const target = await screen.findByRole('article')
+    await waitFor(() => expect(target).toHaveFocus())
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center', behavior: 'auto' })
+    delete (HTMLElement.prototype as { scrollIntoView?: unknown }).scrollIntoView
+  })
+
   it('renders the requester projection as shared read-only history without operational controls', async () => {
     vi.mocked(api.listActionsTaken).mockResolvedValue([
       { ...base, id: 13, description: 'Newest work', createdBy: { name: 'Mali' }, assignedTo: undefined, version: undefined },

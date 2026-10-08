@@ -72,6 +72,7 @@ const getOperationsDashboard: RequestHandler = async (request, response, next) =
         assignedCountRows,
         performedLast7Days,
         assignedActionRows,
+        performedActionRows,
         recentTickets,
         urgentTickets,
         userGroups,
@@ -127,6 +128,23 @@ const getOperationsDashboard: RequestHandler = async (request, response, next) =
           ORDER BY action."updatedAt" DESC, action.id DESC
           LIMIT 10
         `),
+        transaction.actionTaken.findMany({
+          where: {
+            performedById: actor.id,
+            status: 'COMPLETED',
+            completedAt: { gte: windowStart, lte: asOf },
+          },
+          orderBy: [{ completedAt: 'desc' }, { id: 'desc' }],
+          take: 10,
+          select: {
+            id: true,
+            description: true,
+            status: true,
+            completedAt: true,
+            ticket: { select: { ticketNumber: true } },
+            performedBy: { select: ownerSelect },
+          },
+        }),
         transaction.ticket.findMany({
           where: { updatedAt: { lte: asOf } },
           orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
@@ -156,6 +174,7 @@ const getOperationsDashboard: RequestHandler = async (request, response, next) =
         myAssignedActions: assignedCountRows[0]?.count ?? 0,
         myPerformedLast7Days: performedLast7Days,
         assignedActionRows,
+        performedActionRows,
         recentTickets,
         urgentTickets,
         userGroups,
@@ -211,6 +230,14 @@ const getOperationsDashboard: RequestHandler = async (request, response, next) =
           role: action.assignedToRole,
         },
         updatedAt: action.updatedAt.toISOString(),
+      })),
+      myPerformedActions: result.performedActionRows.map((action) => ({
+        id: action.id,
+        ticketNumber: action.ticket.ticketNumber,
+        description: action.description,
+        status: action.status,
+        performedBy: action.performedBy!,
+        completedAt: action.completedAt!.toISOString(),
       })),
       recentTickets: serializeTickets(result.recentTickets),
       urgentTickets: serializeTickets(result.urgentTickets),

@@ -93,10 +93,10 @@ export default function OperationsDashboardPage() {
     {state === 'error' && <FeedbackState variant={'error'} title={'Operational dashboard unavailable'} message={'Dashboard data could not be loaded. Ticket data remains safe.'} action={<AppButton variant={'secondary'} icon={<RefreshCw />} onClick={() => setRetry((value) => value + 1)}>Retry</AppButton>} />}
     {state === 'ready' && data && <>
       <section className={'dashboard-metrics operations-metrics'} aria-label={'Operational summary'}>
-        <Metric label={'Unassigned tickets'} value={data.counts.unassigned} description={'Active tickets without a primary owner.'} action={<Link className={'dashboard-card-link'} to={'/staff/tickets?ownerId=unassigned'}>View queue <ArrowRight aria-hidden={'true'} /></Link>} />
-        <Metric label={'Owned by me'} value={data.counts.ownedByMe} description={'Active tickets where you are the primary owner.'} action={<Link className={'dashboard-card-link'} to={'/staff/tickets?ownerId=me'}>View my tickets <ArrowRight aria-hidden={'true'} /></Link>} />
+        <Metric label={'Unassigned tickets'} value={data.counts.unassigned} description={'Active tickets without a primary owner.'} action={<Link className={'dashboard-card-link'} to={'/staff/tickets?scope=active&ownerId=unassigned'}>View queue <ArrowRight aria-hidden={'true'} /></Link>} />
+        <Metric label={'Owned by me'} value={data.counts.ownedByMe} description={'Active tickets where you are the primary owner.'} action={<Link className={'dashboard-card-link'} to={'/staff/tickets?scope=active&ownerId=me'}>View my tickets <ArrowRight aria-hidden={'true'} /></Link>} />
         <Metric label={'Actions assigned to me'} value={data.counts.myAssignedActions} description={'Current-cycle planned or in-progress Actions.'} action={<a className={'dashboard-card-link'} href={'#my-actions'}>View assigned Actions <ArrowRight aria-hidden={'true'} /></a>} />
-        <Metric label={'Completed by me in 7 days'} value={data.counts.myPerformedLast7Days} description={'Actions you personally completed in the inclusive seven-day window.'} />
+        <Metric label={'Completed by me in 7 days'} value={data.counts.myPerformedLast7Days} description={'Actions you personally completed in the inclusive seven-day window.'} action={<a className={'dashboard-card-link'} href={'#my-performed-actions'}>View completed Actions <ArrowRight aria-hidden={'true'} /></a>} />
       </section>
 
       <div className={'dashboard-sections'}>
@@ -110,7 +110,7 @@ export default function OperationsDashboardPage() {
         <section className={'dashboard-panel'} aria-labelledby={'priority-summary-heading'}>
           <div className={'dashboard-panel-heading'}><div><h2 id={'priority-summary-heading'}>Active tickets by IT priority</h2><p>Current operational priority distribution.</p></div></div>
           <div className={'operations-breakdown'}>{priorities.map((priority) =>
-            <Link key={priority} to={`/staff/tickets?itPriority=${priority}`}>
+            <Link key={priority} to={`/staff/tickets?scope=active&itPriority=${priority}`}>
               <span>{label(priority)}</span><strong>{data.byPriority[priority]}</strong>
             </Link>)}</div>
         </section>
@@ -126,9 +126,19 @@ export default function OperationsDashboardPage() {
             </li>)}</ul>}
       </section>
 
+      <section className={'dashboard-panel'} id={'my-performed-actions'} aria-labelledby={'my-performed-actions-heading'} tabIndex={-1}>
+        <div className={'dashboard-panel-heading'}><div><h2 id={'my-performed-actions-heading'}>Actions completed by me in 7 days</h2><p>Completed work in the inclusive seven-day window.</p></div></div>
+        {data.myPerformedActions.length === 0 ? <p className={'dashboard-list-empty'}>You have not completed any Actions in this window.</p> :
+          <ul className={'dashboard-action-list'}>{data.myPerformedActions.map((action) =>
+            <li key={action.id}>
+              <div><Link to={`/staff/tickets/${encodeURIComponent(action.ticketNumber)}#action-${action.id}`}>Action #{action.id} on {action.ticketNumber}</Link><span className={'action-status action-status-completed'}>Completed</span></div>
+              <p>{action.description}</p><small>Completed {formatTime(action.completedAt)} by {action.performedBy.name}</small>
+            </li>)}</ul>}
+      </section>
+
       <div className={'dashboard-sections'}>
         <section className={'dashboard-panel'} aria-labelledby={'urgent-heading'}>
-          <div className={'dashboard-panel-heading'}><div><h2 id={'urgent-heading'}>Urgent active tickets</h2><p>Highest-priority work needing operational awareness.</p></div><Link to={'/staff/tickets?itPriority=URGENT'}>View all</Link></div>
+          <div className={'dashboard-panel-heading'}><div><h2 id={'urgent-heading'}>Urgent active tickets</h2><p>Highest-priority work needing operational awareness.</p></div><Link to={'/staff/tickets?scope=active&itPriority=URGENT'}>View all</Link></div>
           <TicketList tickets={data.urgentTickets} empty={'No active urgent tickets.'} />
         </section>
         <section className={'dashboard-panel'} aria-labelledby={'operations-recent-heading'}>
