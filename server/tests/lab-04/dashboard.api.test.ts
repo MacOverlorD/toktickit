@@ -18,8 +18,11 @@ let requesterId: number
 let emptyRequesterId: number
 let otherRequesterId: number
 let staffId: number
+let adminId: number
+let inactiveStaffId: number
 let categoryId: number
 let systemId: number
+let operationsTicketId: number
 
 function numberFor(index: number) {
   return `TKT-20991008-${marker}${index.toString(16).toUpperCase().padStart(2, '0')}`
@@ -64,9 +67,28 @@ beforeAll(async () => {
         role: 'IT_STAFF',
       },
     }),
+    prisma.user.create({
+      data: {
+        name: 'Dashboard Administrator',
+        email: `dash-admin-${emailMarker}@example.test`,
+        role: 'ADMINISTRATOR',
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Inactive Dashboard Staff',
+        email: `dash-inactive-${emailMarker}@example.test`,
+        role: 'IT_STAFF',
+        isActive: false,
+      },
+    }),
   ])
-  ;[requesterId, emptyRequesterId, otherRequesterId, staffId] = users.map((user) => user.id)
+  ;[requesterId, emptyRequesterId, otherRequesterId, staffId, adminId, inactiveStaffId] = users.map((user) => user.id)
   userIds.push(...users.map((user) => user.id))
+  await prisma.user.updateMany({
+    where: { id: { in: userIds } },
+    data: { updatedAt: new Date(fixedAsOf.getTime() - 24 * 60 * 60 * 1000) },
+  })
 
   const tieTime = new Date(fixedAsOf.getTime() - 2 * 60 * 60 * 1000)
   for (let index = 1; index <= 12; index += 1) {
@@ -187,11 +209,76 @@ beforeAll(async () => {
       },
     ],
   })
+
+  const operationsTicket = await prisma.ticket.create({
+    data: {
+      ticketNumber: numberFor(20),
+      submissionKey: randomUUID(),
+      requesterId: otherRequesterId,
+      ownerId: staffId,
+      categoryId,
+      relatedSystemId: systemId,
+      summary: 'Urgent operations dashboard work',
+      requestedPriority: 'URGENT',
+      itPriority: 'URGENT',
+      description: 'Exercises operator-owned counts and current-cycle Actions.',
+      status: 'IN_PROGRESS',
+      workCycle: 2,
+      updatedAt: new Date(fixedAsOf.getTime() - 15 * 60 * 1000),
+    },
+  })
+  operationsTicketId = operationsTicket.id
+  await prisma.actionTaken.createMany({
+    data: [
+      {
+        fixtureKey: `dash-current-${marker}`,
+        ticketId: operationsTicketId,
+        ticketWorkCycle: 2,
+        description: 'Current-cycle assigned Action',
+        createdById: adminId,
+        assignedToId: staffId,
+        idempotencyKey: randomUUID(),
+        requestFingerprint: 'a'.repeat(64),
+        status: 'PLANNED',
+        updatedAt: new Date(fixedAsOf.getTime() - 10 * 60 * 1000),
+      },
+      {
+        fixtureKey: `dash-old-${marker}`,
+        ticketId: operationsTicketId,
+        ticketWorkCycle: 1,
+        description: 'Old-cycle Action must be excluded',
+        createdById: adminId,
+        assignedToId: staffId,
+        idempotencyKey: randomUUID(),
+        requestFingerprint: 'b'.repeat(64),
+        status: 'IN_PROGRESS',
+        updatedAt: new Date(fixedAsOf.getTime() - 5 * 60 * 1000),
+      },
+      {
+        fixtureKey: `dash-completed-${marker}`,
+        ticketId: operationsTicketId,
+        ticketWorkCycle: 2,
+        description: 'Completed exactly at the inclusive boundary',
+        createdById: adminId,
+        performedById: staffId,
+        idempotencyKey: randomUUID(),
+        requestFingerprint: 'c'.repeat(64),
+        status: 'COMPLETED',
+        actionAt: new Date(fixedAsOf.getTime() - sevenDaysMs),
+        result: 'Boundary completion result',
+        completedAt: new Date(fixedAsOf.getTime() - sevenDaysMs),
+        updatedAt: new Date(fixedAsOf.getTime() - sevenDaysMs),
+      },
+    ],
+  })
 })
 
 afterAll(async () => {
   await Promise.all(sessions.map((session) => session.cleanup()))
   if (userIds.length > 0) {
+    await prisma.actionTaken.deleteMany({
+      where: { ticket: { requesterId: { in: userIds } } },
+    })
     await prisma.ticket.deleteMany({ where: { requesterId: { in: userIds } } })
     await prisma.user.deleteMany({ where: { id: { in: userIds } } })
   }
@@ -344,5 +431,91 @@ describe('Issue 59 requester dashboard API', () => {
     const response = await request(app).get('/api/dashboard/requester')
     expect(response.status).toBe(401)
     expect(response.body.error.code).toBe('UNAUTHENTICATED')
+  })
+})
+
+describe('Issue 60 operational dashboard API', () => {
+  it('calculates role-safe operational metrics, bounded lists, and current-cycle Actions', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(fixedAsOf)
+    const session = await sessionFor(staffId)
+    const response = await request(app)
+      .get('/api/dashboard/operations')
+      .set(session.headers)
+    vi.useRealTimers()
+
+    expect(response.status).toBe(200)
+    expect(Object.keys(response.body).sort()).toEqual([
+      'asOf',
+      'byPriority',
+      'byStatus',
+      'counts',
+      'myActions',
+      'recentTickets',
+      'urgentTickets',
+    ])
+    expect(response.body.asOf).toBe(fixedAsOf.toISOString())
+    expect(Object.keys(response.body.byStatus)).toEqual([
+      'NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER',
+      'REOPENED', 'RESOLVED', 'CLOSED', 'CANCELLED',
+    ])
+    expect(Object.keys(response.body.byPriority)).toEqual(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+    expect(response.body.counts.ownedByMe).toBe(1)
+    expect(response.body.counts.myAssignedActions).toBe(1)
+    expect(response.body.counts.myPerformedLast7Days).toBe(1)
+    expect(response.body.myActions).toEqual([
+      expect.objectContaining({
+        ticketNumber: numberFor(20),
+        description: 'Current-cycle assigned Action',
+        status: 'PLANNED',
+        assignedTo: expect.objectContaining({ id: staffId, role: 'IT_STAFF' }),
+      }),
+    ])
+    expect(response.body.recentTickets).toHaveLength(10)
+    expect(response.body.urgentTickets).toEqual(expect.arrayContaining([
+      expect.objectContaining({ ticketNumber: numberFor(20), itPriority: 'URGENT' }),
+    ]))
+    expect(response.body).not.toHaveProperty('administration')
+    expect(JSON.stringify(response.body)).not.toMatch(/requestFingerprint|idempotencyKey|submissionKey/)
+  })
+
+  it('adds the concise account summary only for Administrators', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(fixedAsOf)
+    const session = await sessionFor(adminId)
+    const response = await request(app)
+      .get('/api/dashboard/operations')
+      .set(session.headers)
+    vi.useRealTimers()
+
+    expect(response.status).toBe(200)
+    expect(response.body.administration).toEqual(expect.objectContaining({
+      activeRequesters: expect.any(Number),
+      activeStaff: expect.any(Number),
+      activeAdministrators: expect.any(Number),
+      inactiveAccounts: expect.any(Number),
+    }))
+    expect(response.body.administration.activeAdministrators).toBeGreaterThanOrEqual(1)
+    expect(response.body.administration.inactiveAccounts).toBeGreaterThanOrEqual(1)
+  })
+
+  it('rejects anonymous and Requester access plus all client-supplied input', async () => {
+    const [staffSession, requesterSession] = await Promise.all([
+      sessionFor(staffId),
+      sessionFor(requesterId),
+    ])
+    const [anonymous, requesterResponse, queryInjected, bodyInjected] = await Promise.all([
+      request(app).get('/api/dashboard/operations'),
+      request(app).get('/api/dashboard/operations').set(requesterSession.headers),
+      request(app).get('/api/dashboard/operations').query({ userId: adminId }).set(staffSession.headers),
+      request(app).get('/api/dashboard/operations').send({ userId: adminId }).set(staffSession.headers),
+    ])
+
+    expect(anonymous.status).toBe(401)
+    expect(requesterResponse.status).toBe(403)
+    expect(queryInjected.status).toBe(400)
+    expect(queryInjected.body.error.code).toBe('INVALID_QUERY')
+    expect(bodyInjected.status).toBe(400)
+    expect(bodyInjected.body.error.code).toBe('INVALID_QUERY')
   })
 })

@@ -137,10 +137,16 @@ function AppShell() {
                 </>
               )}
               {(user.role === 'IT_STAFF' || user.role === 'ADMINISTRATOR') && (
-                <NavLink className={navigationClass} to={'/staff/tickets'}>
-                  <List aria-hidden={'true'} />
-                  <span>Ticket Queue</span>
-                </NavLink>
+                <>
+                  <NavLink className={navigationClass} to={'/staff/dashboard'} end>
+                    <LayoutDashboard aria-hidden={'true'} />
+                    <span>Dashboard</span>
+                  </NavLink>
+                  <NavLink className={navigationClass} to={'/staff/tickets'}>
+                    <List aria-hidden={'true'} />
+                    <span>Ticket Queue</span>
+                  </NavLink>
+                </>
               )}
               {user.role === 'ADMINISTRATOR' && (
                 <NavLink className={navigationClass} to={'/admin/users'}>

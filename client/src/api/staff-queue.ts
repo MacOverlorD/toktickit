@@ -9,7 +9,7 @@ export interface StaffQueueQuery {
   status: TicketStatus | null
   requestedPriority: RequestedPriority | null
   itPriority: RequestedPriority | null
-  ownerId: number | 'unassigned' | null
+  ownerId: number | 'unassigned' | 'me' | null
   sortBy: QueueSortField
   sortOrder: 'asc' | 'desc'
   page: number

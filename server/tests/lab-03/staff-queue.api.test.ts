@@ -63,6 +63,10 @@ describe('Lab 3 Staff Ticket Queue', () => {
     expect(response.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[1]])
     const unassigned = await queue(sessions[1], `?search=${marker}&ownerId=unassigned`)
     expect(unassigned.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[0]])
+    const ownedByStaff = await queue(sessions[1], `?search=${marker}&ownerId=me`)
+    expect(ownedByStaff.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[1]])
+    const ownedByAdmin = await queue(sessions[2], `?search=${marker}&ownerId=me`)
+    expect(ownedByAdmin.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[2]])
   })
 
   it('sorts priority by rank with a same-direction ID tie breaker', async () => {

@@ -9,7 +9,7 @@ export interface QueueQuery {
   status: TicketStatus | null
   requestedPriority: RequestedPriority | null
   itPriority: RequestedPriority | null
-  ownerId: number | 'unassigned' | null
+  ownerId: number | 'unassigned' | 'me' | null
   sortBy: typeof QUEUE_SORT_FIELDS[number]
   sortOrder: 'asc' | 'desc'
   page: number
@@ -39,7 +39,10 @@ export function parseQueueQuery(query: Record<string, unknown>): QueueQuery {
   }
   const search = scalar('search')?.trim() ?? null
   if (search !== null && (!search || Array.from(search).length > 100)) invalid()
-  const ownerId = scalar('ownerId') === 'unassigned' ? 'unassigned' : integer('ownerId', null)
+  const rawOwnerId = scalar('ownerId')
+  const ownerId = rawOwnerId === 'unassigned' || rawOwnerId === 'me'
+    ? rawOwnerId
+    : integer('ownerId', null)
   const pageSize = integer('pageSize', 10)
   if (![10, 20, 50].includes(pageSize!)) invalid()
   return {

@@ -17,6 +17,7 @@ The final submission requires 6-10 selected prompts. Only prompts actually used 
 | 1 | Read `docs/lab-04/SE+Lab+4.pdf` carefully and summarize how many issues are needed. | Produced a nine-issue dependency plan covering contract, data, API, UI, workflow, dashboards, hardening, and release. | Checked against all handout sections; setup accepted by the student. |
 | 2 | Start the setup. | Created label/issues/Project states, isolated branches/worktree, and draft contract documents. | Repository and GitHub results must be reviewed before Issue #54 approval. |
 | 3 | Continue after Issue #58 was merged and implement the next issue. | Closed merged Issue #58 and implemented Issue #59 Requester Dashboard from the approved API/UI/test contracts, including authoritative metrics, drill-downs, responsive UI, and automated evidence. | Builds, targeted API/UI tests, full server/client regression, and Lab 4 browser tests were executed; peer review remains required before merge. |
+| 4 | Continue after the Requester Dashboard PR was merged and implement the next issue. | Implemented Issue #60 operational dashboard for Staff/Admin, including session-derived metrics, current-cycle Actions, exact queue drill-downs, Administrator summary, responsive UI, and traceable tests. | Build, API, component, queue, and browser evidence were executed; peer review remains required before merge. |
 
 ## Assistance boundaries
 
