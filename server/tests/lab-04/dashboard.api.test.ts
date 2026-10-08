@@ -68,7 +68,7 @@ beforeAll(async () => {
   ;[requesterId, emptyRequesterId, otherRequesterId, staffId] = users.map((user) => user.id)
   userIds.push(...users.map((user) => user.id))
 
-  const tieTime = new Date(Date.now() - 2 * 60 * 60 * 1000)
+  const tieTime = new Date(fixedAsOf.getTime() - 2 * 60 * 60 * 1000)
   for (let index = 1; index <= 12; index += 1) {
     await prisma.ticket.create({
       data: {
@@ -101,7 +101,7 @@ beforeAll(async () => {
         itPriority: 'URGENT',
         description: 'Needs attention',
         status: 'WAITING_FOR_REQUESTER',
-        updatedAt: new Date(Date.now() - 60 * 60 * 1000),
+        updatedAt: new Date(fixedAsOf.getTime() - 60 * 60 * 1000),
       },
       {
         ticketNumber: numberFor(14),
@@ -114,8 +114,8 @@ beforeAll(async () => {
         itPriority: 'MEDIUM',
         description: 'Recent resolution',
         status: 'RESOLVED',
-        resolvedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        updatedAt: new Date(Date.now() - 30 * 60 * 1000),
+        resolvedAt: new Date(fixedAsOf.getTime() - 24 * 60 * 60 * 1000),
+        updatedAt: new Date(fixedAsOf.getTime() - 30 * 60 * 1000),
       },
       {
         ticketNumber: numberFor(15),
@@ -128,8 +128,8 @@ beforeAll(async () => {
         itPriority: 'LOW',
         description: 'Outside recent resolution window',
         status: 'CLOSED',
-        resolvedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-        updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+        resolvedAt: new Date(fixedAsOf.getTime() - 8 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(fixedAsOf.getTime() - 8 * 24 * 60 * 60 * 1000),
       },
       {
         ticketNumber: numberFor(16),

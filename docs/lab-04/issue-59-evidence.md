@@ -13,6 +13,7 @@ Scope: deliver the authenticated Requester Dashboard, authoritative metrics and 
 - Added `/dashboard`, Requester-only route protection, active Dashboard navigation, metric cards, attention and recent lists, exact drill-down links, loading, retryable safe failure, and useful zero-state Create Ticket guidance.
 - Preserved the earlier post-login Requester landing route (`/tickets`) to avoid Lab 2/3 regression while making Dashboard directly available in the primary navigation.
 - Added single-column mobile, two-column tablet, and balanced desktop layouts with semantic sections, visible native links/buttons, non-color badge labels, long-text wrapping, and no page-level overflow at 320 px.
+- Review follow-up derives every dashboard API fixture timestamp from the same fixed `asOf`, so boundary, ordering, and attention-list assertions remain deterministic regardless of the real execution date.
 
 ## Automated verification
 
