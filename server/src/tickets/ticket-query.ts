@@ -10,12 +10,24 @@ export const TICKET_PAGE_SIZES = [10, 20, 50] as const
 
 export type TicketSortField = (typeof TICKET_SORT_FIELDS)[number]
 export type TicketSortOrder = 'asc' | 'desc'
+export type TicketStatus =
+  | 'NEW'
+  | 'OPEN'
+  | 'IN_PROGRESS'
+  | 'WAITING_FOR_REQUESTER'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'REOPENED'
+  | 'CANCELLED'
+export type TicketScope = 'open' | 'recently-resolved'
 
 export interface TicketListQuery {
   search: string | null
   categoryId: number | null
   relatedSystemId: number | null
-  status: 'NEW' | null
+  status: TicketStatus | null
+  scope: TicketScope | null
+  asOf: Date | null
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' | null
   sortBy: TicketSortField
   sortOrder: TicketSortOrder
@@ -28,6 +40,8 @@ const ALLOWED_QUERY_KEYS = new Set([
   'categoryId',
   'relatedSystemId',
   'status',
+  'scope',
+  'asOf',
   'priority',
   'sortBy',
   'sortOrder',
@@ -35,6 +49,17 @@ const ALLOWED_QUERY_KEYS = new Set([
   'pageSize',
 ])
 const PRIORITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+const STATUSES = new Set([
+  'NEW',
+  'OPEN',
+  'IN_PROGRESS',
+  'WAITING_FOR_REQUESTER',
+  'RESOLVED',
+  'CLOSED',
+  'REOPENED',
+  'CANCELLED',
+])
+const SCOPES = new Set(['open', 'recently-resolved'])
 const DATABASE_INT_MAX = 2_147_483_647
 
 function invalidQuery() {
@@ -88,7 +113,21 @@ export function parseTicketListQuery(
     DATABASE_INT_MAX,
   )
   const status = optionalValue(query, 'status')
-  if (status !== null && status !== 'NEW') throw invalidQuery()
+  if (status !== null && !STATUSES.has(status)) throw invalidQuery()
+
+  const scope = optionalValue(query, 'scope')
+  if (scope !== null && !SCOPES.has(scope)) throw invalidQuery()
+  if (scope !== null && status !== null) throw invalidQuery()
+
+  const rawAsOf = optionalValue(query, 'asOf')
+  if ((scope === 'recently-resolved') !== (rawAsOf !== null)) throw invalidQuery()
+  const asOf = rawAsOf === null ? null : new Date(rawAsOf)
+  if (
+    asOf !== null &&
+    (Number.isNaN(asOf.getTime()) || asOf.toISOString() !== rawAsOf)
+  ) {
+    throw invalidQuery()
+  }
 
   const priority = optionalValue(query, 'priority')
   if (priority !== null && !PRIORITIES.has(priority)) throw invalidQuery()
@@ -115,7 +154,9 @@ export function parseTicketListQuery(
     search,
     categoryId,
     relatedSystemId,
-    status: status as 'NEW' | null,
+    status: status as TicketStatus | null,
+    scope: scope as TicketScope | null,
+    asOf,
     priority: priority as TicketListQuery['priority'],
     sortBy: sortBy as TicketSortField,
     sortOrder,

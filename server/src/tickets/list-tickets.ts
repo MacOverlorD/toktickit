@@ -7,6 +7,9 @@ export const listTickets: RequestHandler = async (request, response, next) => {
   try {
     const requester = response.locals.requester as { id: number }
     const query = parseTicketListQuery(request.query)
+    const recentWindowStart = query.asOf === null
+      ? null
+      : new Date(query.asOf.getTime() - 7 * 24 * 60 * 60 * 1000)
     const where: Prisma.TicketWhereInput = {
       requesterId: requester.id,
       ...(query.search && {
@@ -21,6 +24,15 @@ export const listTickets: RequestHandler = async (request, response, next) => {
         relatedSystemId: query.relatedSystemId,
       }),
       ...(query.status !== null && { status: query.status }),
+      ...(query.scope === 'open' && {
+        status: {
+          in: ['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'REOPENED'],
+        },
+      }),
+      ...(query.scope === 'recently-resolved' && query.asOf && recentWindowStart && {
+        status: { in: ['RESOLVED', 'CLOSED'] },
+        resolvedAt: { gte: recentWindowStart, lte: query.asOf },
+      }),
       ...(query.priority !== null && { requestedPriority: query.priority }),
     }
     const orderBy: Prisma.TicketOrderByWithRelationInput[] = [

@@ -1,5 +1,6 @@
 import {
   KeyRound,
+  LayoutDashboard,
   List,
   LogOut,
   Menu,
@@ -104,6 +105,16 @@ function AppShell() {
             <nav className={'app-navigation'} aria-label={'Primary navigation'}>
               {user.role === 'REQUESTER' && (
                 <>
+                  <NavLink
+                    className={navigationClass}
+                    to={'/dashboard'}
+                    end
+                    aria-disabled={isTicketSubmitting || undefined}
+                    onClick={guardTicketNavigation}
+                  >
+                    <LayoutDashboard aria-hidden={'true'} />
+                    <span>Dashboard</span>
+                  </NavLink>
                   <NavLink
                     className={navigationClass}
                     to={'/tickets'}
