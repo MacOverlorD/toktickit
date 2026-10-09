@@ -19,13 +19,14 @@ function fromSearch(parameters: URLSearchParams): StaffQueueQuery {
   const owner = parameters.get('ownerId')
   return {
     ...DEFAULT_STAFF_QUEUE_QUERY,
+    scope: parameters.get('scope') as StaffQueueQuery['scope'],
     search: parameters.get('search') ?? '',
     categoryId: number('categoryId'),
     relatedSystemId: number('relatedSystemId'),
     status: parameters.get('status') as TicketStatus | null,
     requestedPriority: parameters.get('requestedPriority') as RequestedPriority | null,
     itPriority: parameters.get('itPriority') as RequestedPriority | null,
-    ownerId: owner === 'unassigned' ? owner : owner ? Number(owner) : null,
+    ownerId: owner === 'unassigned' || owner === 'me' ? owner : owner ? Number(owner) : null,
     sortBy: (parameters.get('sortBy') as StaffQueueQuery['sortBy']) ?? 'updatedAt',
     sortOrder: parameters.get('sortOrder') === 'asc' ? 'asc' : 'desc',
     page: Number(parameters.get('page') ?? 1),
@@ -79,7 +80,7 @@ export default function StaffTicketQueuePage() {
   function page(next: number) {
     setParameters(queueSearch({ ...query, page: next }))
   }
-  const hasFilters = Boolean(query.search || query.categoryId || query.relatedSystemId || query.status || query.requestedPriority || query.itPriority || query.ownerId)
+  const hasFilters = Boolean(query.scope || query.search || query.categoryId || query.relatedSystemId || query.status || query.requestedPriority || query.itPriority || query.ownerId)
   function clear() {
     setDraft(DEFAULT_STAFF_QUEUE_QUERY)
     setParameters(queueSearch(DEFAULT_STAFF_QUEUE_QUERY))
@@ -96,10 +97,11 @@ export default function StaffTicketQueuePage() {
       </label>
       <label>Category<select aria-label={'Category'} value={query.categoryId ?? ''} onChange={event => applyControl({ categoryId: event.target.value ? Number(event.target.value) : null })}><option value={''}>All</option>{result?.filterOptions.categories.map(item => <option key={item.id} value={item.id}>{item.name}{item.isActive ? '' : ' (historical)'}</option>)}</select></label>
       <label>Related System<select aria-label={'Related System'} value={query.relatedSystemId ?? ''} onChange={event => applyControl({ relatedSystemId: event.target.value ? Number(event.target.value) : null })}><option value={''}>All</option>{result?.filterOptions.relatedSystems.map(item => <option key={item.id} value={item.id}>{item.name}{item.isActive ? '' : ' (historical)'}</option>)}</select></label>
-      <label>Status<select aria-label={'Status'} value={query.status ?? ''} onChange={event => applyControl({ status: (event.target.value || null) as TicketStatus | null })}><option value={''}>All</option>{statuses.map(item => <option key={item} value={item}>{label(item)}</option>)}</select></label>
+      <label>Ticket Scope<select aria-label={'Ticket Scope'} value={query.scope ?? ''} onChange={event => applyControl({ scope: (event.target.value || null) as StaffQueueQuery['scope'], status: null })}><option value={''}>All tickets</option><option value={'active'}>Active tickets</option></select></label>
+      <label>Status<select aria-label={'Status'} value={query.status ?? ''} onChange={event => applyControl({ status: (event.target.value || null) as TicketStatus | null, scope: null })}><option value={''}>All</option>{statuses.map(item => <option key={item} value={item}>{label(item)}</option>)}</select></label>
       <label>Requested Priority<select aria-label={'Requested Priority'} value={query.requestedPriority ?? ''} onChange={event => applyControl({ requestedPriority: (event.target.value || null) as RequestedPriority | null })}><option value={''}>All</option>{priorities.map(item => <option key={item} value={item}>{label(item)}</option>)}</select></label>
       <label>IT Priority<select aria-label={'IT Priority'} value={query.itPriority ?? ''} onChange={event => applyControl({ itPriority: (event.target.value || null) as RequestedPriority | null })}><option value={''}>All</option>{priorities.map(item => <option key={item} value={item}>{label(item)}</option>)}</select></label>
-      <label>Owner<select aria-label={'Owner'} value={query.ownerId ?? ''} onChange={event => applyControl({ ownerId: event.target.value === 'unassigned' ? 'unassigned' : event.target.value ? Number(event.target.value) : null })}><option value={''}>All</option><option value={'unassigned'}>Unassigned</option>{result?.filterOptions.owners.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+      <label>Owner<select aria-label={'Owner'} value={query.ownerId ?? ''} onChange={event => applyControl({ ownerId: event.target.value === 'unassigned' || event.target.value === 'me' ? event.target.value : event.target.value ? Number(event.target.value) : null })}><option value={''}>All</option><option value={'me'}>Owned by me</option><option value={'unassigned'}>Unassigned</option>{result?.filterOptions.owners.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
       <label>Sort By<select aria-label={'Sort By'} value={query.sortBy} onChange={event => applyControl({ sortBy: event.target.value as StaffQueueQuery['sortBy'] })}><option value={'updatedAt'}>Updated</option><option value={'createdAt'}>Created</option><option value={'ticketNumber'}>Ticket Number</option><option value={'summary'}>Summary</option><option value={'itPriority'}>IT Priority</option></select></label>
       <label>Order<select aria-label={'Sort Order'} value={query.sortOrder} onChange={event => applyControl({ sortOrder: event.target.value as 'asc' | 'desc' })}><option value={'desc'}>Descending</option><option value={'asc'}>Ascending</option></select></label>
       <label>Page Size<select aria-label={'Page Size'} value={query.pageSize} onChange={event => applyControl({ pageSize: Number(event.target.value) as 10 | 20 | 50 })}><option>10</option><option>20</option><option>50</option></select></label>

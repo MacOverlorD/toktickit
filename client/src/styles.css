@@ -1731,6 +1731,96 @@ a[aria-disabled='true'] {
   gap: var(--space-4);
 }
 
+.operations-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.operations-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.operations-breakdown a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-page);
+  font-weight: 700;
+}
+
+.operations-breakdown strong {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.dashboard-action-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-action-list li {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-page);
+}
+
+.dashboard-action-list li > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dashboard-action-list a {
+  font-weight: 800;
+}
+
+.dashboard-action-list p,
+.dashboard-action-list small,
+.administration-summary {
+  margin: 0;
+}
+
+.dashboard-action-list small {
+  color: var(--color-text-muted);
+}
+
+.administration-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.administration-summary div {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-page);
+}
+
+.administration-summary dt {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.administration-summary dd {
+  margin: var(--space-2) 0 0;
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
 .dashboard-metric-card,
 .dashboard-panel,
 .dashboard-zero-action {
@@ -1883,11 +1973,27 @@ a[aria-disabled='true'] {
   .dashboard-sections {
     grid-template-columns: 1fr;
   }
+
+  .operations-metrics,
+  .administration-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
   .dashboard-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .operations-metrics,
+  .operations-breakdown,
+  .administration-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-action-list li > div {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .dashboard-panel-heading,

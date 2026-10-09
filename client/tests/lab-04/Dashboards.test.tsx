@@ -1,12 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../src/App'
+import * as operationsApi from '../../src/api/operations-dashboard'
 import * as dashboardApi from '../../src/api/requester-dashboard'
 import type { AuthPayload } from '../../src/auth/AuthContext'
 
 vi.mock('../../src/api/requester-dashboard', async (importOriginal) => ({
   ...(await importOriginal<typeof dashboardApi>()),
   getRequesterDashboard: vi.fn(),
+}))
+
+vi.mock('../../src/api/operations-dashboard', async (importOriginal) => ({
+  ...(await importOriginal<typeof operationsApi>()),
+  getOperationsDashboard: vi.fn(),
 }))
 
 const dashboard: dashboardApi.RequesterDashboardResult = {
@@ -52,9 +58,82 @@ const staff: AuthPayload = {
   expiresAt: '2026-10-09T00:00:00.000Z',
 }
 
+const administrator: AuthPayload = {
+  ...staff,
+  user: {
+    ...staff.user,
+    id: 10,
+    name: 'Araya Administrator',
+    email: 'araya@example.test',
+    role: 'ADMINISTRATOR',
+  },
+}
+
+const operationsDashboard: operationsApi.OperationsDashboardResult = {
+  asOf: '2026-10-08T12:00:00.000Z',
+  counts: {
+    unassigned: 5,
+    ownedByMe: 3,
+    myAssignedActions: 2,
+    myPerformedLast7Days: 7,
+  },
+  byStatus: {
+    NEW: 2,
+    OPEN: 3,
+    IN_PROGRESS: 4,
+    WAITING_FOR_REQUESTER: 1,
+    RESOLVED: 5,
+    CLOSED: 6,
+    REOPENED: 0,
+    CANCELLED: 0,
+  },
+  byPriority: { LOW: 2, MEDIUM: 3, HIGH: 4, URGENT: 1 },
+  myActions: [
+    {
+      id: 42,
+      ticketNumber: 'TKT-20261008-OPS00001',
+      description: 'Verify the service recovery',
+      status: 'IN_PROGRESS',
+      assignedTo: { id: 9, name: 'Suda Staff', role: 'IT_STAFF' },
+      updatedAt: '2026-10-08T11:30:00.000Z',
+    },
+  ],
+  myPerformedActions: [
+    {
+      id: 43,
+      ticketNumber: 'TKT-20261008-OPS00003',
+      description: 'Confirmed the recovery result',
+      status: 'COMPLETED',
+      performedBy: { id: 9, name: 'Suda Staff', role: 'IT_STAFF' },
+      completedAt: '2026-10-08T11:15:00.000Z',
+    },
+  ],
+  urgentTickets: [
+    {
+      ticketNumber: 'TKT-20261008-OPS00002',
+      summary: 'Production network unavailable',
+      status: 'OPEN',
+      itPriority: 'URGENT',
+      owner: null,
+      updatedAt: '2026-10-08T11:45:00.000Z',
+    },
+  ],
+  recentTickets: [
+    {
+      ticketNumber: 'TKT-20261008-OPS00001',
+      summary: 'Service recovery in progress',
+      status: 'IN_PROGRESS',
+      itPriority: 'HIGH',
+      owner: { id: 9, name: 'Suda Staff', role: 'IT_STAFF' },
+      updatedAt: '2026-10-08T11:30:00.000Z',
+    },
+  ],
+}
+
 beforeEach(() => {
   window.history.replaceState({}, '', '/dashboard')
   vi.mocked(dashboardApi.getRequesterDashboard).mockResolvedValue(dashboard)
+  vi.mocked(operationsApi.getOperationsDashboard).mockResolvedValue(operationsDashboard)
 })
 
 afterEach(() => {
@@ -127,5 +206,89 @@ describe('Issue 59 Requester Dashboard', () => {
     render(<App initialAuth={staff} />)
     expect(screen.getByRole('heading', { name: 'Forbidden' })).toBeInTheDocument()
     expect(dashboardApi.getRequesterDashboard).not.toHaveBeenCalled()
+  })
+})
+
+describe('Issue 60 Operational Dashboard', () => {
+  it('shows distinct operational metrics, exact drill-downs, lists, and active navigation', async () => {
+    window.history.replaceState({}, '', '/staff/dashboard')
+    render(<App initialAuth={staff} />)
+
+    expect(screen.getByText('Loading operational dashboard')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Operational Dashboard' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Unassigned tickets: 5')).toBeInTheDocument()
+    expect(screen.getByLabelText('Owned by me: 3')).toBeInTheDocument()
+    expect(screen.getByLabelText('Actions assigned to me: 2')).toBeInTheDocument()
+    expect(screen.getByLabelText('Completed by me in 7 days: 7')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /View queue/ }).find(
+      (link) => link.getAttribute('href')?.includes('ownerId=unassigned'),
+    )).toHaveAttribute('href', '/staff/tickets?scope=active&ownerId=unassigned')
+    expect(screen.getByRole('link', { name: /View my tickets/ })).toHaveAttribute(
+      'href',
+      '/staff/tickets?scope=active&ownerId=me',
+    )
+    expect(screen.getByRole('link', { name: /Action #42/ })).toHaveAttribute(
+      'href',
+      '/staff/tickets/TKT-20261008-OPS00001#action-42',
+    )
+    expect(screen.getByRole('link', { name: /Action #43/ })).toHaveAttribute(
+      'href',
+      '/staff/tickets/TKT-20261008-OPS00003#action-43',
+    )
+    expect(screen.getByRole('link', { name: 'View completed Actions' })).toHaveAttribute(
+      'href',
+      '#my-performed-actions',
+    )
+    expect(screen.getByText('Production network unavailable')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Account summary' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('shows the account summary to Administrators only', async () => {
+    vi.mocked(operationsApi.getOperationsDashboard).mockResolvedValue({
+      ...operationsDashboard,
+      administration: {
+        activeRequesters: 10,
+        activeStaff: 4,
+        activeAdministrators: 2,
+        inactiveAccounts: 3,
+      },
+    })
+    window.history.replaceState({}, '', '/staff/dashboard')
+    render(<App initialAuth={administrator} />)
+
+    expect(await screen.findByRole('heading', { name: 'Account summary' })).toBeInTheDocument()
+    expect(screen.getByText('Active Administrators')).toBeInTheDocument()
+    expect(screen.getByText('Inactive Accounts')).toBeInTheDocument()
+  })
+
+  it('renders empty lists and retries a safe failure', async () => {
+    vi.mocked(operationsApi.getOperationsDashboard)
+      .mockRejectedValueOnce(new Error('private database detail'))
+      .mockResolvedValueOnce({
+        ...operationsDashboard,
+        myActions: [],
+        myPerformedActions: [],
+        urgentTickets: [],
+        recentTickets: [],
+      })
+    window.history.replaceState({}, '', '/staff/dashboard')
+    render(<App initialAuth={staff} />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Operational dashboard unavailable')
+    expect(screen.queryByText('private database detail')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByText('No active Actions are assigned to you.')).toBeInTheDocument()
+    expect(screen.getByText('You have not completed any Actions in this window.')).toBeInTheDocument()
+    expect(screen.getByText('No active urgent tickets.')).toBeInTheDocument()
+    expect(screen.getByText('No tickets are available.')).toBeInTheDocument()
+    await waitFor(() => expect(operationsApi.getOperationsDashboard).toHaveBeenCalledTimes(2))
+  })
+
+  it('blocks a Requester direct route before requesting operational data', () => {
+    window.history.replaceState({}, '', '/staff/dashboard')
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Forbidden' })).toBeInTheDocument()
+    expect(operationsApi.getOperationsDashboard).not.toHaveBeenCalled()
   })
 })

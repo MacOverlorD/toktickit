@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { Router } from 'express'
-import { requireRole } from '../auth/auth-middleware.js'
+import { authSession, requireRole } from '../auth/auth-middleware.js'
 import prisma from '../prisma.js'
 import { parseQueueQuery } from './queue-query.js'
 
@@ -11,6 +11,7 @@ const ownerWhere: Prisma.UserWhereInput = {
   isActive: true,
   role: { in: ['IT_STAFF', 'ADMINISTRATOR'] },
 }
+const activeStatuses = ['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'REOPENED'] as const
 
 queueRouter.get('/ticket-owners', async (_request, response, next) => {
   try {
@@ -28,6 +29,7 @@ queueRouter.get('/ticket-owners', async (_request, response, next) => {
 queueRouter.get('/tickets', async (request, response, next) => {
   try {
     const query = parseQueueQuery(request.query)
+    const actorId = authSession(response).user.id
     const where: Prisma.TicketWhereInput = {
       ...(query.search !== null && {
         OR: [
@@ -39,11 +41,15 @@ queueRouter.get('/tickets', async (request, response, next) => {
       }),
       ...(query.categoryId !== null && { categoryId: query.categoryId }),
       ...(query.relatedSystemId !== null && { relatedSystemId: query.relatedSystemId }),
+      ...(query.scope === 'active' && { status: { in: [...activeStatuses] } }),
       ...(query.status !== null && { status: query.status }),
       ...(query.requestedPriority !== null && { requestedPriority: query.requestedPriority }),
       ...(query.itPriority !== null && { itPriority: query.itPriority }),
       ...(query.ownerId !== null && {
-        ownerId: query.ownerId === 'unassigned' ? null : query.ownerId,
+        ownerId:
+          query.ownerId === 'unassigned'
+            ? null
+            : query.ownerId === 'me' ? actorId : query.ownerId,
       }),
     }
     const orderBy: Prisma.TicketOrderByWithRelationInput[] = [

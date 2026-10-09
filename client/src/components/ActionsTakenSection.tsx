@@ -257,6 +257,21 @@ export default function ActionsTakenSection({
 
   useEffect(() => { void load() }, [load])
 
+  useEffect(() => {
+    if (state !== 'ready') return
+    let targetId: string
+    try {
+      targetId = decodeURIComponent(window.location.hash.slice(1))
+    } catch {
+      return
+    }
+    if (!/^action-[1-9]\d*$/.test(targetId)) return
+    const target = document.getElementById(targetId)
+    if (!target) return
+    target.focus({ preventScroll: true })
+    target.scrollIntoView({ block: 'center', behavior: 'auto' })
+  }, [items, state])
+
   function replace(next: ActionTaken) {
     setItems((current) => current.map((item) => item.id === next.id ? next : item))
     setAssignments((current) => ({ ...current, [next.id]: next.assignedTo?.id ? String(next.assignedTo.id) : '' }))
