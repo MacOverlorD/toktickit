@@ -19,8 +19,9 @@ audit belongs to Issue #62.
 
 | Command | Observed result |
 |---|---|
+| `npm test` | Passed end-to-end: client 163, isolated server 186, Labs 1-3 browser 10, Lab 4 browser 13 tests (372 total), plus builds; exit code 0 |
 | `npm run build` | Passed server TypeScript build, client typecheck, and Vite production build (1,867 modules) |
-| `npm test --prefix server -- --run` | 30 files, 186 tests passed; 0 failed/skipped |
+| `npm run test:server:isolated` | Fresh migrated/seeded schema; 30 files, 186 tests passed; 0 failed/skipped |
 | `npm test --prefix client -- --run` | 21 files, 163 tests passed; 0 failed/skipped |
 | `npm run test:e2e` | 10 Labs 1-3 Chromium tests passed; 0 failed/skipped |
 | `npm run test:e2e:lab4` | 13 Lab 4 Chromium tests passed; 0 failed/skipped |
@@ -31,6 +32,12 @@ state inherited from the preceding workflow test. The test now uses semantic
 heading locators, establishes its own OPEN/unassigned precondition, and sends a
 tampered IN_PROGRESS transition to verify the server-side owner guard. The
 isolated test and then the complete suite were rerun after the correction.
+
+The fresh-schema server run also exposed a historical frozen date in the
+dashboard API tests. Newly seeded records had timestamps after that cutoff,
+so snapshot counts excluded records that live queue lists included. The tests
+now freeze a relative cutoff after seed creation; the focused eight-test run
+passed while retaining the inclusive/exclusive seven-day boundary assertions.
 
 The Lab 4 regression test additionally walks critical Requester, Staff, and
 Administrator routes, verifies safe forbidden states, checks the integrated
@@ -52,29 +59,67 @@ and user management. All three role tests passed with no serious or critical
 violations. Keyboard entry also produced a visible `:focus-visible` target with
 a nonzero outline.
 
+Readiness now checks the loaded dashboard summary, an actual populated Action
+record for both Ticket-detail roles, and an Administrator account result.
+The audit also waits for both page and Action loading indicators to disappear.
+The accessibility Action fixture is removed after that suite, so it does not
+alter later workflow tests.
+
 The browser suites assert no horizontal document overflow for Actions and both
 dashboards at 1440 x 900, 768 x 1024, 390 x 844, and 320 x 700. The promoted
 320 px Action/Ticket detail and operational dashboard were manually inspected:
 controls stack within the viewport, labels remain readable, and Ticket/Action
 states include text/icons rather than relying on color alone.
 
+The header allows navigation and identity content to wrap, uses a flexible
+name column, and gives Change password and Log out their own grid columns.
+After resizing, visual checks wait for final content, loading completion,
+fonts, and two animation frames before asserting overflow and taking images.
+The three tablet full-page images now measure exactly 768 px wide; all
+full-page images measure 1440/768/390/320 px as named. Region screenshots are
+narrower than their viewport. The regenerated desktop operational dashboard
+contains metrics and Action records rather than a loading shell.
+
 ## Dashboard performance smoke
 
-`server/tests/lab-04/dashboard-performance.test.ts` creates an isolated
-PostgreSQL workload of 1,000 Tickets and 5,000 Actions, performs five warmups,
+`npm run test:performance:lab4` runs
+`server/tests/lab-04/dashboard-performance.test.ts` in a new uniquely named
+PostgreSQL schema. The runner deploys all six migrations and the standard seed
+before testing, and drops only its generated schema in cleanup. The smoke
+asserts a baseline of exactly 12 seeded Tickets and 4 seeded Actions before
+adding 1,000 Tickets and 5,000 Actions. Global endpoints therefore measure
+exactly 1,012 Tickets and 5,004 Actions without existing development records.
+It performs five warmups,
 then records 30 sequential samples for each dashboard and key list endpoint.
 Lists use page 1 with the maximum supported 50-row page; the Staff queue uses
 the indexed active scope. The local gate is p95 <= 500 ms per endpoint.
 
 | Endpoint | Observed p95 | Gate |
 |---|---:|---:|
-| Requester dashboard | 54.09 ms | <= 500 ms |
-| Operations dashboard | 117.29 ms | <= 500 ms |
-| My Tickets (`page=1&pageSize=50`) | 50.61 ms | <= 500 ms |
-| Staff queue (`scope=active&page=1&pageSize=50`) | 59.97 ms | <= 500 ms |
+| Requester dashboard | 44.22 ms | <= 500 ms |
+| Operations dashboard | 119.57 ms | <= 500 ms |
+| My Tickets (`page=1&pageSize=50`) | 54.77 ms | <= 500 ms |
+| Staff queue (`scope=active&page=1&pageSize=50`) | 52.63 ms | <= 500 ms |
 
-The test passed and removes its Action, Ticket, Session, and User fixtures in
-cleanup. It is part of the full server suite so later changes retain the gate.
+Captured at `2026-10-09T17:06:25.252Z` on Node `v22.18.0` during the
+aggregate run. These controlled-schema results replace the earlier
+development-database measurements.
+The [promoted performance result](../../artifacts/lab-04/performance-smoke.json)
+preserves the observed JSON from that run.
+
+The test removes its Action, Ticket, Session, and User fixtures in cleanup.
+The runner drops the temporary schema in a finally block. Direct execution
+without the matching isolated-schema environment fails with instructions
+instead of measuring uncontrolled data. The corrected measurements are also
+written to ignored `artifacts/lab-04/performance-results/latest.json` with the
+timestamp, Node version, baseline/fixture/total counts, sample counts, budget,
+and per-endpoint p95. Root `npm test` includes this isolated server suite,
+client tests, builds, and both browser configurations.
+The performance-result directory is separate from Playwright's output
+directory so browser startup cannot clear the server measurement artifact.
+After that path correction, the isolated performance smoke passed again and
+both visual tests passed; the performance JSON's SHA-256 remained unchanged
+across the browser run.
 
 ## Reviewed visual inventory
 

@@ -10,7 +10,9 @@ import {
 
 const marker = randomUUID().replaceAll('-', '').slice(0, 6).toUpperCase()
 const emailMarker = marker.toLowerCase()
-const fixedAsOf = new Date('2026-10-08T12:00:00.000Z')
+// Include the freshly created seed baseline in the frozen snapshot. A historical
+// cutoff excludes today's seed records from dashboards but not live queue lists.
+const fixedAsOf = new Date(Date.now() + 24 * 60 * 60 * 1000)
 const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
 const userIds: number[] = []
 const sessions: TestSession[] = []

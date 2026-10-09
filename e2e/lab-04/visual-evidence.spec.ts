@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '@playwright/test'
 import {
   E2E_REQUESTER_PASSWORD,
   E2E_REQUESTER_USERS,
@@ -70,15 +70,43 @@ async function login(page: Page, email: string, heading: string) {
   await expect(page.getByRole('heading', { name: heading })).toBeVisible()
 }
 
-async function capture(page: Page, folder: string, name: string) {
+async function waitForStableLayout(page: Page, ready: Locator) {
+  await expect(ready).toBeVisible()
+  await expect(page.locator('.feedback-loading')).toHaveCount(0)
+  await expect(page.locator('.actions-loading')).toHaveCount(0)
+  await page.evaluate(async () => {
+    await document.fonts.ready
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  })
+}
+
+async function assertNoHorizontalOverflow(page: Page, viewportWidth: number) {
+  const layout = await page.evaluate(() => {
+    const elements = [...document.querySelectorAll('body *')]
+      .map((element) => {
+        const rect = element.getBoundingClientRect()
+        return { tag: element.tagName, className: (element as HTMLElement).className, right: Math.round(rect.right), width: Math.round(rect.width) }
+      })
+      .filter((element) => element.right > innerWidth + 1)
+      .slice(0, 8)
+    return {
+      viewportWidth: innerWidth,
+      documentWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+      elements,
+    }
+  })
+  expect(layout.documentWidth, JSON.stringify(layout.elements)).toBeLessThanOrEqual(viewportWidth)
+}
+
+async function capture(page: Page, folder: string, name: string, ready: Locator) {
   const root = process.env.PROMOTE_LAB4_EVIDENCE === '1'
     ? 'artifacts/lab-04/screenshots'
     : 'artifacts/lab-04/test-results/visual-captures'
   for (const viewport of viewports) {
     await page.setViewportSize(viewport)
     await page.evaluate(() => scrollTo(0, 0))
-    await expect(page.locator('main')).toBeVisible()
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await waitForStableLayout(page, ready)
+    await assertNoHorizontalOverflow(page, viewport.width)
     await page.screenshot({
       path: root + '/' + folder + '/' + name + '-' + viewport.name + '.png',
       fullPage: true,
@@ -86,15 +114,15 @@ async function capture(page: Page, folder: string, name: string) {
   }
 }
 
-async function captureRegion(page: Page, folder: string, name: string) {
+async function captureRegion(page: Page, folder: string, name: string, ready: Locator) {
   const root = process.env.PROMOTE_LAB4_EVIDENCE === '1'
     ? 'artifacts/lab-04/screenshots'
     : 'artifacts/lab-04/test-results/visual-captures'
   const actions = page.getByRole('region', { name: 'Actions Taken' })
   for (const viewport of viewports) {
     await page.setViewportSize(viewport)
-    await expect(actions).toBeVisible()
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await waitForStableLayout(page, ready)
+    await assertNoHorizontalOverflow(page, viewport.width)
     await actions.screenshot({
       path: root + '/' + folder + '/' + name + '-' + viewport.name + '.png',
     })
@@ -104,17 +132,17 @@ async function captureRegion(page: Page, folder: string, name: string) {
 test('captures Requester dashboard evidence at required viewports', async ({ page }) => {
   await login(page, E2E_REQUESTER_USERS[0].email, 'My Tickets')
   await page.goto('/dashboard')
-  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
-  await capture(page, 'requester-dashboard', 'dashboard')
+  const dashboardSummary = page.getByRole('region', { name: 'Ticket summary' })
+  await capture(page, 'requester-dashboard', 'dashboard', dashboardSummary)
 })
 
 test('captures operational dashboard and Actions evidence at required viewports', async ({ page }) => {
   await login(page, E2E_STAFF_USER.email, 'Ticket Queue')
   await page.goto('/staff/dashboard')
-  await expect(page.getByRole('heading', { name: 'Operational Dashboard', exact: true })).toBeVisible()
-  await capture(page, 'operations-dashboard', 'dashboard')
+  const operationsSummary = page.getByRole('region', { name: 'Operational summary' })
+  await capture(page, 'operations-dashboard', 'dashboard', operationsSummary)
   await page.goto('/staff/tickets/' + E2E_WORKFLOW_TICKET)
-  await expect(page.getByRole('heading', { name: 'Actions Taken' })).toBeVisible()
-  await captureRegion(page, 'actions', 'ticket-actions')
-  await capture(page, 'ticket-workflow', 'staff-ticket-detail')
+  const action = page.getByText('Verify the requester can sign in after the access reset', { exact: true })
+  await captureRegion(page, 'actions', 'ticket-actions', action)
+  await capture(page, 'ticket-workflow', 'staff-ticket-detail', action)
 })

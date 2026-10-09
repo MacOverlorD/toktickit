@@ -3,13 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "npm run test:server && npm run test:client && npm run test:e2e",
+    "test": "npm run test:quality:lab4",
     "test:server": "npm test --prefix server",
+    "test:server:isolated": "node scripts/run-lab4-isolated-server.mjs",
+    "test:performance:lab4": "node scripts/run-lab4-isolated-server.mjs tests/lab-04/dashboard-performance.test.ts",
     "test:client": "npm test --prefix client",
     "test:e2e": "playwright test",
     "test:e2e:lab4": "playwright test --config playwright.lab4.config.ts",
+    "test:e2e:all": "npm run test:e2e && npm run test:e2e:lab4",
     "test:e2e:headed": "playwright test --headed",
-    "build": "npm run build --prefix server && npm run typecheck --prefix client && npm run build --prefix client"
+    "build": "npm run build --prefix server && npm run typecheck --prefix client && npm run build --prefix client",
+    "test:quality:lab4": "npm run test:client && npm run test:server:isolated && npm run build && npm run test:e2e:all"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

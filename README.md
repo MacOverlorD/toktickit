@@ -221,7 +221,7 @@ session, and every drill-down uses the equivalent Ticket/Action filter.
 
 ```powershell
 npm run prisma:generate --prefix server
-npm run test:server
+npm run test:server:isolated
 npm run test:client
 npm run build
 npm run test:e2e
@@ -229,8 +229,22 @@ npm run test:e2e:lab4
 npm run prisma:seed --prefix server
 ```
 
-The root `npm test` command also runs server tests, client tests, and the complete
-Chromium E2E suite. Playwright always starts fresh isolated services at
+The root `npm test` command runs client tests, the isolated server suite,
+production builds, and both Labs 1-3 and Lab 4 Chromium E2E configurations.
+`npm run test:server:isolated` creates a uniquely named PostgreSQL schema,
+deploys all migrations, seeds it, runs the server tests sequentially, and drops
+only that generated schema in cleanup. `DATABASE_URL` in `server/.env` must
+allow creating schemas. To run only the performance smoke, use
+`npm run test:performance:lab4`. It verifies the seed baseline of 12 Tickets
+and 4 Actions before adding 1,000 Tickets and 5,000 Actions; global endpoints
+therefore measure exactly 1,012 Tickets and 5,004 Actions. Ordinary direct
+server runs containing this smoke fail with instructions to use isolation.
+The measured counts and p95 values are written to the ignored
+`artifacts/lab-04/performance-results/latest.json` for inspection. This path is
+separate from Playwright's cleared output directory, so the aggregate run
+preserves the performance result.
+
+Playwright always starts fresh isolated services at
 `http://localhost:5174` (client) and `http://localhost:3100` (API), using
 `client/.env.e2e` so normal development ports can remain independent. If either
 E2E port is occupied, the run fails instead of reusing a potentially stale app.

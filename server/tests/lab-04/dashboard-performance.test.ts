@@ -1,9 +1,20 @@
 import { randomUUID } from 'node:crypto'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../src/app.js'
 import prisma from '../../src/prisma.js'
 import { createTestSession, type TestSession } from '../helpers/auth-session.js'
+import { actionSeeds } from '../../prisma/seed-data.js'
+
+const isolatedSchema = process.env.TOKTICKIT_ISOLATED_TEST_SCHEMA
+const databaseSchema = process.env.DATABASE_URL
+  ? new URL(process.env.DATABASE_URL).searchParams.get('schema')
+  : null
+if (!isolatedSchema || isolatedSchema !== databaseSchema) {
+  throw new Error('Run this performance smoke through npm run test:performance:lab4 so it uses a fresh migrated and seeded schema.')
+}
 
 const marker = randomUUID().replaceAll('-', '').slice(0, 4).toUpperCase()
 const emailMarker = marker.toLowerCase()
@@ -18,6 +29,9 @@ function ticketNumber(index: number) {
 }
 
 beforeAll(async () => {
+  // Verify the controlled seed baseline before adding performance fixtures.
+  expect(await prisma.ticket.count()).toBe(12)
+  expect(await prisma.actionTaken.count()).toBe(actionSeeds.length)
   const [category, system] = await Promise.all([
     prisma.category.findFirstOrThrow({ where: { isActive: true }, orderBy: { id: 'asc' } }),
     prisma.relatedSystem.findFirstOrThrow({ where: { isActive: true }, orderBy: { id: 'asc' } }),
@@ -86,6 +100,8 @@ beforeAll(async () => {
       }),
     })
   }
+  expect(await prisma.ticket.count()).toBe(1012)
+  expect(await prisma.actionTaken.count()).toBe(5000 + actionSeeds.length)
 }, 120_000)
 
 afterAll(async () => {
@@ -116,10 +132,25 @@ describe('Lab 4 dashboard and list performance smoke', () => {
     const operationsP95 = await p95('/api/dashboard/operations', staffSession)
     const myTicketsP95 = await p95('/api/tickets?page=1&pageSize=50', requesterSession)
     const staffQueueP95 = await p95('/api/staff/tickets?scope=active&page=1&pageSize=50', staffSession)
-    console.info(`L4-PERF-001 requester_p95_ms=${requesterP95.toFixed(2)} operations_p95_ms=${operationsP95.toFixed(2)} my_tickets_p95_ms=${myTicketsP95.toFixed(2)} staff_queue_p95_ms=${staffQueueP95.toFixed(2)} tickets=1000 actions=5000 samples=30 warmups=5`)
+    console.info(`L4-PERF-001 requester_p95_ms=${requesterP95.toFixed(2)} operations_p95_ms=${operationsP95.toFixed(2)} my_tickets_p95_ms=${myTicketsP95.toFixed(2)} staff_queue_p95_ms=${staffQueueP95.toFixed(2)} fixture_tickets=1000 fixture_actions=5000 baseline_tickets=12 baseline_actions=${actionSeeds.length} total_tickets=1012 total_actions=${5000 + actionSeeds.length} samples=30 warmups=5`)
     expect(requesterP95).toBeLessThanOrEqual(500)
     expect(operationsP95).toBeLessThanOrEqual(500)
     expect(myTicketsP95).toBeLessThanOrEqual(500)
     expect(staffQueueP95).toBeLessThanOrEqual(500)
+    const resultFile = process.env.TOKTICKIT_PERFORMANCE_RESULT_FILE
+    if (resultFile) {
+      await mkdir(dirname(resultFile), { recursive: true })
+      await writeFile(resultFile, JSON.stringify({
+        capturedAt: new Date().toISOString(),
+        nodeVersion: process.version,
+        baseline: { tickets: 12, actions: actionSeeds.length },
+        fixtures: { tickets: 1000, actions: 5000 },
+        total: { tickets: 1012, actions: 5000 + actionSeeds.length },
+        warmups: 5,
+        samples: 30,
+        budgetMs: 500,
+        p95Ms: { requester: requesterP95, operations: operationsP95, myTickets: myTicketsP95, staffQueue: staffQueueP95 },
+      }, null, 2) + '\n')
+    }
   }, 120_000)
 })

@@ -23,6 +23,13 @@ The final submission requires 6-10 selected prompts. Only prompts actually used 
 
 ## Assistance boundaries
 
+Review follow-up for prompt 6 used PR #70's four peer findings to complete the
+root aggregate command, wait for loaded content before axe/screenshots, fix
+the responsive header, regenerate the 16 images, and measure performance in a
+fresh schema with asserted baseline/fixture counts. Actual commands and
+controlled-schema p95 values are recorded in `issue-61-evidence.md`; genuine
+peer approval remains required.
+
 AI suggestions are proposals, not peer approval or test evidence. Credentials and secrets must not be inserted into prompts or committed. Any suggested domain choice is recorded in `decisions.md` and remains proposed until reviewed. Generated text is checked against the handout and actual codebase; commands/results are recorded only when observed.
 
 ## Student reflection
