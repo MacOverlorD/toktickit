@@ -22,6 +22,9 @@ const directory = path.join(root, 'artifacts/lab-04/release-results', commit)
 mkdirSync(directory, { recursive: true })
 const result = { mode: candidate ? 'candidate' : 'final-main', commit, startedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, arch: process.arch }, commands: [], passed: false }
+const history = git('log', '--graph', '--oneline', '--decorate', '-45')
+writeFileSync(path.join(directory, 'commit-history.txt'), `${history}\n`)
+result.history = { log: 'commit-history.txt', sha256: createHash('sha256').update(`${history}\n`).digest('hex') }
 const commands = [
   ['audit-documents', ['run', 'audit:docs:lab4']],
   ['release-tool-tests', ['run', 'test:release-tools:lab4']],

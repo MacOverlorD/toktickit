@@ -10,7 +10,7 @@ function gh(...args) {
 const repository = 'MacOverlorD/toktickit'
 function getPull(number) {
   const pull = gh('pr', 'view', String(number), '--repo', repository, '--json',
-    'number,title,url,baseRefName,headRefName,state,mergedAt,mergeCommit')
+    'number,title,url,baseRefName,headRefName,headRefOid,state,mergedAt,mergeCommit')
   const reviews = gh('api', `repos/${repository}/pulls/${number}/reviews`, '--paginate')
   const comments = gh('api', `repos/${repository}/pulls/${number}/comments`, '--paginate')
   return { ...pull, reviews: reviews.map(r => ({ author: r.user.login, state: r.state,

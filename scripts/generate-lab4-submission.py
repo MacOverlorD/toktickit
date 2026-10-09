@@ -38,8 +38,14 @@ if not args.preview:
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip():
         raise SystemExit("Final source must be clean.")
     releases = snapshot.get("releasePulls", [])
+    def peer_approved(pull):
+        decisions = {}
+        for review in pull["reviews"]:
+            if review["author"] != "MacOverlorD" and review["state"] in ("APPROVED", "CHANGES_REQUESTED"):
+                decisions[review["author"]] = review
+        return any(r["state"] == "APPROVED" and r["commit"] == pull.get("headRefOid") for r in decisions.values())
     if not any(p["state"] == "MERGED" and p["baseRefName"] == "main"
-               and any(r["state"] == "APPROVED" and r["author"] != "MacOverlorD" for r in p["reviews"])
+               and (p.get("mergeCommit") or {}).get("oid") == sha and peer_approved(p)
                for p in releases):
         raise SystemExit("Snapshot must contain a genuinely peer-approved merged release PR to main.")
     if not all(any(i["issue"] == number and i["status"] == "Done" for i in snapshot["project"]["items"])
@@ -55,13 +61,16 @@ if not args.preview:
         log = args.manifest.parent / command["log"]
         if hashlib.sha256(log.read_bytes()).hexdigest() != command["sha256"]:
             raise SystemExit("Verification log hash mismatch.")
+    history = manifest.get('history')
+    if not history or hashlib.sha256((args.manifest.parent / history['log']).read_bytes()).hexdigest() != history['sha256']:
+        raise SystemExit('Missing or changed commit-history evidence.')
 
 OUT = ROOT / ("tmp/pdfs/TokTickIT_Lab4_Preview.pdf" if args.preview else "output/pdf/TokTickIT_Lab4_Submission.pdf")
 OUT.parent.mkdir(parents=True, exist_ok=True)
 base = getSampleStyleSheet()
 GREEN = colors.HexColor("#164E3B")
 styles = {
-    "body": ParagraphStyle("L4body", parent=base["BodyText"], fontSize=9.5, leading=13, spaceAfter=6),
+    "body": ParagraphStyle("L4body", parent=base["BodyText"], fontSize=9.5, leading=13, spaceAfter=6, allowWidows=0, allowOrphans=0),
     "h1": ParagraphStyle("L4h1", parent=base["Heading1"], fontSize=18, leading=22, textColor=GREEN, spaceAfter=12),
     "h2": ParagraphStyle("L4h2", parent=base["Heading2"], fontSize=12, leading=16, textColor=GREEN, spaceBefore=8, spaceAfter=6),
     "small": ParagraphStyle("L4small", parent=base["BodyText"], fontSize=8, leading=10.5, spaceAfter=5),
@@ -158,6 +167,12 @@ p("Name and ID are intentionally blank at the student's request. Screenshots are
 begin(1, "Git use and engineering workflow")
 p("The Lab 3 baseline was 6e327a799531e9814101c0ef8309bf70d1e05064. Eight separately reviewed Lab 4 feature branches were merged into lab4-staging. The release must then preserve this history in main through a separately reviewed merge PR.")
 link("GitHub Project / Kanban", snapshot["project"]["url"])
+link("Commit history at the exact source SHA", f"{REPO}/commits/{sha}")
+if manifest and manifest.get('history'):
+    p("Captured feature/staging/release graph", "h2")
+    history = (args.manifest.parent / manifest['history']['log']).read_text(encoding='utf-8')
+    for line in history.splitlines()[:30]:
+        p(line, "small")
 p(f"GitHub snapshot captured at {snapshot['capturedAt']}; it is historical evidence, not a claim that the live board has never changed.")
 for item in snapshot["project"]["items"]:
     p(f"Issue #{item['issue']}: {item['status']}", "small")
@@ -207,13 +222,16 @@ p("Ticket Detail supports list, create, assign/unassign, edit, start, complete a
 p("Description is 1-2000 Unicode code points; completion result 1-4000; follow-up note 1-1000 and required only when true; evidence notes 1-1000 if supplied. Time must be a timezone-qualified ISO instant within +5 minutes. Inactive/non-operational assignees reject; requester writes return 403; cross-owner reads return non-disclosing 404. Repeated keys replay the same create, changed payloads conflict, stale versions preserve newer state, and recoverable UI failures retain drafts.")
 link("Action API lifecycle, validation, ordering and concurrency tests", f"{REPO}/blob/{sha}/server/tests/lab-04/actions.api.test.ts")
 link("UI modes, draft recovery and first-invalid focus", f"{REPO}/blob/{sha}/client/tests/lab-04/ActionsTaken.test.tsx")
-figure("actions", "ticket-actions-mobile.png", "Populated Actions view; full original includes additional records and operation controls.", height=1050, max_width=105*mm)
+figure("actions", "ticket-actions-mobile.png", "Planned Action with assignment and lifecycle controls.", height=990, max_width=86*mm)
+story.append(PageBreak())
+p("Multiple Actions on the same Ticket", "h2")
+figure("actions", "ticket-actions-mobile.png", "Completed Actions preserve work time, result and actual performer; terminal records are read-only.", top=990, height=1050, max_width=105*mm)
 
 begin(7, "Working Ticket workflow")
 p("The self-contained 19-edge matrix is rendered in Part 2. Only Staff/Admin execute formal transitions; owner and confirmation requirements are enforced server-side. Requester indication is advisory. Resolution requires a completed nonblank-result Action in the current work cycle; reopen increments the cycle and clears resolution metadata, so old work cannot resolve a new cycle.")
 p("Terminal Actions are immutable, corrections append a new Action referencing the old ID, and communication remains append-only. Shared-safe requester projections omit internal notes and operational control fields. Lists are ordered by createdAt DESC, id DESC; API tests verify stable ties and role visibility. Ticket-workflow tests exhaust both allowed and forbidden edges, direct gate bypass, concurrent conflicts and reopen cycles.")
 link("Workflow transaction and gate coverage", f"{REPO}/blob/{sha}/server/tests/lab-04/ticket-workflow.test.ts")
-figure("ticket-workflow", "staff-ticket-detail-mobile.png", "Staff Ticket summary and workflow controls, mobile.", height=700)
+figure("ticket-workflow", "staff-ticket-detail-mobile.png", "Owner, IT priority and permitted next-status controls, mobile.", top=1180, height=570)
 
 begin(8, "Requester dashboard and final regression")
 p("Every requester metric includes requesterId=authenticated actor. Open excludes RESOLVED/CLOSED/CANCELLED; waiting is WAITING_FOR_REQUESTER; recently resolved covers RESOLVED/CLOSED in [asOf-604800000ms, asOf]. Attention/recent lists have a ten-record cap and stable ID tie-break. Drill-downs retain the exact ownership, status and time predicates.")
