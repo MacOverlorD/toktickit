@@ -1,0 +1,1129 @@
+{
+  "capturedAt": "2026-10-09T17:54:35.179Z",
+  "repository": "MacOverlorD/toktickit",
+  "pulls": [
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-01-engineering-contract",
+      "mergeCommit": {
+        "oid": "51af4c38843206c0bb130114c90b81a88693f857"
+      },
+      "mergedAt": "2026-09-24T15:44:45Z",
+      "number": 63,
+      "state": "MERGED",
+      "title": "[Lab 4][4-01] Define engineering contract and test plan",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/63",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-24T07:58:55Z",
+          "commit": "dac4c23e8d6e72b986fd584c71bd59f52f1adb5d",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301454385",
+          "body": "The documentation is well organized, the evidence status is truthful, and the initial FR/BR/AC mapping is useful. However, the contract is not yet implementation-ready.\n\nSeveral decisions explicitly required by the Lab 4 handout remain undefined or deferred: the complete Ticket transition and Action authorization matrices, creator-versus-performer semantics, reopened-Ticket resolution behavior, exact data/migration rules, endpoint request/response and validation contracts, authoritative dashboard formulas and time boundaries, and concrete planned test cases with file paths and expected results.\n\nBecause Issue #54 gates all implementation work, these decisions should be finalized and made testable before the contract is approved. Please address the inline findings and update the affected FR/BR/AC/test mappings. Requesting changes for now."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:27Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301875405",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:29Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301875729",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:31Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301876001",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:33Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301876234",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:35Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301876489",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:36Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301876743",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:38Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301876952",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-24T08:36:40Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5301877198",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-24T15:43:43Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5306711897",
+          "body": "Sieht gut aus!"
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-09-24T15:44:16Z",
+          "commit": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#pullrequestreview-5306718193",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4091228985,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091228985",
+          "body": "Complete the Action authorization matrix\n\nThis table defines only high-level role capabilities and later relies on the undefined term “accessible Ticket.” It does not specify whether IT Staff may list or mutate Actions on unassigned Tickets, Tickets owned by another staff member, or Tickets in each terminal state.\n\nPlease add an operation-level authorization matrix covering list, get, create, edit, assign, start, complete, and cancel, together with the exact Ticket-access rule and non-disclosing response behavior. Issues #56 and #57 cannot implement or test authorization consistently without this decision."
+        },
+        {
+          "id": 4091230433,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091230433",
+          "body": "Include the complete Ticket transition matrix\n\nThe handout explicitly requires the final permitted transition matrix and authorized roles, but this contract only states that the Lab 3 transitions remain enforced. Please include the complete source-to-target matrix, role permissions, owner requirements, confirmation requirements, and the new resolution prerequisite for each relevant edge.\n\nA cross-reference is acceptable only if it identifies an immutable baseline and clearly documents every Lab 4 modification; otherwise the FLOW implementation and exhaustive matrix tests do not have a self-contained contract."
+        },
+        {
+          "id": 4091231634,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091231634",
+          "body": "Distinguish the creator from the actual performer\n\nDeriving an immutable `performedBy` from the creator produces incorrect audit data when one staff member creates a planned Action, assigns it to another staff member, and the assignee later performs or completes the work. The original creator would remain displayed as the performer.\n\nPlease define separate `createdBy` and `performedBy` semantics, or specify exactly when `performedBy` is assigned or updated by the backend. The create, assignment, completion, Requester projection, and dashboard contracts should all use the same meaning."
+        },
+        {
+          "id": 4091232879,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091232879",
+          "body": "Define whether the resolution Action must belong to the current workflow cycle\n\nUnder the current rule, the first completed Action qualifies the Ticket forever. After RESOLVED → REOPENED, the existing historical Action still satisfies the gate, allowing the Ticket to be resolved again without recording any work for the reopened problem.\n\nPlease explicitly decide whether a qualifying Action must have been completed after the latest reopen/current work cycle. Whichever policy is selected should be reflected in D-05, the API transaction rule, dashboard calculations, and FLOW tests."
+        },
+        {
+          "id": 4091234549,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091234549",
+          "body": "Finalize the data and migration contract in Issue #54\n\nThis paragraph says that exact Prisma names and nullability will be finalized in Issue #54, but this PR is the Issue #54 deliverable. The contract still lacks concrete field types/nullability, foreign-key delete behavior, exact index column order, idempotency-key storage and payload fingerprinting, and the populated-database recovery procedure.\n\nPlease finalize these decisions here before Issue #55 begins so the migration is implementable and its preservation, rollback/recovery, repeated-seed, and concurrency tests have deterministic expectations."
+        },
+        {
+          "id": 4091236515,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/api-spec.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091236515",
+          "body": "Make the Action endpoint definitions an exact REST contract\n\nThe endpoint table describes intent but omits the exact success status, request body, response envelope, and endpoint-specific error outcomes. The validation section also leaves text bounds, future-skew allowance, null/empty behavior, and the follow-up-false clear-versus-reject policy undecided.\n\nPlease specify these values for every route, including version/idempotency behavior and stable error codes, so the API, client, and tests cannot make incompatible assumptions."
+        },
+        {
+          "id": 4091238751,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/api-spec.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091238751",
+          "body": "Resolve the dashboard formulas and time boundaries before approval\n\nThis section explicitly leaves whether RESOLVED is included in “open” to a future approved contract, and it does not define the recently-resolved window, inclusive/exclusive time boundaries, `attentionTickets`, the recent/urgent list, or the exact current-user Action counts.\n\nThe handout requires every metric to have an authoritative query, empty behavior, date/time boundary, ordering, cap, and drill-down destination. Please finalize those definitions in this PR and map each formula to deterministic boundary tests."
+        },
+        {
+          "id": 4091241912,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091241912",
+          "body": "Add concrete planned test cases and file paths\n\nThe handout requires a test inventory with Test ID, type, mapped requirement/AC, scenario, expected result, automated test file, and final status. The current rows are broad test groups without executable test IDs, concrete file paths, expected results, or Planned status per case.\n\nPlease add planned rows for the lifecycle and authorization matrices, validation boundaries, stale/concurrent updates, idempotency mismatch, migration/recovery, dashboard boundary calculations, UI/accessibility states, responsive viewports, and E2E flows. Group-level AC mapping alone is not sufficient for implementation traceability."
+        },
+        {
+          "id": 4091557515,
+          "replyTo": 4091228985,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091557515",
+          "body": "Addressed in 60ba944. specification.md section 3 now defines accessible Ticket exactly and includes list/get/create/edit/assign/start/complete/cancel permissions across Requester, Staff and Administrator, active versus terminal Ticket rules, owner/assignee independence, and the 401/403/non-disclosing 404 outcomes. L4-ACT-002 and L4-ACT-007 provide concrete authorization/privacy cases."
+        },
+        {
+          "id": 4091557792,
+          "replyTo": 4091230433,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091557792",
+          "body": "Addressed in 60ba944. specification.md section 5.1 now contains all 19 permitted Ticket edges with authorized roles, owner requirement, confirmation requirement, side effects, current-cycle resolution gate, and the rejection rule for every omitted/self edge. L4-FLOW-001 tests the full matrix."
+        },
+        {
+          "id": 4091558043,
+          "replyTo": 4091231634,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091558043",
+          "body": "Addressed in 60ba944. BR-02/03, DTOs, schema, UI and dashboard contracts now separate immutable createdBy, optional assignedTo, and nullable performedBy. performedBy is set by the backend to the authenticated user who successfully completes the Action. L4-ACT-003 verifies creator A / assignee B / completer B semantics and rejects client actor fields."
+        },
+        {
+          "id": 4091558241,
+          "replyTo": 4091232879,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091558241",
+          "body": "Addressed in 60ba944. Ticket now has a positive workCycle; each Action captures ticketWorkCycle. REOPENED increments the Ticket cycle and clears resolvedAt/indication. RESOLVED requires a qualifying COMPLETED Action from the current cycle. L4-FLOW-002/003 cover old-cycle rejection and new-cycle success."
+        },
+        {
+          "id": 4091558449,
+          "replyTo": 4091234549,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/specification.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091558449",
+          "body": "Addressed in 60ba944 by new docs/lab-04/data-migration.md. It fixes Prisma names/types/nullability, Restrict FKs, ordered indexes, SQL checks, UUID key scope and SHA-256 payload fingerprint, populated migration preflight/backup/deploy/verification/recovery, and idempotent fixture rules. L4-MIG-001 through 003 define deterministic clean/populated/rollback/restore/reseed expectations."
+        },
+        {
+          "id": 4091558664,
+          "replyTo": 4091236515,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/api-spec.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091558664",
+          "body": "Addressed in 60ba944. api-spec.md sections 1-4 now define exact operational/Requester DTOs, request bodies, success envelopes/statuses, endpoint-specific failures, error codes, optimistic version and idempotency behavior, Unicode/text bounds, +5 minute actionAt limit, optional null/blank behavior, and the follow-up-false rejection/store-null policy."
+        },
+        {
+          "id": 4091558830,
+          "replyTo": 4091238751,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/api-spec.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091558830",
+          "body": "Addressed in 60ba944. api-spec.md sections 5-6 now define every Requester/operational/Admin metric predicate, the active status set, inclusive 604800000 ms window around one snapshot asOf, ordering/tie-break/cap, zero behavior, response item shapes, and drill-down destinations. L4-DREQ-001, L4-DOPS-001 and L4-DASH-002 cover database and boundary results."
+        },
+        {
+          "id": 4091559039,
+          "replyTo": 4091241912,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/63#discussion_r4091559039",
+          "body": "Addressed in 60ba944. tests.md now contains 24 concrete Planned rows with Test ID, type, mapped requirement/AC, scenario, expected result and automated file path. Coverage includes matrices, authorization, validation boundaries, concurrency/idempotency, migration/recovery, dashboard +/-1 ms boundaries, UI/a11y/responsive states, E2E, regression and performance."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-02-actions-data",
+      "mergeCommit": {
+        "oid": "58a9897d4d8a3dafdacad07dd9a7c19de9fcf83a"
+      },
+      "mergedAt": "2026-09-28T07:05:56Z",
+      "number": 64,
+      "state": "MERGED",
+      "title": "[Lab 4][4-02] Add Actions Taken data foundation",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/64",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-26T15:22:24Z",
+          "commit": "76b81f82bf3ebc36243b1bf3350fddf3df204dc0",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#pullrequestreview-5326370475",
+          "body": "I found two gaps in the migration verification: the rollback test fails before any Lab 4 DDL is applied, and the populated-database fixture does not cover all Lab 1–3 relationships required by Issue #55. Please address these test gaps and synchronize the traceability document status before merging."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T03:24:13Z",
+          "commit": "9ba028b0b7b5680c780e0f80d83eb5d9a852167c",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#pullrequestreview-5333657563",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T03:24:15Z",
+          "commit": "9ba028b0b7b5680c780e0f80d83eb5d9a852167c",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#pullrequestreview-5333657752",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T03:24:17Z",
+          "commit": "9ba028b0b7b5680c780e0f80d83eb5d9a852167c",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#pullrequestreview-5333657900",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-09-28T07:05:48Z",
+          "commit": "9ba028b0b7b5680c780e0f80d83eb5d9a852167c",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#pullrequestreview-5335032621",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4111803241,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/tests/lab-04/migration.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4111803241",
+          "body": "Force the rollback test to fail after Lab 4 DDL has started\n\nThe injected `ActionStatus` conflict occurs at the migration's first statement, before `Ticket.workCycle`, `resolvedAt`, any indexes, or `ActionTaken` are created. Therefore, the assertions below only prove that no statements ran before the first error; they do not prove that partially applied Lab 4 changes are rolled back. Please trigger a later failure, such as by pre-creating the second Ticket index, and assert that the enum, Ticket columns/indexes, and ActionTaken table are all absent after the failure."
+        },
+        {
+          "id": 4111803366,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/tests/lab-04/migration.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4111803366",
+          "body": "Expand the populated migration fixture to cover all legacy relations\n\nThe current fixture only creates a Category, RelatedSystem, User, Ticket, and PublicComment. It does not exercise Attachments, Internal Notes, Sessions, or their foreign-key relationships, even though Issue #55 requires preserving all Lab 1–3 data and relationships. Please add representative rows for those tables and assert their pre/post counts and key relationships before marking L4-MIG-001 as passed."
+        },
+        {
+          "id": 4111804457,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4111804457",
+          "body": "Keep the execution status consistent\n\nThe document header still says `Status: planned` and states that no runtime test is marked as passed, while these rows now report three tests as passed in Issue #55. Please update the header and the Issue #54 wording so the execution record has one unambiguous status."
+        },
+        {
+          "id": 4118292823,
+          "replyTo": 4111803241,
+          "author": "MacOverlorD",
+          "path": "server/tests/lab-04/migration.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4118292823",
+          "body": "Fixed in `9ba028b`. The rollback test now pre-creates the second Lab 4 Ticket index, so the migration first creates `ActionStatus`, adds both Ticket columns, and creates the first Ticket index before failing on the deliberate name conflict. After the failure, the test asserts that the new enum, columns, first index, and `ActionTaken` table are absent, while the pre-existing conflict index remains. This verifies rollback of partially executed DDL rather than a failure at statement one. The Lab 4 migration suite passes 4/4."
+        },
+        {
+          "id": 4118292942,
+          "replyTo": 4111803366,
+          "author": "MacOverlorD",
+          "path": "server/tests/lab-04/migration.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4118292942",
+          "body": "Fixed in `9ba028b`. The populated Lab 3 fixture now includes two Users with requester/owner roles, workflow and resolution-indication state, a removed Attachment with uploader/remover relations, a Public Comment, an Internal Note, and a Session. It snapshots row counts plus every relevant foreign-key relationship before migration and compares the complete state after migration. It also still verifies `workCycle=1`, `resolvedAt=null`, and zero invented Actions. The focused suite and full regression suite both pass."
+        },
+        {
+          "id": 4118293033,
+          "replyTo": 4111804457,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/64#discussion_r4118293033",
+          "body": "Fixed in `9ba028b`. The header now says the plan is partially executed, explicitly states that Issue #54 created the plan without runtime results, identifies L4-MIG-001 through L4-MIG-003 as executed in Issue #55, and leaves all remaining rows planned. I also refreshed the Issue #55 evidence with the review-fix coverage and latest full-suite result (25 files / 148 tests passed, no failures or skips)."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-03-actions-api",
+      "mergeCommit": {
+        "oid": "8f9e9a50d27fc7081be98465dee92f1315ffec77"
+      },
+      "mergedAt": "2026-09-28T16:53:48Z",
+      "number": 65,
+      "state": "MERGED",
+      "title": "[Lab 4][4-03] Implement Actions Taken domain and REST API",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/65",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-28T08:35:50Z",
+          "commit": "6a5ba35fcb89db0db61c44aa6d45970280593ddc",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#pullrequestreview-5335957575",
+          "body": "I found a blocking partial-update issue where disabling follow-up can fail when the note is omitted, and the date parser accepts formats outside the approved ISO-8601 instant contract. Please address these validation issues and add the missing regression coverage before merging."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T16:50:11Z",
+          "commit": "0936b4a24defe7cee5491ed156b1c86a7f344792",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#pullrequestreview-5341910344",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T16:50:13Z",
+          "commit": "0936b4a24defe7cee5491ed156b1c86a7f344792",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#pullrequestreview-5341910782",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T16:50:15Z",
+          "commit": "0936b4a24defe7cee5491ed156b1c86a7f344792",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#pullrequestreview-5341911121",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-09-28T16:53:28Z",
+          "commit": "0936b4a24defe7cee5491ed156b1c86a7f344792",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#pullrequestreview-5341948667",
+          "body": "Sieht für mich gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4120092710,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/src/actions/action-domain.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4120092710",
+          "body": "Clear the follow-up note when follow-up is disabled\n\nThe API contract states that when `followUpRequired` is false, omitting `followUpNote` must clear the stored note. In this partial-update path, omitting `followUpNote` preserves `current.followUpNote`, so changing an existing Action from `followUpRequired=true` to false without sending the note rejects an otherwise valid request. Please normalize the next follow-up note to null when follow-up is disabled and add a regression test for the omitted-field case."
+        },
+        {
+          "id": 4120096728,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/src/actions/action-domain.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4120096728",
+          "body": "Enforce an ISO-8601 instant before parsing\n\n`new Date(value)` accepts date-only and non-ISO strings, and timezone-less timestamps may be interpreted using the server's local timezone. The API contract requires a valid ISO-8601 instant that can be normalized to UTC. Please validate the required format and timezone explicitly before parsing, and add regression tests for date-only, locale-like, and timezone-less inputs."
+        },
+        {
+          "id": 4120099202,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4120099202",
+          "body": "Add the missing date-format regression before marking this case as passed\n\nL4-ACT-004 is marked as passed, but the current tests cover future skew and text boundaries only. They do not verify rejection of non-ISO, date-only, or timezone-less timestamps required by the API contract. Please add those regression cases or narrow the traceability claim before recording this item as fully passed."
+        },
+        {
+          "id": 4124803928,
+          "replyTo": 4120092710,
+          "author": "MacOverlorD",
+          "path": "server/src/actions/action-domain.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4124803928",
+          "body": "Fixed in `0936b4a`. Edit validation now derives the next follow-up state first; when the resulting `followUpRequired` is false and `followUpNote` is omitted, the stored note is normalized to `null`. Explicit non-null notes while false are still rejected. Both the domain regression and the API lifecycle test now omit the note while disabling follow-up and assert `followUpNote: null`."
+        },
+        {
+          "id": 4124804206,
+          "replyTo": 4120096728,
+          "author": "MacOverlorD",
+          "path": "server/src/actions/action-domain.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4124804206",
+          "body": "Fixed in `0936b4a`. `actionAt` must now match a timezone-qualified ISO-8601 instant before parsing. The validator also checks calendar day/month, clock ranges, and ISO offset bounds before normalizing with `Date`, while retaining the +5 minute rule. Regression coverage rejects date-only, locale-like, timezone-less, and impossible-calendar inputs; the existing offset-to-UTC canonicalization case remains passing."
+        },
+        {
+          "id": 4124804451,
+          "replyTo": 4120099202,
+          "author": "MacOverlorD",
+          "path": "docs/lab-04/tests.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/65#discussion_r4124804451",
+          "body": "Addressed in `0936b4a`. L4-ACT-004 now has explicit regression assertions for rejection of `2026-09-28`, `09/28/2026 00:00:00`, `2026-09-28T00:00:00`, and an impossible ISO calendar date, alongside the existing valid offset, exact +5 minute, +1 ms, Unicode, null/blank, and assignee cases. Targeted tests pass 9/9 and the full suite passes 27 files / 157 tests with no failures or skips, so the Passed status now has the missing evidence."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-04-actions-ui",
+      "mergeCommit": {
+        "oid": "355870217e05d7ad0706ea7ab7e3d6fe984b89db"
+      },
+      "mergedAt": "2026-09-29T06:51:08Z",
+      "number": 66,
+      "state": "MERGED",
+      "title": "[Lab 4][4-04] Add Actions Taken Ticket Detail UI",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/66",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-28T18:16:39Z",
+          "commit": "b04261554e9028771a0031ec628cdce7cb0ee17e",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5342848346",
+          "body": "I found several issues that should be addressed before merging: mutation controls are still exposed for terminal or old-cycle Tickets, Action timestamps are interpreted using the browser timezone instead of Asia/Bangkok, editor state can be reused for the wrong Action, and first-invalid focus does not cover actionAt. Please fix these issues and add the corresponding regression coverage."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T20:19:43Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5344146665",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T20:19:49Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5344147459",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T20:19:55Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5344148422",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T20:20:00Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5344149200",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-28T20:20:06Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5344149973",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-09-29T06:50:58Z",
+          "commit": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#pullrequestreview-5348740516",
+          "body": "Sieht für mich gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4125552381,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4125552381",
+          "body": "Gate Action controls by the parent Ticket state\n\nThis component only receives `ticketNumber`, `mode`, and `assignees`, so it still renders “Add Action Taken” and the edit, assignment, start, complete, and cancel controls when the parent Ticket is RESOLVED, CLOSED, or CANCELLED. The API will reject these requests, but the UI contract requires Actions on terminal Tickets to be read-only. Please pass the Ticket status and current work cycle, hide or disable these controls for terminal/old-cycle Actions, and add a regression test for these states."
+        },
+        {
+          "id": 4125555668,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4125555668",
+          "body": "Use Asia/Bangkok for Action timestamps and datetime input\n\nThe Lab 4 contract requires UTC storage with Asia/Bangkok display, but `Intl.DateTimeFormat(undefined, ...)`, `getTimezoneOffset()`, and `new Date(value)` all use the browser's local timezone. Users outside Bangkok can therefore see or edit a different instant than intended. Please use an explicit Asia/Bangkok formatter/parser for both display and datetime input, and add a timezone regression test."
+        },
+        {
+          "id": 4125559922,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4125559922",
+          "body": "Reset the form when switching editor targets\n\n`ActionForm` is rendered without a key, while the Action cards and their controls remain interactive below the open editor. If a user switches from editing one Action to completing or editing another, React preserves the previous form state and can submit the previous Action's description, result, date, or notes for the new Action. Please add a key derived from the editor kind and Action ID, or disable the background controls while editing, and cover this interaction with a regression test."
+        },
+        {
+          "id": 4125561825,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4125561825",
+          "body": "Include the actionAt field in first-invalid focus handling\n\nClient and server validation can return an `actionAt` error, but the focus map has no ref for the datetime input and the input itself has no ref. As a result, the first-invalid focus requirement fails for invalid or future Action dates. Please add an `actionAtRef`, register it in this map, and add a regression test."
+        },
+        {
+          "id": 4125564093,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4125564093",
+          "body": "Do not coerce optional blank strings to null\n\nThe API contract explicitly rejects optional blank strings, but `result.trim() || null` and `attachmentNotes.trim() || null` silently convert whitespace-only input into null. This makes the UI behavior inconsistent with the server contract. Please validate whitespace-only optional values and show field errors instead of silently converting them."
+        },
+        {
+          "id": 4126646476,
+          "replyTo": 4125552381,
+          "author": "MacOverlorD",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4126646476",
+          "body": "Fixed in ca014dd. Staff Ticket Detail now projects workCycle, and the section receives the parent ticketStatus plus currentWorkCycle. Add and mutation controls render only for an active parent Ticket and a PLANNED or IN_PROGRESS Action in the current cycle; terminal Tickets, terminal Actions, and historical cycles show an explicit read-only reason. Added the terminal-parent and current-cycle regression in ActionsTaken.test.tsx."
+        },
+        {
+          "id": 4126647137,
+          "replyTo": 4125555668,
+          "author": "MacOverlorD",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4126647137",
+          "body": "Fixed in ca014dd. Action display formatting now sets the time zone to Asia/Bangkok. The datetime-local value is built with formatToParts in Asia/Bangkok and parsed with an explicit +07:00 offset, so it no longer depends on the browser timezone. Added an exact UTC-to-Bangkok round-trip regression."
+        },
+        {
+          "id": 4126647790,
+          "replyTo": 4125559922,
+          "author": "MacOverlorD",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4126647790",
+          "body": "Fixed in ca014dd. ActionForm is now keyed by editor kind plus Action ID, so switching edit or complete targets remounts the form with the selected Action's authoritative values. Added a two-Action regression that enters an unsaved draft for one Action, switches to Complete on the other, and verifies no state leaks."
+        },
+        {
+          "id": 4126648372,
+          "replyTo": 4125561825,
+          "author": "MacOverlorD",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4126648372",
+          "body": "Fixed in ca014dd. Added actionAtRef, registered it in the first-invalid focus map, and attached it to the datetime input. The regression enters a future Bangkok datetime, submits, and verifies the input receives focus and aria-invalid=true."
+        },
+        {
+          "id": 4126649112,
+          "replyTo": 4125564093,
+          "author": "MacOverlorD",
+          "path": "client/src/components/ActionsTakenSection.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/66#discussion_r4126649112",
+          "body": "Fixed in ca014dd. Optional Result and Evidence Notes now distinguish an empty value from a non-empty whitespace-only value. Whitespace-only input produces a field error and prevents the API call; only an actually empty input maps to null. Added regression coverage for both fields and first-invalid focus."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-05-final-workflow",
+      "mergeCommit": {
+        "oid": "c54c5d6edc4d8d45aa2e60d270922a1be73c94df"
+      },
+      "mergedAt": "2026-09-30T15:31:42Z",
+      "number": 67,
+      "state": "MERGED",
+      "title": "[Lab 4][4-05] Enforce final Ticket workflow and resolution gate",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/67",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-09-30T08:14:29Z",
+          "commit": "bcd1bfc4d3fb5e68086cee3cf7990323021d5e61",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#pullrequestreview-5363413844",
+          "body": "Filter status options by owner eligibility\n\nThe status options are derived only from the current Ticket status. This still exposes owner-required transitions when the Ticket has no active IT Staff or Administrator owner. Since the UI contract requires showing only currently permitted actions, please filter owner-required targets based on the current owner while keeping the backend validation authoritative.\n\nand \n\nThe backend transaction handling, optimistic concurrency checks, current-work-cycle resolution gate, and reopen behavior are well covered.\n\nBefore approval, please address the UI issues noted in the review: place the resolution guidance next to the status control, handle CONCURRENT_UPDATE as a recoverable conflict, and direct users to the Actions Taken section after a resolution-gate failure. Please also ensure that owner-required transitions are not presented when the Ticket has no eligible owner.\n\nThe repository build and client workflow tests passed locally. Server/API tests could not be executed in this environment because DATABASE_URL and the PostgreSQL test database were unavailable."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-30T08:36:27Z",
+          "commit": "8f8dab7d85ebeb8f56de39965ef564b3fe247127",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#pullrequestreview-5363687895",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-30T08:36:29Z",
+          "commit": "8f8dab7d85ebeb8f56de39965ef564b3fe247127",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#pullrequestreview-5363688393",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-09-30T08:36:32Z",
+          "commit": "8f8dab7d85ebeb8f56de39965ef564b3fe247127",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#pullrequestreview-5363688834",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-09-30T15:15:33Z",
+          "commit": "8f8dab7d85ebeb8f56de39965ef564b3fe247127",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#pullrequestreview-5368258028",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4142341171,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/StaffTicketDetailPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142341171",
+          "body": "Place the resolution guidance next to the status control\n\nThis message is currently rendered inside the IT Priority section, so it may appear to describe the priority update rather than the RESOLVED status transition. Please move it next to the “Next Status” control and associate it with that control, for example through aria-describedby, so users clearly understand which action requires a completed Action Taken."
+        },
+        {
+          "id": 4142344763,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/StaffTicketDetailPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142344763",
+          "body": "Handle CONCURRENT_UPDATE as a recoverable conflict\n\nThe backend can return CONCURRENT_UPDATE after exhausting serializable transaction retries, but this client mapping only handles STALE_RESOURCE. As a result, the UI falls back to the raw error message and does not show the “Reload latest” recovery action. Please map CONCURRENT_UPDATE to the same reloadable conflict handling and add a regression test for this response."
+        },
+        {
+          "id": 4142348273,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/tests/lab-04/TicketWorkflow.test.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142348273",
+          "body": "Focus the Actions Taken section after a resolution-gate failure\n\nThe UI specification requires a RESOLUTION_ACTION_REQUIRED response to direct the user to the Actions Taken section. This assertion currently expects focus to remain on the status select, which does not help the user complete the missing prerequisite. Please update the implementation and this test to focus or link to the Actions Taken section after the gate rejection."
+        },
+        {
+          "id": 4142558863,
+          "replyTo": 4142341171,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/StaffTicketDetailPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142558863",
+          "body": "Fixed in 8f8dab7. The resolution guidance now renders immediately below Next Status instead of under IT Priority, and the RESOLVED option connects the select to that guidance with aria-describedby. Added a regression assertion for both placement and the accessible association."
+        },
+        {
+          "id": 4142559250,
+          "replyTo": 4142344763,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/StaffTicketDetailPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142559250",
+          "body": "Fixed in 8f8dab7. CONCURRENT_UPDATE is now handled through the same recoverable conflict path as STALE_RESOURCE, showing the friendly reload message and Reload latest action. Added a regression test covering the concurrent-update response."
+        },
+        {
+          "id": 4142559681,
+          "replyTo": 4142348273,
+          "author": "MacOverlorD",
+          "path": "client/tests/lab-04/TicketWorkflow.test.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/67#discussion_r4142559681",
+          "body": "Fixed in 8f8dab7. The Actions Taken section is now programmatically focusable, and a resolution-gate failure moves focus there so the user lands directly at the required control. The workflow regression test now verifies that focus behavior."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-06-requester-dashboard",
+      "mergeCommit": {
+        "oid": "304f0e9c34472cd5008b72d569450d9cff2e63a8"
+      },
+      "mergedAt": "2026-10-08T14:24:50Z",
+      "number": 68,
+      "state": "MERGED",
+      "title": "[Lab 4][4-06] Add Requester Dashboard",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/68",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-10-08T13:56:03Z",
+          "commit": "214535036e3e994429b9b96ef46bf209ee57e9f9",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/68#pullrequestreview-5457702976",
+          "body": "The Requester Dashboard implementation is well aligned with the approved contract: requester identity is session-derived, calculations are owner-scoped, drill-down filters preserve the documented formulas, and the responsive UI covers loading, zero, failure, and forbidden states.\n\nBefore approval, please make the dashboard API fixtures independent of the real wall clock. The suite currently combines a fixed asOf value with Date.now()-based fixture timestamps, which makes the assertions time-dependent and causes them to fail as time advances. Please derive all fixture timestamps from fixedAsOf and rerun the server, client, and Lab 4 E2E suites."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-08T14:16:56Z",
+          "commit": "13ea274b6e99ffd27f85657ab586dc2852294231",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/68#pullrequestreview-5457998625",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-10-08T14:24:41Z",
+          "commit": "13ea274b6e99ffd27f85657ab586dc2852294231",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/68#pullrequestreview-5458116852",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4219832963,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/tests/lab-04/dashboard.api.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/68#discussion_r4219832963",
+          "body": "Derive every fixture timestamp from fixedAsOf\n\nThis suite freezes the clock to fixedAsOf only inside the test, but beforeAll creates several fixtures using the real wall clock through Date.now(). For example, after 2026-10-08T13:00:00Z, the waiting ticket's updatedAt becomes later than fixedAsOf and is excluded by the updatedAt <= asOf predicate, causing the attention-list assertions to fail. Subsequent runs will also move the resolved fixtures outside the intended seven-day window.\n\nPlease derive tieTime, updatedAt, and resolvedAt consistently from fixedAsOf, or install the fake clock before creating the fixtures, so this test remains deterministic regardless of when it runs."
+        },
+        {
+          "id": 4220070577,
+          "replyTo": 4219832963,
+          "author": "MacOverlorD",
+          "path": "server/tests/lab-04/dashboard.api.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/68#discussion_r4220070577",
+          "body": "Fixed in 13ea274. Every fixture timestamp in this suite now derives from fixedAsOf: the tied recent rows, waiting-for-requester update, recent resolution, and old closed resolution/update. No Date.now() calls remain in the fixture, so the attention, ordering, cap, and seven-day assertions are independent of the real execution date. Reran the requested suites: server 180/180, client 158/158, and Lab 4 E2E 5/5."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-07-operations-dashboard",
+      "mergeCommit": {
+        "oid": "1cd25bed9a6556444c991a36f7da925d181d2b94"
+      },
+      "mergedAt": "2026-10-09T10:12:42Z",
+      "number": 69,
+      "state": "MERGED",
+      "title": "[Lab 4][4-07] Add Staff and Administrator operational dashboard",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/69",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-10-08T16:57:21Z",
+          "commit": "e4954bec08a2615c3f3d4df064c3807f3aee0495",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5459635850",
+          "body": "Thank you for the implementation. The operational dashboard structure, role authorization, response allowlisting, bounded lists, responsive states, and Administrator-only summary are well organized.\n\nI am requesting changes because several drill-down paths do not yet preserve the meaning of the displayed metrics:\n\n1. Active-only Ticket metrics open queue results that can include terminal Tickets.\n2. The completed-by-me metric has no formula-equivalent drill-down.\n3. Action hash links are not resolved after the Action list loads asynchronously.\n\nPlease address these paths and add regression coverage that validates the actual result sets, rather than only checking the generated URLs. Once these issues are resolved, this should be ready for another review."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-08T19:12:06Z",
+          "commit": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5461642964",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-08T19:12:12Z",
+          "commit": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5461644497",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-08T19:12:17Z",
+          "commit": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5461645521",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-08T19:12:25Z",
+          "commit": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5461647468",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-10-09T10:12:31Z",
+          "commit": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#pullrequestreview-5468697739",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4221406335,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4221406335",
+          "body": "Preserve the active-ticket predicate in queue drill-downs\n\nThe dashboard calculates unassigned, owned-by-me, priority, and urgent values using active Ticket statuses only. However, these links pass only `ownerId` or `itPriority`, while Staff Queue applies those filters across every status. As a result, RESOLVED, CLOSED, and CANCELLED Tickets can appear in the drill-down even though they were excluded from the displayed count.\n\nPlease add a supported active scope/filter to Staff Queue and include it in the unassigned, owned-by-me, priority, and urgent links. Please also add an integration test asserting that the queue `totalItems` matches the corresponding dashboard metric."
+        },
+        {
+          "id": 4221816233,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4221816233",
+          "body": "Provide a formula-preserving drill-down for completed work\n\nThe “Completed by me in 7 days” metric is rendered without any link or supporting rows, and the response currently exposes only active Actions assigned to the actor. Therefore, operators cannot inspect the records behind this count.\n\nThe dashboard contract requires meaningful drill-downs, and the API specification states that performed-work rows should link to their Action anchors. Please resolve this contract gap by exposing a bounded performed-Action projection or another formula-equivalent endpoint, then render links using the same `performedById`, COMPLETED status, and inclusive seven-day window predicates. This should not reuse `myActions`, because its identity and status predicates are different."
+        },
+        {
+          "id": 4221829543,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4221829543",
+          "body": "Resolve Action anchors after asynchronous loading\n\nThis link navigates to an Action hash, but the target Action card is created only after `ActionsTakenSection` finishes its asynchronous request. There is currently no hash-handling effect after the Actions become ready, so the browser can process the fragment before `#action-<id>` exists and leave the user at the top of Ticket Detail.\n\nPlease resolve and focus/scroll the hash target after the Action list has loaded, and add a regression test that follows the dashboard link and verifies that the intended Action receives focus or is scrolled into view."
+        },
+        {
+          "id": 4221833222,
+          "replyTo": 4221406335,
+          "author": "Ohmmykung09",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4221833222",
+          "body": "Note: This issue applies to all related drill-down links on lines 96, 97, 113, and 131, including the unassigned, owned-by-me, priority, and urgent-ticket links."
+        },
+        {
+          "id": 4223109659,
+          "replyTo": 4221406335,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4223109659",
+          "body": "Fixed in 918f9ad. Staff Queue now supports the allowlisted scope=active predicate (the same five statuses as the dashboard), rejects scope combined with exact status, and exposes the scope in the UI. Dashboard drill-down integration tests now compare queue totalItems directly with unassigned, owned-by-me, and every IT-priority metric while asserting terminal statuses are absent."
+        },
+        {
+          "id": 4223110730,
+          "replyTo": 4221816233,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4223110730",
+          "body": "Fixed in 918f9ad. The operations response now includes a bounded myPerformedActions projection using the exact performedById=actor, COMPLETED, and inclusive asOf-7d <= completedAt <= asOf formula, ordered by completedAt DESC, id DESC. The dashboard renders a separate completed-work list and links every row to its Action anchor; assignment and performance remain distinct."
+        },
+        {
+          "id": 4223111457,
+          "replyTo": 4221829543,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4223111457",
+          "body": "Fixed in 918f9ad. ActionsTakenSection now waits until the asynchronous list is ready, safely decodes a valid #action-<id> fragment, then focuses and scrolls the rendered card. Component coverage verifies post-load focus/scroll, and Playwright follows a performed-Action link from the dashboard and verifies the target card is focused."
+        },
+        {
+          "id": 4223112935,
+          "replyTo": 4221406335,
+          "author": "MacOverlorD",
+          "path": "client/src/pages/OperationsDashboardPage.tsx",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/69#discussion_r4223112935",
+          "body": "Confirmed in 918f9ad: unassigned, owned-by-me, every priority summary, and the urgent-ticket link now include scope=active. Exact status links intentionally remain status-only because byStatus includes both active and terminal status groups."
+        }
+      ]
+    },
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-08-integrated-hardening",
+      "mergeCommit": {
+        "oid": "c0ec9772c0263fefacf322ef070dc7012516d68f"
+      },
+      "mergedAt": "2026-10-09T17:46:09Z",
+      "number": 70,
+      "state": "MERGED",
+      "title": "[Lab 4][4-08] Complete integrated regression and hardening",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/70",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-10-09T16:00:43Z",
+          "commit": "b31598a9fa450fd580e60f6e6ee1389ee7850303",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5472429317",
+          "body": "Thank you for the integrated hardening work. The added regression coverage, accessibility tooling, performance smoke, documentation, and visual inventory are valuable.\n\nI am requesting changes because the current evidence path does not yet reliably verify the final application state:\n\n1. The root `npm test` command omits the Lab 4 Playwright suite.\n2. Visual evidence is captured before asynchronous content and responsive layout have stabilized, producing a loading-state screenshot and tablet images wider than the documented viewport.\n3. Axe can run against the same incomplete loading state.\n4. Global performance endpoints are measured against uncontrolled pre-existing database data.\n\nPlease make the aggregate test command complete, synchronize visual and accessibility checks with page-specific ready states, fix the exposed 768 px overflow, regenerate the affected evidence, and make the performance workload reproducible. Once these are addressed, I will re-review the PR."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-09T17:23:58Z",
+          "commit": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5473249619",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-09T17:24:00Z",
+          "commit": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5473250012",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-09T17:24:02Z",
+          "commit": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5473250278",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-09T17:24:03Z",
+          "commit": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5473250491",
+          "body": ""
+        },
+        {
+          "author": "Ohmmykung09",
+          "state": "APPROVED",
+          "submittedAt": "2026-10-09T17:46:02Z",
+          "commit": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#pullrequestreview-5473467473",
+          "body": "Sieht gut aus!"
+        }
+      ],
+      "comments": [
+        {
+          "id": 4232051061,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "README.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232051061",
+          "body": "Include the Lab 4 browser suite in the root test command\n\nThe README states that the root `npm test` command runs the complete Chromium E2E suite. However, the root script invokes only `npm run test:e2e`, whose Playwright configuration is restricted to `e2e/lab-03`. The 13 tests under `e2e/lab-04`, including the new accessibility and integrated-regression checks, are therefore omitted from the documented aggregate command.\n\nPlease update `npm test` to run both E2E configurations, or provide a unified Playwright configuration that includes both directories. Then rerun the aggregate command from the documented clean setup."
+        },
+        {
+          "id": 4232054368,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "e2e/lab-04/visual-evidence.spec.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232054368",
+          "body": "Wait for the final loaded layout before validating and capturing evidence\n\nWaiting only for `main` to be visible does not establish that the asynchronously loaded screen has reached its final state. The committed evidence demonstrates this race: the desktop operational-dashboard screenshot contains only “Loading operational dashboard”.\n\nThe responsive assertion can also execute before the final content is rendered. Several promoted full-page files exceed the documented 768 px tablet viewport: the Requester dashboard is 873 px wide, while the operational dashboard and Staff Ticket Detail are 796 px wide. The operational-dashboard tablet image also visibly clips the Change Password control.\n\nPlease wait for a page-specific ready-state locator and the loading indicator to disappear after navigation and each viewport change, allow the resized layout to stabilize, then perform the overflow assertion and screenshot. Any resulting 768 px layout overflow should be fixed before regenerating all affected evidence."
+        },
+        {
+          "id": 4232057456,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "e2e/lab-04/accessibility.spec.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232057456",
+          "body": "Run the accessibility audit against the completed screen state\n\nThe page heading is rendered before the dashboard data and Action list finish loading, so this readiness check can allow Axe to analyze only the loading shell. The promoted operational-dashboard screenshot confirms that the heading can already be visible while the page still displays “Loading operational dashboard”.\n\nPlease wait for page-specific final content—for example, the dashboard metrics, loaded Action records, or the user-management results—and verify that the corresponding loading indicator has disappeared before calling `analyze()`. Otherwise, accessibility regressions in the primary interactive content can pass undetected."
+        },
+        {
+          "id": 4232061076,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "server/tests/lab-04/dashboard-performance.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232061076",
+          "body": "Isolate global endpoint performance measurements from existing database data\n\nAlthough this test creates 1,000 Ticket and 5,000 Action fixtures, the operational dashboard and Staff Queue endpoints are global rather than scoped to the newly created users or Tickets. Their measurements therefore include every pre-existing Ticket in the configured development database.\n\nThis makes the recorded p95 values dependent on local database history and means the evidence cannot accurately describe the workload as isolated or exactly 1,000 Tickets. Please run the performance smoke against a dedicated clean test database, or establish and document a controlled baseline before collecting the samples."
+        },
+        {
+          "id": 4232757365,
+          "replyTo": 4232051061,
+          "author": "MacOverlorD",
+          "path": "README.md",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232757365",
+          "body": "Updated the root `npm test` entry point to `test:quality:lab4`. It runs client tests, the fresh-schema server suite (including the performance smoke), production builds, and `test:e2e:all`, which explicitly executes both the Labs 1-3 and Lab 4 Playwright configurations. The README now describes the same commands and their database prerequisites; the aggregate results are recorded in `docs/lab-04/issue-61-evidence.md`.\n\nAlso routed all Labs 1-3 legacy/visual capture destinations through the documented promotion flag, so ordinary aggregate verification writes ignored temporary images rather than replacing archived evidence. The full Labs 1-3 suite was checked again for both passing tests and unchanged tracked screenshots.\n"
+        },
+        {
+          "id": 4232757691,
+          "replyTo": 4232054368,
+          "author": "MacOverlorD",
+          "path": "e2e/lab-04/visual-evidence.spec.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232757691",
+          "body": "Visual captures now wait for the loaded Ticket/Operational summary or the actual visual Action description, and for page/Action loading indicators to disappear. After each viewport change they also wait for fonts and two animation frames, then assert both document/body width before capturing. The assertion includes overflowing element diagnostics.\n\nThe header now wraps its navigation/identity layout, uses a flexible name column, and gives Change password and Log out separate grid columns. Regenerated all 16 promoted PNGs and checked their dimensions: all full-page images are exactly 1440/768/390/320 px as named. The three affected tablet full-page images are now exactly 768 px wide, and the desktop operational dashboard contains loaded metrics/Action lists. I also visually checked the tablet controls, desktop dashboards, Staff detail, and 320 px Actions/operational dashboard for clipping. All 13 Lab 4 browser tests passed in the promotion run.\n"
+        },
+        {
+          "id": 4232757893,
+          "replyTo": 4232057456,
+          "author": "MacOverlorD",
+          "path": "e2e/lab-04/accessibility.spec.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232757893",
+          "body": "Axe now waits for loaded dashboard summaries, an actual populated Action record on both Requester/Staff Ticket detail, and the Administrator account result on User Management. Both `.feedback-loading` and `.actions-loading` must be absent before `analyze()` runs. The accessibility suite creates its own planned Action fixture and removes it afterward so the audits exercise the real Action content without changing later workflow tests. All three role accessibility tests passed, retaining the keyboard/focus-visible checks.\n"
+        },
+        {
+          "id": 4232758097,
+          "replyTo": 4232061076,
+          "author": "MacOverlorD",
+          "path": "server/tests/lab-04/dashboard-performance.test.ts",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/70#discussion_r4232758097",
+          "body": "Added a runner that creates a uniquely named PostgreSQL schema, applies all six migrations, seeds it, runs the server tests sequentially with that schema in `DATABASE_URL`, and drops only its generated schema in a `finally` block. `npm run test:performance:lab4` runs just this smoke through the same isolation path; the root aggregate uses it for the server suite too.\n\nThe smoke rejects execution without a matching isolation marker/schema and asserts exactly 12 seeded Tickets/4 seeded Actions before adding 1,000 Tickets/5,000 Actions. Global measurements therefore cover exactly 1,012 Tickets/5,004 Actions, with five warmups and 30 samples per endpoint. The runner writes counts/environment/p95 to the ignored performance JSON; corrected measurements and reproduction commands are documented in `issue-61-evidence.md`.\n\nFresh-schema verification also exposed an older dashboard test's historical frozen cutoff, which excluded newly seeded records from dashboard snapshots while live queue lists included them. The test now freezes a relative cutoff after the fresh seed; its eight API tests pass, including the seven-day boundary cases. Cleanup was verified after both failed and successful runs.\n\nPromoted the observed aggregate result to `artifacts/lab-04/performance-smoke.json`. Ordinary output uses a separate ignored `performance-results/latest.json`, because Playwright clears its own output directory. After correcting that artifact path, reran the isolated smoke and both visual tests and verified that the performance file's SHA-256 remained unchanged across the browser run.\n"
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "closedAt": "2026-09-24T16:55:28Z",
+      "number": 54,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-01] Engineering Contract and Requirement Baseline",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/54"
+    },
+    {
+      "closedAt": "2026-09-28T07:46:25Z",
+      "number": 55,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-02] Actions Taken Data Model, Migration, and Seed",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/55"
+    },
+    {
+      "closedAt": "2026-09-28T17:43:05Z",
+      "number": 56,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-03] Actions Taken Domain and REST API",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/56"
+    },
+    {
+      "closedAt": "2026-09-29T19:18:31Z",
+      "number": 57,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-04] Actions Taken Ticket Detail UI",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/57"
+    },
+    {
+      "closedAt": "2026-10-08T08:22:37Z",
+      "number": 58,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-05] Final Ticket Workflow and Resolution Gate",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/58"
+    },
+    {
+      "closedAt": "2026-10-08T15:02:00Z",
+      "number": 59,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-06] Requester Dashboard",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/59"
+    },
+    {
+      "closedAt": "2026-10-09T12:06:24Z",
+      "number": 60,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-07] IT Staff and Administrator Dashboard",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/60"
+    },
+    {
+      "closedAt": "2026-10-09T17:53:45Z",
+      "number": 61,
+      "state": "CLOSED",
+      "title": "[Lab 4][4-08] Integrated Regression and Final Hardening",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/61"
+    },
+    {
+      "closedAt": null,
+      "number": 62,
+      "state": "OPEN",
+      "title": "[Lab 4][4-09] Release Integration and Submission Evidence",
+      "url": "https://github.com/MacOverlorD/toktickit/issues/62"
+    }
+  ],
+  "project": {
+    "url": "https://github.com/users/MacOverlorD/projects/2",
+    "items": [
+      {
+        "issue": 54,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKN0"
+      },
+      {
+        "issue": 55,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKQ4"
+      },
+      {
+        "issue": 56,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKTE"
+      },
+      {
+        "issue": 57,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKVQ"
+      },
+      {
+        "issue": 58,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKYc"
+      },
+      {
+        "issue": 59,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKbE"
+      },
+      {
+        "issue": 60,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKeE"
+      },
+      {
+        "issue": 61,
+        "status": "Done",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKjI"
+      },
+      {
+        "issue": 62,
+        "status": "Started",
+        "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKmE"
+      }
+    ]
+  }
+}

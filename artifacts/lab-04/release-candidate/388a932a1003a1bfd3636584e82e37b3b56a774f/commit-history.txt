@@ -1,0 +1,67 @@
+* 388a932 (HEAD -> feature/4-09-release-submission) fix(lab4): make patched test tooling and PDF evidence reproducible
+* 648c302 feat(lab4): prepare reviewed release and truthful submission evidence
+*   c0ec977 (origin/lab4-staging) Merge pull request #70 from MacOverlorD/feature/4-08-integrated-hardening
+|\  
+| * 0b95dbc (origin/feature/4-08-integrated-hardening, feature/4-08-integrated-hardening) test(lab4): preserve promoted evidence during regression
+| * 94a460b fix(lab4): make hardening evidence reproducible
+| * b31598a test(lab4): complete integrated hardening
+|/  
+*   1cd25be Merge pull request #69 from MacOverlorD/feature/4-07-operations-dashboard
+|\  
+| * 918f9ad (origin/feature/4-07-operations-dashboard, feature/4-07-operations-dashboard) fix: preserve dashboard drill-down semantics
+| * e4954be feat: add operational dashboard
+|/  
+*   304f0e9 Merge pull request #68 from MacOverlorD/feature/4-06-requester-dashboard
+|\  
+| * 13ea274 (origin/feature/4-06-requester-dashboard, feature/4-06-requester-dashboard) test(lab4): stabilize dashboard fixtures
+| * 2145350 feat(lab4): add requester dashboard
+|/  
+*   c54c5d6 Merge pull request #67 from MacOverlorD/feature/4-05-final-workflow
+|\  
+| * 8f8dab7 (origin/feature/4-05-final-workflow, feature/4-05-final-workflow) fix(lab4): address workflow review feedback
+| * bcd1bfc feat(lab4): enforce final ticket workflow gate
+|/  
+*   3558702 Merge pull request #66 from MacOverlorD/feature/4-04-actions-ui
+|\  
+| * ca014dd (origin/feature/4-04-actions-ui, feature/4-04-actions-ui) fix(lab4): address actions UI review feedback
+| * b042615 feat(lab4): add actions taken ticket detail UI
+|/  
+*   8f9e9a5 Merge pull request #65 from MacOverlorD/feature/4-03-actions-api
+|\  
+| * 0936b4a (origin/feature/4-03-actions-api, feature/4-03-actions-api) fix(lab4): tighten action partial validation
+| * 6a5ba35 feat(lab4): implement actions domain and API
+|/  
+*   58a9897 (lab4-staging) Merge pull request #64 from MacOverlorD/feature/4-02-actions-data
+|\  
+| * 9ba028b (origin/feature/4-02-actions-data, feature/4-02-actions-data) test(lab4): strengthen migration review coverage
+| * 76b81f8 feat(lab4): add actions data foundation
+|/  
+* d2703d9 docs(lab4): record contract approval and merge
+*   51af4c3 Merge pull request #63 from MacOverlorD/feature/4-01-engineering-contract
+|\  
+| * f38ae64 (origin/feature/4-01-engineering-contract, feature/4-01-engineering-contract) docs(lab4): record contract review responses
+| * 60ba944 docs(lab4): resolve contract review findings
+| * dac4c23 docs(lab4): clarify pending review commit
+| * 9c13466 docs(lab4): link contract review PR
+| * f98e852 docs(lab4): initialize engineering contract
+|/  
+*   6e327a7 (origin/main) Merge pull request #53 from MacOverlorD/feature/3-10-final-main-evidence
+|\  
+| * b1aa9cd (origin/feature/3-10-final-main-evidence, feature/3-10-final-main-evidence) docs(lab3): finalize immutable submission PDF
+| * 2270c50 docs(lab3): record final main verification
+|/  
+*   f8d5307 Merge pull request #52 from MacOverlorD/lab3-staging
+|\  
+| *   3ee94a9 (origin/lab3-staging) Merge pull request #51 from MacOverlorD/feature/3-09-release-submission
+| |\  
+| | * 280d350 (origin/feature/3-09-release-submission, feature/3-09-release-submission) fix(lab3): address submission PDF review
+| | * 2a8457b docs(lab3): record release pull request
+| | * fe0f37b docs(lab3): prepare release submission evidence
+| |/  
+| *   93d270d Merge pull request #50 from MacOverlorD/feature/3-08-integrated-verification
+| |\  
+| | * dd5d575 (origin/feature/3-08-integrated-verification, feature/3-08-integrated-verification) docs: record pr 50 re-review request
+| | * 54abce4 docs: record pr 50 review fixes
+| | * 2eb9d7e fix: strengthen accessibility review evidence
+| | * ad9a038 docs: link Issue 40 verification PR
+| | * f56ea2f docs: record integrated Lab 3 verification
