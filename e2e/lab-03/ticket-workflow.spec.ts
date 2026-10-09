@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { lab3EvidencePath } from "./evidence-path.js";
 import {
   E2E_REQUESTER_PASSWORD,
   E2E_REQUESTER_USERS,
@@ -54,7 +55,7 @@ test("Requester indication and public communication continue through staff workf
   await page.getByRole("button", { name: "Add Internal Note" }).click();
   await expect(page.getByText(privateNote)).toBeVisible();
   await page.screenshot({
-    path: "artifacts/lab-03/staff-ticket-detail.png",
+    path: lab3EvidencePath("staff-ticket-detail.png"),
     fullPage: true,
   });
   await page.getByRole("button", { name: "Log out" }).click();
@@ -67,7 +68,7 @@ test("Requester indication and public communication continue through staff workf
     page.getByText(/IT Staff still performs formal resolution/),
   ).toBeVisible();
   await page.screenshot({
-    path: "artifacts/lab-03/requester-communication.png",
+    path: lab3EvidencePath("requester-communication.png"),
     fullPage: true,
   });
 });

@@ -9,6 +9,7 @@ import {
   E2E_WORKFLOW_TICKET,
 } from "./values.js";
 import { database } from "../lab-02/database.js";
+import { lab3EvidencePath } from "./evidence-path.js";
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
@@ -200,7 +201,7 @@ async function capture(page: Page, folder: string, screen: string) {
     ).toBe(true);
     await verifyCompleteKeyboardPath(page);
     await page.screenshot({
-      path: `artifacts/lab-03/screenshots/${folder}/${screen}-${viewport.name}.png`,
+      path: lab3EvidencePath(`screenshots/${folder}/${screen}-${viewport.name}.png`),
       fullPage: true,
     });
   }
@@ -217,7 +218,7 @@ async function saveValidationEvidence(
     ),
   ).toBe(true);
   await page.screenshot({
-    path: `artifacts/lab-03/screenshots/${folder}/${screen}-boundary-320.png`,
+    path: lab3EvidencePath(`screenshots/${folder}/${screen}-boundary-320.png`),
     fullPage: true,
   });
 }
@@ -403,7 +404,7 @@ test("brings the Administrator editor and validation into view at every responsi
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `artifacts/lab-03/screenshots/user-management/create-user-validation-${viewport.name}.png`,
+      path: lab3EvidencePath(`screenshots/user-management/create-user-validation-${viewport.name}.png`),
     });
   }
 });

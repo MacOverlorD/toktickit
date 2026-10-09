@@ -137,6 +137,12 @@ tests with `PROMOTE_LAB4_EVIDENCE=1` and produced 16 PNG files:
 
 Ordinary generated reports, traces, and temporary captures remain ignored.
 Promoted screenshots are committed only through the explicit environment flag.
+The Labs 1-3 capture paths also honor `PROMOTE_E2E_EVIDENCE`: ordinary legacy
+and visual captures go under ignored `artifacts/lab-03/test-results/visual-captures/`
+instead of replacing the archived promoted PNGs during aggregate verification.
+The complete ten-test Labs 1-3 suite passed after this routing change, the
+temporary Staff-detail capture existed, and `git diff --exit-code -- artifacts/lab-03`
+confirmed that the tracked archival evidence was unchanged.
 
 ## Requirement conclusion
 

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { lab3EvidencePath } from './evidence-path.js'
 import { E2E_REQUESTER_PASSWORD, E2E_STAFF_USER } from './values.js'
 
 test('staff queue remains usable across desktop, tablet, and mobile', async ({ page }) => {
@@ -31,7 +32,7 @@ test('staff queue remains usable across desktop, tablet, and mobile', async ({ p
       document.documentElement.scrollWidth <= document.documentElement.clientWidth,
     )).toBe(true)
     await page.screenshot({
-      path: `artifacts/lab-03/staff-queue-${view.name}.png`,
+      path: lab3EvidencePath(`staff-queue-${view.name}.png`),
       fullPage: true,
     })
   }

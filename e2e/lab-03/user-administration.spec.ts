@@ -1,4 +1,5 @@
 ﻿import { expect, test } from "@playwright/test";
+import { lab3EvidencePath } from "./evidence-path.js";
 import {
   E2E_ADMIN_USER,
   E2E_MANAGED_EMAIL,
@@ -57,13 +58,13 @@ test("Administrator creates, edits and resets an account while non-admin access 
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `artifacts/lab-03/user-management-${width}.png`,
+      path: lab3EvidencePath(`user-management-${width}.png`),
       fullPage: true,
     });
   }
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.screenshot({
-    path: "artifacts/lab-03/user-management.png",
+    path: lab3EvidencePath("user-management.png"),
     fullPage: true,
   });
   await page.getByRole("button", { name: "Edit E2E Managed User" }).click();
