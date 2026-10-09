@@ -19,8 +19,16 @@ The final submission requires 6-10 selected prompts. Only prompts actually used 
 | 3 | Continue after Issue #58 was merged and implement the next issue. | Closed merged Issue #58 and implemented Issue #59 Requester Dashboard from the approved API/UI/test contracts, including authoritative metrics, drill-downs, responsive UI, and automated evidence. | Builds, targeted API/UI tests, full server/client regression, and Lab 4 browser tests were executed; peer review remains required before merge. |
 | 4 | Continue after the Requester Dashboard PR was merged and implement the next issue. | Implemented Issue #60 operational dashboard for Staff/Admin, including session-derived metrics, current-cycle Actions, exact queue drill-downs, Administrator summary, responsive UI, and traceable tests. | Build, API, component, queue, and browser evidence were executed; peer review remains required before merge. |
 | 5 | Address every requested change on the operational-dashboard PR, reply per thread, and request approval again. | Used the peer findings to add an active queue scope, a distinct performed-Action projection/drill-down, and post-load Action hash focus, with result-set and browser regression coverage. | Build passed; full server 185, client 163, and Lab 4 browser 7-test suites passed before the revision was returned for peer approval. |
+| 6 | Continue after the operational-dashboard PR was merged and implement the next issue. | Implemented Issue #61 integrated hardening: full role/route regression, axe accessibility checks, keyboard-focus verification, a 1,000-Ticket/5,000-Action performance smoke, four-viewport evidence, migration/seed checks, and current setup/verification documentation. | The student should inspect the 16 promoted screenshots and review the measured commands/results in `issue-61-evidence.md` before approving the PR. |
 
 ## Assistance boundaries
+
+Review follow-up for prompt 6 used PR #70's four peer findings to complete the
+root aggregate command, wait for loaded content before axe/screenshots, fix
+the responsive header, regenerate the 16 images, and measure performance in a
+fresh schema with asserted baseline/fixture counts. Actual commands and
+controlled-schema p95 values are recorded in `issue-61-evidence.md`; genuine
+peer approval remains required.
 
 AI suggestions are proposals, not peer approval or test evidence. Credentials and secrets must not be inserted into prompts or committed. Any suggested domain choice is recorded in `decisions.md` and remains proposed until reviewed. Generated text is checked against the handout and actual codebase; commands/results are recorded only when observed.
 
