@@ -1,0 +1,163 @@
+
+> toktickit@0.1.0 test
+> npm run test:quality:lab4
+
+
+> toktickit@0.1.0 test:quality:lab4
+> npm run test:client && npm run test:server:isolated && npm run build && npm run test:e2e:all
+
+
+> toktickit@0.1.0 test:client
+> npm test --prefix client
+
+
+> toktickit-client@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Users/acer/Desktop/toktickit/tmp/lab4-release-submission/client
+
+
+ Test Files  21 passed (21)
+      Tests  163 passed (163)
+   Start at  01:19:48
+   Duration  147.28s (transform 1.79s, setup 9.45s, import 13.89s, tests 37.42s, environment 74.78s)
+
+
+> toktickit@0.1.0 test:server:isolated
+> node scripts/run-lab4-isolated-server.mjs
+
+
+> toktickit-server@0.1.0 prisma:deploy
+> prisma migrate deploy
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "toktickit", schema "lab4_quality_ce94752fd2124ea496c1a93d76a86576" at "127.0.0.1:5432"
+
+6 migrations found in prisma/migrations
+
+Applying migration `20260811033003_add_category`
+Applying migration `20260901111953_lab2_data_foundation`
+Applying migration `20260901122500_normalize_requester_email`
+Applying migration `20260911000100_lab3_user_data_foundation`
+Applying migration `20260911000200_lab3_stable_seed_identity`
+Applying migration `20260924090000_lab4_actions_data_foundation`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260811033003_add_category/
+    └─ migration.sql
+  └─ 20260901111953_lab2_data_foundation/
+    └─ migration.sql
+  └─ 20260901122500_normalize_requester_email/
+    └─ migration.sql
+  └─ 20260911000100_lab3_user_data_foundation/
+    └─ migration.sql
+  └─ 20260911000200_lab3_stable_seed_identity/
+    └─ migration.sql
+  └─ 20260924090000_lab4_actions_data_foundation/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+
+> toktickit-server@0.1.0 prisma:seed
+> prisma db seed
+
+Running seed command `tsx prisma/seed.ts` ...
+
+The seed command has been executed.
+
+> toktickit-server@0.1.0 test
+> vitest run --run --no-file-parallelism
+
+
+ RUN  v4.1.11 C:/Users/acer/Desktop/toktickit/tmp/lab4-release-submission/server
+
+
+ Test Files  30 passed (30)
+      Tests  186 passed (186)
+   Start at  01:22:29
+   Duration  283.83s (transform 1.33s, setup 0ms, import 15.70s, tests 252.69s, environment 8ms)
+
+
+> toktickit@0.1.0 build
+> npm run build --prefix server && npm run typecheck --prefix client && npm run build --prefix client
+
+
+> toktickit-server@0.1.0 build
+> tsc
+
+
+> toktickit-client@0.1.0 typecheck
+> tsc -b
+
+
+> toktickit-client@0.1.0 build
+> vite build
+
+vite v8.2.0 building client environment for production...
+[2Ktransforming...✓ 1867 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.47 kB │ gzip:   0.29 kB
+dist/assets/index-DPTW42oY.css  268.44 kB │ gzip:  37.96 kB
+dist/assets/index-EsDJpVxs.js   362.75 kB │ gzip: 104.60 kB
+
+✓ built in 1.82s
+
+> toktickit@0.1.0 test:e2e:all
+> npm run test:e2e && npm run test:e2e:lab4
+
+
+> toktickit@0.1.0 test:e2e
+> playwright test
+
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e\lab-03\authentication.spec.ts:9:5 › initial login, mandatory password change, logout, and replay denial (3.4s)
+  ✓   2 e2e\lab-03\concurrent-workflow.spec.ts:22:5 › a communication refresh cannot combine another operator's version with stale operation drafts (9.0s)
+  ✓   3 e2e\lab-03\requester-ticket-flow.spec.ts:17:5 › authenticated requester owns the complete ticket and attachment lifecycle (6.0s)
+  ✓   4 e2e\lab-03\staff-queue.spec.ts:5:5 › staff queue remains usable across desktop, tablet, and mobile (2.8s)
+  ✓   5 e2e\lab-03\ticket-workflow.spec.ts:16:5 › Requester indication and public communication continue through staff workflow with private-note isolation (9.8s)
+  ✓   6 e2e\lab-03\user-administration.spec.ts:18:5 › Administrator creates, edits and resets an account while non-admin access stays denied (8.4s)
+  ✓   7 e2e\lab-03\visual-evidence.spec.ts:226:5 › captures authentication, validation, and mandatory-change evidence (8.4s)
+  ✓   8 e2e\lab-03\visual-evidence.spec.ts:266:5 › captures Requester keyboard and communication validation evidence (18.4s)
+  ✓   9 e2e\lab-03\visual-evidence.spec.ts:287:5 › captures Staff keyboard and communication validation evidence (34.3s)
+  ✓  10 e2e\lab-03\visual-evidence.spec.ts:351:5 › brings the Administrator editor and validation into view at every responsive width (27.8s)
+
+  10 passed (2.3m)
+
+> toktickit@0.1.0 test:e2e:lab4
+> playwright test --config playwright.lab4.config.ts
+
+
+Running 13 tests using 1 worker
+
+  ✓   1 e2e\lab-04\accessibility.spec.ts:84:5 › Requester Lab 4 screens pass automated accessibility checks (8.1s)
+  ✓   2 e2e\lab-04\accessibility.spec.ts:100:5 › Staff Lab 4 screens pass automated accessibility checks (7.9s)
+  ✓   3 e2e\lab-04\accessibility.spec.ts:117:5 › Administrator screens pass automated accessibility checks (8.2s)
+  ✓   4 e2e\lab-04\actions-taken.spec.ts:17:5 › staff records and completes an Action that the Requester sees read-only (9.4s)
+  ✓   5 e2e\lab-04\actions-taken.spec.ts:89:5 › Actions Taken has no horizontal page overflow at required viewports (6.1s)
+  ✓   6 e2e\lab-04\dashboards.spec.ts:69:5 › Requester dashboard stays owner-scoped and drills into equivalent My Tickets filters (3.2s)
+  ✓   7 e2e\lab-04\dashboards.spec.ts:89:5 › Requester dashboard has no page overflow at required widths (4.7s)
+  ✓   8 e2e\lab-04\dashboards.spec.ts:105:5 › staff direct access receives the safe forbidden state (2.3s)
+  ✓   9 e2e\lab-04\dashboards.spec.ts:112:5 › Staff operational dashboard drills into the unassigned queue and remains responsive (7.4s)
+  ✓  10 e2e\lab-04\dashboards.spec.ts:154:5 › Administrator sees account summary while Requester is denied operational access (5.6s)
+  ✓  11 e2e\lab-04\regression.spec.ts:23:5 › Labs 1-4 critical routes retain role isolation without browser errors (12.6s)
+  ✓  12 e2e\lab-04\visual-evidence.spec.ts:132:5 › captures Requester dashboard evidence at required viewports (3.5s)
+  ✓  13 e2e\lab-04\visual-evidence.spec.ts:139:5 › captures operational dashboard and Actions evidence at required viewports (9.4s)
+
+  13 passed (1.7m)
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.
+(node:40580) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

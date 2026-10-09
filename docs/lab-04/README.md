@@ -41,6 +41,7 @@ Issues #59 and #60 may proceed in parallel only after their shared contract and 
 - [Review readiness](./review-readiness.md)
 - [Peer-review record](./reviewer.md)
 - [AI-use record](./ai-use.md)
+- [Release preparation evidence](./issue-62-evidence.md)
 
 ## Evidence policy
 

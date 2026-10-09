@@ -13,6 +13,8 @@ Status: release preparation in progress. This file is deliberately not a final-m
 
 ## Commands
 
+Release tooling needs Node/npm/Git/GitHub CLI plus Python 3 with `reportlab`, `Pillow`, `pdfplumber` and `pypdf` installed. Poppler's `pdftoppm` is required for visual PDF QA. These are document-authoring prerequisites, not server runtime dependencies. Install the Python packages with `python -m pip install reportlab Pillow pdfplumber pypdf` if absent.
+
 ```powershell
 npm run audit:docs:lab4
 npm run verify:release:lab4 -- --candidate
@@ -26,6 +28,8 @@ $env:TOKTICKIT_REVIEW_SNAPSHOT="artifacts/lab-04/release-results/$releaseSha/rev
 npm run evidence:reviews:lab4 -- N
 Remove-Item Env:TOKTICKIT_REVIEW_SNAPSHOT
 python scripts/generate-lab4-submission.py --manifest "artifacts/lab-04/release-results/$releaseSha/verification.json" --snapshot "artifacts/lab-04/release-results/$releaseSha/review-history.json"
+python scripts/check-lab4-pdf.py output/pdf/TokTickIT_Lab4_Submission.pdf
+pdftoppm -png output/pdf/TokTickIT_Lab4_Submission.pdf tmp/pdfs/lab4-final
 ```
 
 Verification output is ignored under `artifacts/lab-04/release-results/<full-SHA>/` so recording results does not dirty the source commit. The one final PDF belongs under `output/pdf/TokTickIT_Lab4_Submission.pdf`; this generated delivery artifact remains ignored so its exact-main reference is not self-referential. Source documents, review snapshots, audit scripts and PDF source are version-controlled.
@@ -58,3 +62,5 @@ Verification output is ignored under `artifacts/lab-04/release-results/<full-SHA
 Name and student ID are intentionally left blank in the submission for the student to fill in, as requested.
 
 The final generator requires the real merged/approved release PR and all-Done board snapshot. Prepare and visually check a preview first, complete the other acceptance gates, then close #62/mark Done and immediately refresh the final snapshot and build/check the final PDF. If the final audit fails, reopen #62 and correct the failure; never leave a failed final deliverable marked complete.
+
+Update the source reviewer record with genuine release findings/approval/merge through a reviewed evidence-only follow-up if necessary; run exact-main verification after the last source merge. Keep final SHA certificates/PDF delivery ignored so recording the current main SHA does not itself change that SHA. Any later source change requires a new exact-main run.
