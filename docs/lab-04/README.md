@@ -1,6 +1,6 @@
 # Lab 4 Sprint Setup
 
-Status: Issue [#54](https://github.com/MacOverlorD/toktickit/issues/54) contract was approved and [PR #63](https://github.com/MacOverlorD/toktickit/pull/63) merged into `lab4-staging` as `51af4c3`. Issues #55-#62 remain implementation/release work; no runtime completion is claimed yet.
+Status: Issues #54-#61 are peer-reviewed, merged into `lab4-staging`, closed, and Done on the Project. The latest integration is `c0ec9772c0263fefacf322ef070dc7012516d68f` (PR #70). Issue #62 is in progress: release preparation is not final-main completion. See [release checklist](./release-checklist.md).
 
 ## Workflow
 
@@ -21,10 +21,10 @@ Status: Issue [#54](https://github.com/MacOverlorD/toktickit/issues/54) contract
 | 02 | [#55 Actions Taken Data Model, Migration, and Seed](https://github.com/MacOverlorD/toktickit/issues/55) | `feature/4-02-actions-data` | #54 |
 | 03 | [#56 Actions Taken Domain and REST API](https://github.com/MacOverlorD/toktickit/issues/56) | `feature/4-03-actions-api` | #54, #55 |
 | 04 | [#57 Actions Taken Ticket Detail UI](https://github.com/MacOverlorD/toktickit/issues/57) | `feature/4-04-actions-ui` | #56 |
-| 05 | [#58 Final Ticket Workflow and Resolution Gate](https://github.com/MacOverlorD/toktickit/issues/58) | `feature/4-05-ticket-workflow` | #54, #56 |
+| 05 | [#58 Final Ticket Workflow and Resolution Gate](https://github.com/MacOverlorD/toktickit/issues/58) | `feature/4-05-final-workflow` | #54, #56 |
 | 06 | [#59 Requester Dashboard](https://github.com/MacOverlorD/toktickit/issues/59) | `feature/4-06-requester-dashboard` | #54, #55 |
-| 07 | [#60 IT Staff and Administrator Dashboard](https://github.com/MacOverlorD/toktickit/issues/60) | `feature/4-07-staff-dashboard` | #54, #55 |
-| 08 | [#61 Integrated Regression and Final Hardening](https://github.com/MacOverlorD/toktickit/issues/61) | `feature/4-08-final-hardening` | #55-#60 |
+| 07 | [#60 IT Staff and Administrator Dashboard](https://github.com/MacOverlorD/toktickit/issues/60) | `feature/4-07-operations-dashboard` | #54, #55 |
+| 08 | [#61 Integrated Regression and Final Hardening](https://github.com/MacOverlorD/toktickit/issues/61) | `feature/4-08-integrated-hardening` | #55-#60 |
 | 09 | [#62 Release Integration and Submission Evidence](https://github.com/MacOverlorD/toktickit/issues/62) | `feature/4-09-release-submission` | #54-#61 |
 
 Issues #59 and #60 may proceed in parallel only after their shared contract and data dependencies are approved.
