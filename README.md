@@ -1,6 +1,6 @@
 # TokTickIT
 
-TokTickIT is a full-stack IT service desk project for CPE334. The repository contains a React client and an Express API backed by PostgreSQL through Prisma. Lab 3 adds authenticated role-based workflows on top of the Lab 2 requester ticket lifecycle.
+TokTickIT is a full-stack IT service desk project for CPE334. The repository contains a React client and an Express API backed by PostgreSQL through Prisma. Labs 1-3 establish the secure, role-based Ticket lifecycle; Lab 4 adds auditable Actions Taken, final workflow rules, and role-specific dashboards.
 
 ## Prerequisites
 
@@ -19,14 +19,18 @@ toktickit/
 |   `-- tests/
 |       |-- lab-01/
 |       |-- lab-02/
-|       `-- lab-03/
-|-- e2e/lab-03/        Authenticated browser and responsive evidence tests
+|       |-- lab-03/
+|       `-- lab-04/
+|-- e2e/lab-03/        Labs 1-3 authenticated browser regression tests
+|-- e2e/lab-04/        Lab 4 Actions, dashboards, a11y, visual, and regression tests
 |-- artifacts/lab-03/  Reviewed Lab 3 screenshots
-|-- output/pdf/        The single Lab 3 submission PDF
+|-- artifacts/lab-04/  Reviewed Lab 4 screenshots
+|-- output/pdf/        The current single submission PDF
 `-- docs/
     |-- lab-01/
     |-- lab-02/
-    `-- lab-03/         Engineering contract and evidence
+    |-- lab-03/         Lab 3 engineering contract and evidence
+    `-- lab-04/         Lab 4 engineering contract and evidence
 ```
 
 ## Setup
@@ -66,7 +70,7 @@ toktickit/
    npx playwright install chromium
    ```
 
-4. Apply all database migrations and seed the Lab 3 reference data:
+4. Apply all database migrations and seed the repeatable Lab 3/Lab 4 reference data:
 
    ```powershell
    npm run prisma:generate --prefix server
@@ -75,8 +79,9 @@ toktickit/
    ```
 
    The repeatable seed maintains the reference Categories and Related Systems,
-   Requester/IT Staff/Administrator accounts, and realistic Tickets across all
-   eight workflow states without resetting existing user-managed values. For a
+   Requester/IT Staff/Administrator accounts, realistic Tickets across all
+   workflow states, and zero/one/many Action fixtures without resetting
+   existing user-managed values. For a
    populated Lab 2 database, backup, migration, verification, and guarded local
    password setup are documented in
    [Lab 3 Data Migration and Local Accounts](docs/lab-03/data-migration.md).
@@ -195,6 +200,23 @@ names; and compensates partial storage/database failures. Removal requires a
 access. All endpoints require the active requester context and enforce Ticket
 ownership.
 
+### Lab 4 Actions, workflow, and dashboards
+
+Authenticated IT Staff and Administrators manage formal work history through
+`/api/staff/tickets/:ticketNumber/actions` and its edit, assignment, start,
+complete, and cancel operations. The server derives creator and performer from
+the session, enforces optimistic concurrency and idempotent creation, and keeps
+Requester projections read-only and free of operational-only fields.
+
+Final Ticket transitions are validated by the server. Resolution requires a
+completed Action with a nonblank result in the current work cycle; reopening
+starts a new work cycle, so an older Action cannot satisfy a later resolution.
+
+`GET /api/dashboard/requester` returns owner-scoped Requester metrics, while
+`GET /api/dashboard/operations` returns Staff/Administrator queue, Action, and
+account metrics. Dashboard identity always comes from the authenticated
+session, and every drill-down uses the equivalent Ticket/Action filter.
+
 ## Verification
 
 ```powershell
@@ -203,6 +225,7 @@ npm run test:server
 npm run test:client
 npm run build
 npm run test:e2e
+npm run test:e2e:lab4
 npm run prisma:seed --prefix server
 ```
 
@@ -231,3 +254,18 @@ Remove-Item Env:PROMOTE_E2E_EVIDENCE
 
 Approved screenshots live in `artifacts/lab-03/screenshots/`; the local HTML
 report is written to `artifacts/lab-03/playwright-report/index.html`.
+
+Lab 4 normal runs keep reports and visual captures ignored. Promote a reviewed
+four-viewport evidence run explicitly:
+
+```powershell
+$env:PROMOTE_LAB4_EVIDENCE='1'
+npm run test:e2e:lab4 -- --grep "captures"
+Remove-Item Env:PROMOTE_LAB4_EVIDENCE
+```
+
+The 1440, 768, 390, and 320 px screenshots are stored under
+`artifacts/lab-04/screenshots/`. See
+[Lab 4 integrated hardening evidence](docs/lab-04/issue-61-evidence.md) for the
+executed commands, performance samples, accessibility audit, and evidence
+inventory.

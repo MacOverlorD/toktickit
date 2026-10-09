@@ -8,6 +8,7 @@ import {
   E2E_VISUAL_AUTH_USER,
   E2E_WORKFLOW_TICKET,
 } from "./values.js";
+import { database } from "../lab-02/database.js";
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
@@ -285,6 +286,19 @@ test("captures Requester keyboard and communication validation evidence", async 
 test("captures Staff keyboard and communication validation evidence", async ({
   page,
 }) => {
+  const prisma = await database();
+  await prisma.ticket.update({
+    where: { ticketNumber: E2E_WORKFLOW_TICKET },
+    data: {
+      ownerId: null,
+      status: "OPEN",
+      resolvedAt: null,
+      resolutionIndicatedAt: null,
+      resolutionIndicatedById: null,
+    },
+  });
+  await prisma.$disconnect();
+
   await login(page, E2E_STAFF_USER.email);
   await expect(
     page.getByRole("heading", { name: "Ticket Queue" }),
@@ -294,8 +308,12 @@ test("captures Staff keyboard and communication validation evidence", async ({
   await expect(
     page.getByRole("heading", { name: E2E_WORKFLOW_TICKET }),
   ).toBeVisible();
-  await expect(page.getByText("Public Comments")).toBeVisible();
-  await expect(page.getByText("Internal Notes")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Public Comments" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Internal Notes" }),
+  ).toBeVisible();
   await capture(page, "staff-ticket-detail", "ticket-detail");
   await page.setViewportSize({ width: 320, height: 844 });
   await page.getByRole("button", { name: "Add Public Comment" }).click();
@@ -306,27 +324,22 @@ test("captures Staff keyboard and communication validation evidence", async ({
     "staff-ticket-detail",
     "comment-validation",
   );
-  const owner = page.getByLabel("Owner");
-  const rejectedOperation =
-    (await owner.inputValue()) === ""
-      ? {
-          control: page.getByLabel("Next Status"),
-          submit: page.getByRole("button", { name: "Change Status" }),
-        }
-      : {
-          control: owner,
-          submit: page.getByRole("button", { name: "Save Owner" }),
-        };
-  if ((await owner.inputValue()) !== "") await owner.selectOption("");
-  await rejectedOperation.submit.click();
+  const status = page.getByLabel("Next Status");
+  await status.evaluate((element) => {
+    const select = element as HTMLSelectElement;
+    const option = document.createElement("option");
+    option.value = "IN_PROGRESS";
+    option.textContent = "In Progress";
+    select.append(option);
+    select.value = option.value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await page.getByRole("button", { name: "Change Status" }).click();
   await expect(
     page.getByText("Assign an eligible owner before this action."),
   ).toBeVisible();
-  await expect(rejectedOperation.control).toBeFocused();
-  await expect(rejectedOperation.control).toHaveAttribute(
-    "aria-invalid",
-    "true",
-  );
+  await expect(status).toBeFocused();
+  await expect(status).toHaveAttribute("aria-invalid", "true");
   await saveValidationEvidence(
     page,
     "staff-ticket-detail",
