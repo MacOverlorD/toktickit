@@ -1,0 +1,15 @@
+
+> toktickit-server@0.1.0 prisma:deploy
+> prisma migrate deploy
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "toktickit", schema "public" at "127.0.0.1:5432"
+
+6 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.

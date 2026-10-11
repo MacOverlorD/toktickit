@@ -2,7 +2,25 @@
 
 Status: candidate verification passed; preparation peer review and staging-to-main release remain pending. This is not a final-main completion claim.
 
-## Verified candidate
+## Refreshed candidate after PR #71 review
+
+- Exact clean tested source: `b5d9a0719c1281c6fd79b1526c616ef0c6dc4953`.
+- Command: `npm run verify:release:lab4 -- --candidate`.
+- Observed interval: `2026-10-11T12:07:10.867Z` to `2026-10-11T12:21:22.651Z`.
+- All 11 recorded commands passed, including `npm ci`, `npm ci --prefix client`, and `npm ci --prefix server` before Prisma generation. Source was clean before and after the run.
+- Client 163; isolated server 186; Labs 1-3 browser 10; Lab 4 browser 13. Builds, six-migration deploy/status and two seed runs passed.
+- Release guards: 5 Node tests passed; the policy test additionally executed 13 Python cases covering release identity/ancestry, stale/revoked approvals, issue closure/Project status and missing/reordered/failed installations. These nested cases are reported separately, not double-counted in the application total.
+- Final output now requires genuine final-head peer approval of the merged `lab4-staging -> main` release, Git ancestry to final main, approval of the PR merged at final HEAD, all nine Issues CLOSED, and all nine cards Done. A later reviewed evidence PR cannot replace an unreviewed staging release.
+
+The refreshed [verification manifest](../../artifacts/lab-04/release-candidate/b5d9a0719c1281c6fd79b1526c616ef0c6dc4953/verification.json), [aggregate output](../../artifacts/lab-04/release-candidate/b5d9a0719c1281c6fd79b1526c616ef0c6dc4953/quality-all.txt), [release regression output](../../artifacts/lab-04/release-candidate/b5d9a0719c1281c6fd79b1526c616ef0c6dc4953/release-tool-tests.txt), [commit graph](../../artifacts/lab-04/release-candidate/b5d9a0719c1281c6fd79b1526c616ef0c6dc4953/commit-history.txt), and [performance data](../../artifacts/lab-04/release-candidate/b5d9a0719c1281c6fd79b1526c616ef0c6dc4953/performance.json) are retained. Every per-command log named by this manifest is promoted in that same directory, including all three install logs; their captured SHA-256 values were checked before promotion.
+
+Performance: baseline 12 Tickets / 4 Actions; added 1,000 / 5,000; totals 1,012 / 5,004; five warmups and 30 samples. Observed p95: Requester 48.62 ms, operations 183.81 ms, My Tickets 48.73 ms, Staff queue 111.49 ms, all below the 500 ms budget. Captured `2026-10-11T12:16:39.140Z`.
+
+An earlier attempt at this same source stopped at Prisma deploy with P1001 because Docker/PostgreSQL was not running. Its failed manifest/logs were preserved locally under `tmp/lab4-pr71-database-offline-rehearsal/`; it is not counted as passing. The existing `toktickit-postgres` container was started, readiness confirmed, then the complete verifier was rerun from clean installations. The remaining disclosed Prisma advisory is unchanged.
+
+The follow-up commits contain evidence/review documentation only; the tested tooling, application and lockfiles remain those of the exact SHA above. This is still candidate evidence, not a final-main certificate.
+
+## Earlier verified candidate (historical)
 
 - Command: `npm run verify:release:lab4 -- --candidate`.
 - Exact tested source: `388a932a1003a1bfd3636584e82e37b3b56a774f`.

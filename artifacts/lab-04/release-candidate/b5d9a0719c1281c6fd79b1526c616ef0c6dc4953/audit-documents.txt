@@ -1,0 +1,7 @@
+
+> toktickit@0.1.0 audit:docs:lab4
+> node scripts/verify-lab4-docs.mjs
+
+Lab 4 document audit passed: 39 existing test references, 8 prompts, 8 reviewed PRs, 8 Done issues, 16 viewport PNGs.
+This preparation audit does not certify release approval, final-main tests, or final PDF completion.
+
