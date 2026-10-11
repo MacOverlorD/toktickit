@@ -80,4 +80,14 @@ Each pair links the actual review finding and the author's response; response te
 
 ## Release review
 
+PR [#71](https://github.com/MacOverlorD/toktickit/pull/71) received Request changes from Ohmmykung09 on `f54b48920a3494e9cc6b1745b3ffdd35619f81a3` on 2026-10-10. The following fixes were made and the full clean candidate rerun at `b5d9a0719c1281c6fd79b1526c616ef0c6dc4953` passed on 2026-10-11. Re-approval and merge remain pending; author replies are not independent approvals.
+
+| Finding | Implemented response and regression | Posted reply |
+|---|---|---|
+| [Bind final approval to staging release](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237802366) | Require reviewed final head of merged `lab4-staging -> main`, verify merge ancestry, and separately require review of the final-main merge; reject unreviewed-release/reviewed-doc bypass | [response](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241551891) |
+| [Record clean lockfile installations](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237803986) | Shared ordered command contract starts with root/client/server `npm ci`; final validation rejects missing, reordered, duplicate or failed install records; all 11 actual logs retained | [response](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241551963) |
+| [Require issue closure as well as Done](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237813556) | All #54-#62 must be CLOSED independently of Project status; regression rejects OPEN #62 with a Done card | [response](https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241552029) |
+
+See [refreshed candidate evidence](issue-62-evidence.md) for retained command output and the 5 Node / 13 nested Python guard cases. The initial database-offline rehearsal was not counted as passing.
+
 Pending. The Issue #62 preparation PR must be reviewed into staging and the subsequent complete staging-to-main release must receive its own peer approval. Exact release PR, reviewer, reviewed SHA, decision and merge SHA will be recorded from GitHub, not invented in advance.

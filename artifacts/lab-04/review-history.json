@@ -1,10 +1,11 @@
 {
-  "capturedAt": "2026-10-09T17:54:35.179Z",
+  "capturedAt": "2026-10-11T12:25:23.304Z",
   "repository": "MacOverlorD/toktickit",
   "pulls": [
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-01-engineering-contract",
+      "headRefOid": "f38ae64b8c193ed85dea66d8cbdda39135c68e44",
       "mergeCommit": {
         "oid": "51af4c38843206c0bb130114c90b81a88693f857"
       },
@@ -237,6 +238,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-02-actions-data",
+      "headRefOid": "9ba028b0b7b5680c780e0f80d83eb5d9a852167c",
       "mergeCommit": {
         "oid": "58a9897d4d8a3dafdacad07dd9a7c19de9fcf83a"
       },
@@ -341,6 +343,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-03-actions-api",
+      "headRefOid": "0936b4a24defe7cee5491ed156b1c86a7f344792",
       "mergeCommit": {
         "oid": "8f9e9a50d27fc7081be98465dee92f1315ffec77"
       },
@@ -445,6 +448,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-04-actions-ui",
+      "headRefOid": "ca014ddc12d967a08821d74a1b9a31ae254dcaa4",
       "mergeCommit": {
         "oid": "355870217e05d7ad0706ea7ab7e3d6fe984b89db"
       },
@@ -597,6 +601,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-05-final-workflow",
+      "headRefOid": "8f8dab7d85ebeb8f56de39965ef564b3fe247127",
       "mergeCommit": {
         "oid": "c54c5d6edc4d8d45aa2e60d270922a1be73c94df"
       },
@@ -701,6 +706,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-06-requester-dashboard",
+      "headRefOid": "13ea274b6e99ffd27f85657ab586dc2852294231",
       "mergeCommit": {
         "oid": "304f0e9c34472cd5008b72d569450d9cff2e63a8"
       },
@@ -757,6 +763,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-07-operations-dashboard",
+      "headRefOid": "918f9ade5a16166a8d00f1279b1ee9a25850c5b7",
       "mergeCommit": {
         "oid": "1cd25bed9a6556444c991a36f7da925d181d2b94"
       },
@@ -885,6 +892,7 @@
     {
       "baseRefName": "lab4-staging",
       "headRefName": "feature/4-08-integrated-hardening",
+      "headRefOid": "0b95dbc9f3f3aa2dc2eb2670ecb5dad462f5a389",
       "mergeCommit": {
         "oid": "c0ec9772c0263fefacf322ef070dc7012516d68f"
       },
@@ -1011,6 +1019,103 @@
       ]
     }
   ],
+  "releasePulls": [
+    {
+      "baseRefName": "lab4-staging",
+      "headRefName": "feature/4-09-release-submission",
+      "headRefOid": "8755dd23524205511b3f0c59bd5ba3880d411b45",
+      "mergeCommit": null,
+      "mergedAt": null,
+      "number": 71,
+      "state": "OPEN",
+      "title": "[Lab 4][4-09] Prepare reviewed release and submission evidence",
+      "url": "https://github.com/MacOverlorD/toktickit/pull/71",
+      "reviews": [
+        {
+          "author": "Ohmmykung09",
+          "state": "CHANGES_REQUESTED",
+          "submittedAt": "2026-10-10T13:45:22Z",
+          "commit": "f54b48920a3494e9cc6b1745b3ffdd35619f81a3",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#pullrequestreview-5479139626",
+          "body": "Thank you for the careful release preparation and for clearly separating candidate evidence from final-main evidence. I verified the document audit, release-tool guard tests with the documented PDF runtime, clean lockfile installations, client tests, Prisma generation/build, retained evidence hashes, and the rendered PDF preview.\nBefore approval, please address the fail-closed gaps noted inline: bind final approval to the actual lab4-staging -> main release PR, make clean lockfile installation part of the recorded final verifier, and require Issue #62 itself to be closed in addition to its Project item being Done. Please add regression coverage for these cases and refresh the candidate evidence after changing the release tooling."
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-11T12:23:59Z",
+          "commit": "8755dd23524205511b3f0c59bd5ba3880d411b45",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#pullrequestreview-5483282229",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-11T12:24:01Z",
+          "commit": "8755dd23524205511b3f0c59bd5ba3880d411b45",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#pullrequestreview-5483282310",
+          "body": ""
+        },
+        {
+          "author": "MacOverlorD",
+          "state": "COMMENTED",
+          "submittedAt": "2026-10-11T12:24:02Z",
+          "commit": "8755dd23524205511b3f0c59bd5ba3880d411b45",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#pullrequestreview-5483282384",
+          "body": ""
+        }
+      ],
+      "comments": [
+        {
+          "id": 4237802366,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "scripts/generate-lab4-submission.py",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237802366",
+          "body": "Bind final approval to the actual staging release PR\nPlease bind this gate to the actual lab4-staging -> main release PR. As written, any peer-approved PR targeting main whose merge commit equals the current SHA can satisfy the condition, including a later evidence-only follow-up. This would allow an unreviewed staging release to be followed by a reviewed documentation PR and still produce a “final” PDF.\nPlease require a merged PR with headRefName === \"lab4-staging\" and a peer approval on that PR’s final head. If later evidence-only commits are allowed, independently verify that the reviewed staging release merge is an ancestor of the final main SHA rather than replacing the release-review requirement. Please add a regression test for this case."
+        },
+        {
+          "id": 4237803986,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "scripts/verify-lab4-release.mjs",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237803986",
+          "body": "Include clean lockfile installation in the recorded verification\nPlease make clean lockfile installation part of the recorded final verification. The runner currently executes against whatever ignored node_modules directories already exist, and git status --porcelain cannot detect stale or manually modified packages. As a result, the manifest can certify the exact main source while testing dependencies from a different revision.\nPlease add recorded npm ci steps for the root, client, and server before Prisma generation, then require those commands in the PDF manifest’s expected command set. This will also align the executable verifier with step 3 of the release checklist."
+        },
+        {
+          "id": 4237813556,
+          "replyTo": null,
+          "author": "Ohmmykung09",
+          "path": "scripts/generate-lab4-submission.py",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4237813556",
+          "body": "Require the final issue to be closed, not only marked Done\nThe final gate currently checks only the Project statuses. An open Issue #62 manually moved to Done would satisfy this condition even though the release checklist requires closing #62 before final delivery.\nPlease also require Issues #54–#62 in snapshot[\"issues\"] to have state CLOSED, and add a regression test demonstrating that an open #62 cannot produce the final PDF."
+        },
+        {
+          "id": 4241551891,
+          "replyTo": 4237802366,
+          "author": "MacOverlorD",
+          "path": "scripts/generate-lab4-submission.py",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241551891",
+          "body": "Fixed in 6c437da (tested together with b5d9a07). The final generator now calls the tested workflow policy: it requires a MERGED lab4-staging -> main PR with a peer APPROVED decision on its final head, verifies that release merge using git merge-base --is-ancestor against final main, and independently requires a reviewed PR merged at the final SHA. A documentation follow-up cannot substitute for staging approval. Regression cases reject the exact unreviewed-release/reviewed-documentation bypass, wrong head branch, stale approval, revoked approval and non-ancestor release, and accept a genuinely reviewed staging ancestor plus reviewed follow-up. The refreshed full clean candidate passed at b5d9a0719c1281c6fd79b1526c616ef0c6dc4953; observed logs: https://github.com/MacOverlorD/toktickit/blob/8755dd2/docs/lab-04/issue-62-evidence.md. Final-main approval/output remain pending."
+        },
+        {
+          "id": 4241551963,
+          "replyTo": 4237803986,
+          "author": "MacOverlorD",
+          "path": "scripts/verify-lab4-release.mjs",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241551963",
+          "body": "Fixed in 6c437da. The verifier and PDF manifest validator share scripts/lab4-release-commands.json. The first three recorded steps are npm ci, npm ci --prefix client and npm ci --prefix server, before Prisma generation. Any nonzero exit stops the runner; the final manifest must contain the exact ordered names/commands with successful exits, so missing, duplicated, reordered or failed install records reject. The refreshed clean candidate at b5d9a0719c1281c6fd79b1526c616ef0c6dc4953 passed all 11 steps, with all three actual install logs and every per-command log retained and hashed. Regression policy cases also passed. Evidence: https://github.com/MacOverlorD/toktickit/blob/8755dd2/docs/lab-04/issue-62-evidence.md."
+        },
+        {
+          "id": 4241552029,
+          "replyTo": 4237813556,
+          "author": "MacOverlorD",
+          "path": "scripts/generate-lab4-submission.py",
+          "url": "https://github.com/MacOverlorD/toktickit/pull/71#discussion_r4241552029",
+          "body": "Fixed in 6c437da. Final generation now requires every Issue #54-#62 in snapshot.issues to be CLOSED independently of all nine Project cards being Done. The policy regression explicitly keeps #62 OPEN with its card Done and verifies rejection; missing prerequisite issues and a closed issue with an unfinished card also reject. The full refreshed candidate passed at b5d9a0719c1281c6fd79b1526c616ef0c6dc4953: five Node guard tests plus 13 nested Python policy cases, client 163, server 186, browser 10+13, installs/build/migration/repeat seed. Evidence: https://github.com/MacOverlorD/toktickit/blob/8755dd2/docs/lab-04/issue-62-evidence.md. Issue #62 deliberately remains OPEN in this preparation PR; it will only close after the actual reviewed release, exact-main checks and preview QA, followed immediately by final snapshot/PDF checks (reopen on failure)."
+        }
+      ]
+    }
+  ],
   "issues": [
     {
       "closedAt": "2026-09-24T16:55:28Z",
@@ -1121,7 +1226,7 @@
       },
       {
         "issue": 62,
-        "status": "Started",
+        "status": "PR Review",
         "id": "PVTI_lAHOCp7R_s4BfVqnzg8fKmE"
       }
     ]
