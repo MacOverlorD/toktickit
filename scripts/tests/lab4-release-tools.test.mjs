@@ -32,3 +32,10 @@ test('final PDF generation refuses an absent final-main certificate', () => {
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /requires a passed final-main verification manifest/)
 })
+test('final workflow and clean-install policies reject bypasses', () => {
+  const result = spawnSync('python', ['-X', 'utf8', 'scripts/tests/lab4_submission_guards_test.py', '-v'], {
+    cwd: root, encoding: 'utf8', windowsHide: true,
+  })
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stderr, /Ran 13 tests/)
+})

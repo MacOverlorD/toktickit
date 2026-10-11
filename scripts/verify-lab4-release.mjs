@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -25,16 +25,7 @@ const result = { mode: candidate ? 'candidate' : 'final-main', commit, startedAt
 const history = git('log', '--graph', '--oneline', '--decorate', '-45')
 writeFileSync(path.join(directory, 'commit-history.txt'), `${history}\n`)
 result.history = { log: 'commit-history.txt', sha256: createHash('sha256').update(`${history}\n`).digest('hex') }
-const commands = [
-  ['audit-documents', ['run', 'audit:docs:lab4']],
-  ['release-tool-tests', ['run', 'test:release-tools:lab4']],
-  ['prisma-generate', ['run', 'prisma:generate', '--prefix', 'server']],
-  ['prisma-deploy', ['run', 'prisma:deploy', '--prefix', 'server']],
-  ['prisma-status', ['run', 'prisma:status', '--prefix', 'server']],
-  ['prisma-seed-first', ['run', 'prisma:seed', '--prefix', 'server']],
-  ['prisma-seed-repeat', ['run', 'prisma:seed', '--prefix', 'server']],
-  ['quality-all', ['test']],
-]
+const commands = JSON.parse(readFileSync(path.join(root, 'scripts/lab4-release-commands.json'), 'utf8'))
 try {
   for (const [name, args] of commands) {
     console.log(`Verifying ${name} at ${commit} (${result.mode})`)

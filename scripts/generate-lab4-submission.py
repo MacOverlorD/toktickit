@@ -9,6 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 from xml.sax.saxutils import escape
+from lab4_submission_guards import validate_commands, validate_workflow
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -37,24 +38,16 @@ if not args.preview:
         raise SystemExit("Source is not the latest fetched main.")
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip():
         raise SystemExit("Final source must be clean.")
-    releases = snapshot.get("releasePulls", [])
-    def peer_approved(pull):
-        decisions = {}
-        for review in pull["reviews"]:
-            if review["author"] != "MacOverlorD" and review["state"] in ("APPROVED", "CHANGES_REQUESTED"):
-                decisions[review["author"]] = review
-        return any(r["state"] == "APPROVED" and r["commit"] == pull.get("headRefOid") for r in decisions.values())
-    if not any(p["state"] == "MERGED" and p["baseRefName"] == "main"
-               and (p.get("mergeCommit") or {}).get("oid") == sha and peer_approved(p)
-               for p in releases):
-        raise SystemExit("Snapshot must contain a genuinely peer-approved merged release PR to main.")
-    if not all(any(i["issue"] == number and i["status"] == "Done" for i in snapshot["project"]["items"])
-               for number in range(54, 63)):
-        raise SystemExit("Final submission requires all nine Project issues Done.")
-    expected = {"audit-documents", "release-tool-tests", "prisma-generate", "prisma-deploy", "prisma-status",
-                "prisma-seed-first", "prisma-seed-repeat", "quality-all"}
-    if {c["name"] for c in manifest["commands"]} != expected:
-        raise SystemExit("Incomplete command manifest.")
+    def is_ancestor(merge, current):
+        result = subprocess.run(["git", "merge-base", "--is-ancestor", merge, current], cwd=ROOT)
+        if result.returncode not in (0, 1):
+            raise ValueError("Cannot verify release ancestry from the local Git history.")
+        return result.returncode == 0
+    try:
+        validate_workflow(snapshot, sha, is_ancestor)
+        validate_commands(manifest)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     for command in manifest["commands"]:
         if command["exitCode"] != 0:
             raise SystemExit("A recorded verification command failed.")
