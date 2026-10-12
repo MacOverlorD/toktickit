@@ -283,3 +283,19 @@ The 1440, 768, 390, and 320 px screenshots are stored under
 [Lab 4 integrated hardening evidence](docs/lab-04/issue-61-evidence.md) for the
 executed commands, performance samples, accessibility audit, and evidence
 inventory.
+
+### Lab 4 release and submission
+
+`npm run audit:docs:lab4` checks the concrete test paths, numbered contract,
+student reflection/prompt log, real peer-review snapshot, completed dependency
+issues, and viewport PNG inventory. It is not a final-release certificate.
+
+After the reviewed staging-to-main release is merged, install from lockfiles
+in a clean worktree at the fetched `origin/main` SHA and run
+`npm run verify:release:lab4`. The runner rejects a dirty or non-main source,
+captures migration/status, repeated seed and the complete aggregate test
+output, and verifies that main did not advance during the run. Results and
+their hashes remain ignored so the source commit stays unchanged. Use
+`-- --candidate` only for a clearly labelled pre-release rehearsal. See the
+[release checklist](docs/lab-04/release-checklist.md) for genuine peer review,
+exact-main verification, the single nine-part PDF, and final Project gates.

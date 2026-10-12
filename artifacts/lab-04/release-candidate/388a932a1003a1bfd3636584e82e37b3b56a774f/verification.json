@@ -1,0 +1,90 @@
+{
+  "mode": "candidate",
+  "commit": "388a932a1003a1bfd3636584e82e37b3b56a774f",
+  "startedAt": "2026-10-09T18:19:14.197Z",
+  "environment": {
+    "node": "v22.18.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "commands": [
+    {
+      "name": "audit-documents",
+      "command": "npm run audit:docs:lab4",
+      "startedAt": "2026-10-09T18:19:14.520Z",
+      "finishedAt": "2026-10-09T18:19:15.393Z",
+      "exitCode": 0,
+      "log": "audit-documents.txt",
+      "sha256": "76fb69735efda896e7d714a6e5257bdfa012b0e23f3eef3c567a592c147b0e00"
+    },
+    {
+      "name": "release-tool-tests",
+      "command": "npm run test:release-tools:lab4",
+      "startedAt": "2026-10-09T18:19:15.393Z",
+      "finishedAt": "2026-10-09T18:19:17.451Z",
+      "exitCode": 0,
+      "log": "release-tool-tests.txt",
+      "sha256": "56b24770b362ea5278b84a944ba98eb05d077f2b019488546782e7e99ebd46c9"
+    },
+    {
+      "name": "prisma-generate",
+      "command": "npm run prisma:generate --prefix server",
+      "startedAt": "2026-10-09T18:19:17.452Z",
+      "finishedAt": "2026-10-09T18:19:22.587Z",
+      "exitCode": 0,
+      "log": "prisma-generate.txt",
+      "sha256": "b15da9bc3decdc5dea4ad172a239f7cb237e05741692fa987116001860b72994"
+    },
+    {
+      "name": "prisma-deploy",
+      "command": "npm run prisma:deploy --prefix server",
+      "startedAt": "2026-10-09T18:19:22.588Z",
+      "finishedAt": "2026-10-09T18:19:27.401Z",
+      "exitCode": 0,
+      "log": "prisma-deploy.txt",
+      "sha256": "30a73908ee7331c42a6e1e8cccb9b41641cd729f9265cd2de162a1bd2f87ee04"
+    },
+    {
+      "name": "prisma-status",
+      "command": "npm run prisma:status --prefix server",
+      "startedAt": "2026-10-09T18:19:27.402Z",
+      "finishedAt": "2026-10-09T18:19:32.014Z",
+      "exitCode": 0,
+      "log": "prisma-status.txt",
+      "sha256": "2173e65ef085a5ffd84ee86b8392445438e0c602ec8803930565133be29fd4c5"
+    },
+    {
+      "name": "prisma-seed-first",
+      "command": "npm run prisma:seed --prefix server",
+      "startedAt": "2026-10-09T18:19:32.015Z",
+      "finishedAt": "2026-10-09T18:19:37.613Z",
+      "exitCode": 0,
+      "log": "prisma-seed-first.txt",
+      "sha256": "bd5d2ee46a6940fa15c5592744162dde6f902dde4947c1f6476838152de37f84"
+    },
+    {
+      "name": "prisma-seed-repeat",
+      "command": "npm run prisma:seed --prefix server",
+      "startedAt": "2026-10-09T18:19:37.614Z",
+      "finishedAt": "2026-10-09T18:19:43.585Z",
+      "exitCode": 0,
+      "log": "prisma-seed-repeat.txt",
+      "sha256": "bd5d2ee46a6940fa15c5592744162dde6f902dde4947c1f6476838152de37f84"
+    },
+    {
+      "name": "quality-all",
+      "command": "npm test",
+      "startedAt": "2026-10-09T18:19:43.585Z",
+      "finishedAt": "2026-10-09T18:31:44.577Z",
+      "exitCode": 0,
+      "log": "quality-all.txt",
+      "sha256": "d0c04076b9f11c23d893e9173eba568164a1cdb0e1aaaecdac70cd07484a3205"
+    }
+  ],
+  "passed": true,
+  "history": {
+    "log": "commit-history.txt",
+    "sha256": "6de877891ca9f29f6007454673ef0b14fd7c79f58a9760d90caba52fa7f2845e"
+  },
+  "finishedAt": "2026-10-09T18:31:45.031Z"
+}

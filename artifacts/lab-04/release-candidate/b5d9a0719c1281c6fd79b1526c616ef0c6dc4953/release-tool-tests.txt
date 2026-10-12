@@ -1,0 +1,45 @@
+
+> toktickit@0.1.0 test:release-tools:lab4
+> node --test scripts/tests/lab4-release-tools.test.mjs
+
+TAP version 13
+# Subtest: preparation document audit verifies the real repository inventory
+ok 1 - preparation document audit verifies the real repository inventory
+  ---
+  duration_ms: 220.9846
+  type: 'test'
+  ...
+# Subtest: release runner rejects unknown arguments before running commands
+ok 2 - release runner rejects unknown arguments before running commands
+  ---
+  duration_ms: 166.5495
+  type: 'test'
+  ...
+# Subtest: release runner rejects execution outside npm rather than guessing a shell
+ok 3 - release runner rejects execution outside npm rather than guessing a shell
+  ---
+  duration_ms: 194.6081
+  type: 'test'
+  ...
+# Subtest: final PDF generation refuses an absent final-main certificate
+ok 4 - final PDF generation refuses an absent final-main certificate
+  ---
+  duration_ms: 915.8488
+  type: 'test'
+  ...
+# Subtest: final workflow and clean-install policies reject bypasses
+ok 5 - final workflow and clean-install policies reject bypasses
+  ---
+  duration_ms: 268.1313
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2011.2781
+

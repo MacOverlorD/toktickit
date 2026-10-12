@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "audit:docs:lab4": "node scripts/verify-lab4-docs.mjs",
+    "test:release-tools:lab4": "node --test scripts/tests/lab4-release-tools.test.mjs",
+    "verify:release:lab4": "node scripts/verify-lab4-release.mjs",
+    "evidence:reviews:lab4": "node scripts/collect-lab4-review-evidence.mjs",
     "test": "npm run test:quality:lab4",
     "test:server": "npm test --prefix server",
     "test:server:isolated": "node scripts/run-lab4-isolated-server.mjs",
