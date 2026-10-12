@@ -1,0 +1,117 @@
+{
+  "mode": "candidate",
+  "commit": "b5d9a0719c1281c6fd79b1526c616ef0c6dc4953",
+  "startedAt": "2026-10-11T12:07:10.867Z",
+  "environment": {
+    "node": "v22.18.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "commands": [
+    {
+      "name": "install-root",
+      "command": "npm ci",
+      "startedAt": "2026-10-11T12:07:11.130Z",
+      "finishedAt": "2026-10-11T12:07:15.096Z",
+      "exitCode": 0,
+      "log": "install-root.txt",
+      "sha256": "aa29dfe6c968d6820d90f3386adfbc228aa0a5f095485156897ea4bb4afa5c8b"
+    },
+    {
+      "name": "install-client",
+      "command": "npm ci --prefix client",
+      "startedAt": "2026-10-11T12:07:15.097Z",
+      "finishedAt": "2026-10-11T12:07:39.142Z",
+      "exitCode": 0,
+      "log": "install-client.txt",
+      "sha256": "89e7a1156b4647ff66be1944e73ca7b4456c1938f36f87cf3bbe32d702b5a4de"
+    },
+    {
+      "name": "install-server",
+      "command": "npm ci --prefix server",
+      "startedAt": "2026-10-11T12:07:39.143Z",
+      "finishedAt": "2026-10-11T12:08:19.462Z",
+      "exitCode": 0,
+      "log": "install-server.txt",
+      "sha256": "bfd69daa43e6f03d9f59aeb372e9473b060f98a4706a2637dc94bfb0b2b9d9f4"
+    },
+    {
+      "name": "audit-documents",
+      "command": "npm run audit:docs:lab4",
+      "startedAt": "2026-10-11T12:08:19.462Z",
+      "finishedAt": "2026-10-11T12:08:20.743Z",
+      "exitCode": 0,
+      "log": "audit-documents.txt",
+      "sha256": "76fb69735efda896e7d714a6e5257bdfa012b0e23f3eef3c567a592c147b0e00"
+    },
+    {
+      "name": "release-tool-tests",
+      "command": "npm run test:release-tools:lab4",
+      "startedAt": "2026-10-11T12:08:20.744Z",
+      "finishedAt": "2026-10-11T12:08:23.681Z",
+      "exitCode": 0,
+      "log": "release-tool-tests.txt",
+      "sha256": "b8a5731646b0628fd08f90d37f4fe9eb361cb1483477c6de2149a67dcab4eb0b"
+    },
+    {
+      "name": "prisma-generate",
+      "command": "npm run prisma:generate --prefix server",
+      "startedAt": "2026-10-11T12:08:23.682Z",
+      "finishedAt": "2026-10-11T12:08:30.562Z",
+      "exitCode": 0,
+      "log": "prisma-generate.txt",
+      "sha256": "ec53e23935f054617b9f9dca42d53945087318f4d9bb65a9e3a622632d91be42"
+    },
+    {
+      "name": "prisma-deploy",
+      "command": "npm run prisma:deploy --prefix server",
+      "startedAt": "2026-10-11T12:08:30.563Z",
+      "finishedAt": "2026-10-11T12:08:35.612Z",
+      "exitCode": 0,
+      "log": "prisma-deploy.txt",
+      "sha256": "30a73908ee7331c42a6e1e8cccb9b41641cd729f9265cd2de162a1bd2f87ee04"
+    },
+    {
+      "name": "prisma-status",
+      "command": "npm run prisma:status --prefix server",
+      "startedAt": "2026-10-11T12:08:35.613Z",
+      "finishedAt": "2026-10-11T12:08:40.915Z",
+      "exitCode": 0,
+      "log": "prisma-status.txt",
+      "sha256": "2173e65ef085a5ffd84ee86b8392445438e0c602ec8803930565133be29fd4c5"
+    },
+    {
+      "name": "prisma-seed-first",
+      "command": "npm run prisma:seed --prefix server",
+      "startedAt": "2026-10-11T12:08:40.916Z",
+      "finishedAt": "2026-10-11T12:08:46.926Z",
+      "exitCode": 0,
+      "log": "prisma-seed-first.txt",
+      "sha256": "bd5d2ee46a6940fa15c5592744162dde6f902dde4947c1f6476838152de37f84"
+    },
+    {
+      "name": "prisma-seed-repeat",
+      "command": "npm run prisma:seed --prefix server",
+      "startedAt": "2026-10-11T12:08:46.926Z",
+      "finishedAt": "2026-10-11T12:08:53.003Z",
+      "exitCode": 0,
+      "log": "prisma-seed-repeat.txt",
+      "sha256": "bd5d2ee46a6940fa15c5592744162dde6f902dde4947c1f6476838152de37f84"
+    },
+    {
+      "name": "quality-all",
+      "command": "npm test",
+      "startedAt": "2026-10-11T12:08:53.003Z",
+      "finishedAt": "2026-10-11T12:21:22.316Z",
+      "exitCode": 0,
+      "log": "quality-all.txt",
+      "sha256": "a640d51b9514435361aeb9690dd246f93f80847514a31b4c6d9e650308d4a2e3"
+    }
+  ],
+  "passed": true,
+  "history": {
+    "log": "commit-history.txt",
+    "sha256": "9a8ef0ac3ba3f7a59c848ef3afa163f607a4ad4f19278f72dea804cccbd98acf"
+  },
+  "finishedAt": "2026-10-11T12:21:22.651Z"
+}

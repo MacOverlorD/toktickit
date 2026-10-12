@@ -1,0 +1,11 @@
+
+> toktickit-server@0.1.0 prisma:seed
+> prisma db seed
+
+Running seed command `tsx prisma/seed.ts` ...
+
+The seed command has been executed.
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.

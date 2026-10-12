@@ -1,1 +1,3 @@
 *.pdf binary
+# Preserve captured log bytes so verification manifest hashes survive checkout.
+artifacts/lab-04/release-candidate/**/*.txt -text

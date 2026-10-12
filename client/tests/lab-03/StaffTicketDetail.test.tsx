@@ -46,6 +46,8 @@ const detail: workflow.StaffTicketDetail = {
   requestedPriority: "HIGH",
   itPriority: "MEDIUM",
   status: "OPEN",
+  workCycle: 1,
+  resolvedAt: null,
   owner: null,
   resolutionIndicatedAt: null,
   resolutionIndicatedBy: null,
@@ -55,6 +57,8 @@ const updated = {
   owner: { id: 9, name: "Suda", role: "IT_STAFF" } as const,
   itPriority: "URGENT" as const,
   status: "IN_PROGRESS" as const,
+  workCycle: 1,
+  resolvedAt: null,
   version: 4,
   updatedAt: detail.updatedAt,
   resolutionIndicatedAt: null,
@@ -173,6 +177,10 @@ describe("Staff Ticket Detail", () => {
     );
   });
   it("focuses the operation control rejected by the server", async () => {
+    vi.mocked(workflow.getStaffTicketDetail).mockResolvedValueOnce({
+      ...detail,
+      owner: { id: 9, name: "Suda", role: "IT_STAFF" },
+    });
     vi.mocked(workflow.updateOperation).mockRejectedValueOnce(
       new workflow.WorkflowError("OWNER_REQUIRED", "owner required"),
     );

@@ -4,6 +4,8 @@ uploads/
 dist/
 build/
 coverage/
+__pycache__/
+*.pyc
 artifacts/lab-02/playwright-report/
 artifacts/lab-02/test-results/
 .DS_Store
@@ -16,6 +18,10 @@ skills-lock.json
 /tmp/
 artifacts/lab-03/playwright-report/
 artifacts/lab-03/test-results/
+artifacts/lab-04/playwright-report/
+artifacts/lab-04/test-results/
+artifacts/lab-04/performance-results/
+artifacts/lab-04/release-results/
 
 # Keep exactly one generated Lab 3 submission PDF.
 output/pdf/*

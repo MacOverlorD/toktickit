@@ -25,6 +25,9 @@ import { queueRouter } from './staff/queue-router.js'
 import { ticketDetailRouter } from './staff/ticket-detail-router.js'
 import { communicationRouter } from './tickets/communication-router.js'
 import { usersAdminRouter } from './admin/users-router.js'
+import { actionsRouter } from './actions/actions-router.js'
+import { requesterDashboardRouter } from './dashboard/requester-dashboard-router.js'
+import { operationsDashboardRouter } from './dashboard/operations-dashboard-router.js'
 
 const app = express()
 const clientUrl = process.env.CLIENT_URL ?? 'http://localhost:5173'
@@ -66,6 +69,9 @@ app.get('/api/categories', listCategories)
 app.use('/api/staff', queueRouter)
 app.use('/api/staff', ticketDetailRouter)
 app.use('/api', communicationRouter)
+app.use('/api', actionsRouter)
+app.use('/api/dashboard', requesterDashboardRouter)
+app.use('/api/dashboard', operationsDashboardRouter)
 app.use('/api/admin', usersAdminRouter)
 app.get('/api/related-systems', listRelatedSystems)
 app.get('/api/tickets', requireRequester, listTickets)

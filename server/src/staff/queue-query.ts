@@ -3,13 +3,14 @@ import { ApiError } from '../errors/api-error.js'
 
 export const QUEUE_SORT_FIELDS = ['createdAt', 'updatedAt', 'ticketNumber', 'summary', 'itPriority'] as const
 export interface QueueQuery {
+  scope: 'active' | null
   search: string | null
   categoryId: number | null
   relatedSystemId: number | null
   status: TicketStatus | null
   requestedPriority: RequestedPriority | null
   itPriority: RequestedPriority | null
-  ownerId: number | 'unassigned' | null
+  ownerId: number | 'unassigned' | 'me' | null
   sortBy: typeof QUEUE_SORT_FIELDS[number]
   sortOrder: 'asc' | 'desc'
   page: number
@@ -17,7 +18,7 @@ export interface QueueQuery {
 }
 
 export function parseQueueQuery(query: Record<string, unknown>): QueueQuery {
-  const allowed = ['search', 'categoryId', 'relatedSystemId', 'status', 'requestedPriority', 'itPriority', 'ownerId', 'sortBy', 'sortOrder', 'page', 'pageSize']
+  const allowed = ['scope', 'search', 'categoryId', 'relatedSystemId', 'status', 'requestedPriority', 'itPriority', 'ownerId', 'sortBy', 'sortOrder', 'page', 'pageSize']
   function invalid(): never { throw new ApiError(400, 'INVALID_QUERY', 'Check the ticket queue query parameters and try again.') }
   if (Object.keys(query).some(key => !allowed.includes(key))) invalid()
   function scalar(key: string): string | null {
@@ -39,14 +40,21 @@ export function parseQueueQuery(query: Record<string, unknown>): QueueQuery {
   }
   const search = scalar('search')?.trim() ?? null
   if (search !== null && (!search || Array.from(search).length > 100)) invalid()
-  const ownerId = scalar('ownerId') === 'unassigned' ? 'unassigned' : integer('ownerId', null)
+  const rawOwnerId = scalar('ownerId')
+  const ownerId = rawOwnerId === 'unassigned' || rawOwnerId === 'me'
+    ? rawOwnerId
+    : integer('ownerId', null)
   const pageSize = integer('pageSize', 10)
   if (![10, 20, 50].includes(pageSize!)) invalid()
+  const scope = enumeration('scope', ['active'] as const)
+  const status = enumeration('status', Object.values(TicketStatus))
+  if (scope !== null && status !== null) invalid()
   return {
+    scope,
     search,
     categoryId: integer('categoryId', null),
     relatedSystemId: integer('relatedSystemId', null),
-    status: enumeration('status', Object.values(TicketStatus)),
+    status,
     requestedPriority: enumeration('requestedPriority', Object.values(RequestedPriority)),
     itPriority: enumeration('itPriority', Object.values(RequestedPriority)),
     ownerId,

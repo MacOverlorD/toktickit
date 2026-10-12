@@ -12,7 +12,7 @@ let staffId: number
 let adminId: number
 let categoryId: number
 let systemId: number
-const numbers = [1, 2, 3].map(index => `TKT-20990202-${marker.slice(0, 6).toUpperCase()}${index.toString().padStart(2, '0')}`)
+const numbers = [1, 2, 3, 4].map(index => `TKT-20990202-${marker.slice(0, 6).toUpperCase()}${index.toString().padStart(2, '0')}`)
 
 function queue(session?: TestSession, query = '') {
   const call = request(app).get('/api/staff/tickets' + query)
@@ -39,6 +39,7 @@ beforeAll(async () => {
     { ticketNumber: numbers[0], submissionKey: randomUUID(), requesterId, ownerId: null, categoryId, relatedSystemId: systemId, summary: `Printer queue ${marker}`, requestedPriority: 'LOW', itPriority: 'URGENT', description: 'First searchable queue fixture.', status: 'NEW' },
     { ticketNumber: numbers[1], submissionKey: randomUUID(), requesterId, ownerId: staffId, categoryId, relatedSystemId: systemId, summary: `Laptop queue ${marker}`, requestedPriority: 'HIGH', itPriority: 'LOW', description: 'Second searchable queue fixture.', status: 'IN_PROGRESS' },
     { ticketNumber: numbers[2], submissionKey: randomUUID(), requesterId, ownerId: adminId, categoryId, relatedSystemId: systemId, summary: `Account queue ${marker}`, requestedPriority: 'MEDIUM', itPriority: 'HIGH', description: 'Third searchable queue fixture.', status: 'OPEN' },
+    { ticketNumber: numbers[3], submissionKey: randomUUID(), requesterId, ownerId: null, categoryId, relatedSystemId: systemId, summary: `Closed queue ${marker}`, requestedPriority: 'LOW', itPriority: 'URGENT', description: 'Terminal queue fixture.', status: 'CLOSED' },
   ] })
 })
 
@@ -61,12 +62,21 @@ describe('Lab 3 Staff Ticket Queue', () => {
     const response = await queue(sessions[1], `?search=Laptop%20queue&categoryId=${categoryId}&relatedSystemId=${systemId}&status=IN_PROGRESS&requestedPriority=HIGH&itPriority=LOW&ownerId=${staffId}`)
     expect(response.status).toBe(200)
     expect(response.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[1]])
-    const unassigned = await queue(sessions[1], `?search=${marker}&ownerId=unassigned`)
+    const unassigned = await queue(sessions[1], `?search=${marker}&scope=active&ownerId=unassigned`)
     expect(unassigned.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[0]])
+    const ownedByStaff = await queue(sessions[1], `?search=${marker}&ownerId=me`)
+    expect(ownedByStaff.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[1]])
+    const ownedByAdmin = await queue(sessions[2], `?search=${marker}&ownerId=me`)
+    expect(ownedByAdmin.body.items.map((item: { ticketNumber: string }) => item.ticketNumber)).toEqual([numbers[2]])
+    const active = await queue(sessions[1], `?search=${marker}&scope=active`)
+    expect(active.body.items.map((item: { ticketNumber: string }) => item.ticketNumber))
+      .toEqual(expect.arrayContaining(numbers.slice(0, 3)))
+    expect(active.body.items.map((item: { ticketNumber: string }) => item.ticketNumber))
+      .not.toContain(numbers[3])
   })
 
   it('sorts priority by rank with a same-direction ID tie breaker', async () => {
-    const response = await queue(sessions[1], `?search=${marker}&sortBy=itPriority&sortOrder=asc&pageSize=10`)
+    const response = await queue(sessions[1], `?search=${marker}&scope=active&sortBy=itPriority&sortOrder=asc&pageSize=10`)
     expect(response.body.items.map((item: { itPriority: string }) => item.itPriority)).toEqual(['LOW', 'HIGH', 'URGENT'])
   })
 
@@ -74,11 +84,11 @@ describe('Lab 3 Staff Ticket Queue', () => {
     const response = await queue(sessions[1], `?search=%20${marker}%20&page=2&pageSize=10`)
     expect(response.status).toBe(200)
     expect(response.body.items).toEqual([])
-    expect(response.body.pagination).toEqual({ page: 2, pageSize: 10, totalItems: 3, totalPages: 1, hasPreviousPage: true, hasNextPage: false })
+    expect(response.body.pagination).toEqual({ page: 2, pageSize: 10, totalItems: 4, totalPages: 1, hasPreviousPage: true, hasNextPage: false })
     expect(response.body.query.search).toBe(marker)
   })
 
-  it.each(['?unknown=x', '?search=', '?status=UNKNOWN', '?page=0', '?page=1000001', '?pageSize=11', '?search=a&search=b'])(
+  it.each(['?unknown=x', '?search=', '?scope=all', '?scope=active&status=OPEN', '?status=UNKNOWN', '?page=0', '?page=1000001', '?pageSize=11', '?search=a&search=b'])(
     'rejects invalid query %s',
     async query => {
       const response = await queue(sessions[1], query)

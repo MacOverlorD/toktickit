@@ -1,0 +1,25 @@
+{
+  "capturedAt": "2026-10-09T17:06:25.252Z",
+  "nodeVersion": "v22.18.0",
+  "baseline": {
+    "tickets": 12,
+    "actions": 4
+  },
+  "fixtures": {
+    "tickets": 1000,
+    "actions": 5000
+  },
+  "total": {
+    "tickets": 1012,
+    "actions": 5004
+  },
+  "warmups": 5,
+  "samples": 30,
+  "budgetMs": 500,
+  "p95Ms": {
+    "requester": 44.221299999999246,
+    "operations": 119.56720000000041,
+    "myTickets": 54.77059999999983,
+    "staffQueue": 52.634000000000015
+  }
+}

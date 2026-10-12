@@ -1,0 +1,14 @@
+
+> toktickit-server@0.1.0 prisma:status
+> prisma migrate status
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "toktickit", schema "public" at "127.0.0.1:5432"
+
+6 migrations found in prisma/migrations
+
+Database schema is up to date!
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.

@@ -19,6 +19,7 @@ const migrationFiles = [
   '20260901122500_normalize_requester_email',
   '20260911000100_lab3_user_data_foundation',
   '20260911000200_lab3_stable_seed_identity',
+  '20260924090000_lab4_actions_data_foundation',
 ].map((name) => path.join(serverRoot, 'prisma', 'migrations', name, 'migration.sql'))
 
 function schemaUrl(schema: string) {

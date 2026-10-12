@@ -67,6 +67,23 @@ afterEach(() => {
 })
 
 describe('My Tickets', () => {
+  it('applies an allowlisted dashboard drill-down from the URL', async () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/tickets?scope=recently-resolved&asOf=2026-10-08T12%3A00%3A00.000Z',
+    )
+    render(<App />)
+
+    expect(await screen.findByText('Showing tickets resolved in the selected 7-day window.'))
+      .toBeInTheDocument()
+    expect(getMyTickets).toHaveBeenCalledWith(expect.objectContaining({
+      scope: 'recently-resolved',
+      asOf: '2026-10-08T12:00:00.000Z',
+      status: null,
+    }))
+  })
+
   it('keeps the ticket controls visible while the owner list is loading', async () => {
     vi.mocked(getMyTickets).mockReturnValue(
       new Promise(() => {

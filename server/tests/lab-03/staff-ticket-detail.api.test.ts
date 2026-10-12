@@ -95,6 +95,7 @@ beforeAll(async () => {
   attachmentId = attachment.id;
 });
 beforeEach(async () => {
+  await prisma.actionTaken.deleteMany({ where: { ticketId } });
   await prisma.publicComment.deleteMany({ where: { ticketId } });
   await prisma.internalNote.deleteMany({ where: { ticketId } });
   await prisma.ticket.update({
@@ -104,12 +105,15 @@ beforeEach(async () => {
       status: "OPEN",
       itPriority: "MEDIUM",
       version: 1,
+      workCycle: 1,
+      resolvedAt: null,
       resolutionIndicatedAt: null,
       resolutionIndicatedById: null,
     },
   });
 });
 afterAll(async () => {
+  await prisma.actionTaken.deleteMany({ where: { ticketId } });
   await prisma.publicComment.deleteMany({ where: { ticketId } });
   await prisma.internalNote.deleteMany({ where: { ticketId } });
   await prisma.attachment.deleteMany({ where: { ticketId } });
@@ -223,10 +227,34 @@ describe("Lab 3 ticket detail and workflow API", () => {
     };
     for (const [from, allowed] of Object.entries(matrix))
       for (const to of Object.keys(matrix)) {
+        await prisma.actionTaken.deleteMany({ where: { ticketId } });
         await prisma.ticket.update({
           where: { id: ticketId },
-          data: { status: from as any, ownerId: staffId, version: 1 },
+          data: {
+            status: from as any,
+            ownerId: staffId,
+            version: 1,
+            workCycle: 1,
+            resolvedAt: from === "RESOLVED" || from === "CLOSED" ? new Date() : null,
+          },
         });
+        if (to === "RESOLVED" && allowed.includes(to))
+          await prisma.actionTaken.create({
+            data: {
+              ticketId,
+              ticketWorkCycle: 1,
+              status: "COMPLETED",
+              actionAt: new Date(),
+              description: "Qualifying workflow matrix action.",
+              result: "Current-cycle work completed.",
+              createdById: staffId,
+              performedById: staffId,
+              assignedToId: staffId,
+              idempotencyKey: randomUUID(),
+              requestFingerprint: "a".repeat(64),
+              completedAt: new Date(),
+            },
+          });
         const result = await api(
           sessions[2],
           "patch",

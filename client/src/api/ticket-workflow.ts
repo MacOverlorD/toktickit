@@ -30,6 +30,8 @@ export interface StaffTicketDetail {
   requestedPriority: RequestedPriority;
   itPriority: RequestedPriority;
   status: TicketStatus;
+  workCycle: number;
+  resolvedAt: string | null;
   owner: SafeOwner | null;
   resolutionIndicatedAt: string | null;
   resolutionIndicatedBy: { id: number; name: string } | null;
@@ -85,6 +87,8 @@ export async function updateOperation(
       | "owner"
       | "itPriority"
       | "status"
+      | "workCycle"
+      | "resolvedAt"
       | "version"
       | "updatedAt"
       | "resolutionIndicatedAt"

@@ -8,9 +8,10 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   getMyTickets,
+  ticketStatuses,
   type RequestedPriority,
   type TicketListItem,
   type TicketListQuery,
@@ -29,6 +30,8 @@ const DEFAULT_QUERY: TicketListQuery = {
   categoryId: null,
   relatedSystemId: null,
   status: null,
+  scope: null,
+  asOf: null,
   priority: null,
   sortBy: 'createdAt',
   sortOrder: 'desc',
@@ -142,7 +145,27 @@ function TicketCards({ items }: { items: TicketListItem[] }) {
 
 function MyTicketsPage() {
   const { selectedRequester } = useRequester()
-  const [query, setQuery] = useState<TicketListQuery>(DEFAULT_QUERY)
+  const [searchParameters] = useSearchParams()
+  const initialStatus = searchParameters.get('status')
+  const initialScope = searchParameters.get('scope')
+  const initialAsOf = searchParameters.get('asOf')
+  const [query, setQuery] = useState<TicketListQuery>(() => ({
+    ...DEFAULT_QUERY,
+    status:
+      initialStatus !== null && ticketStatuses.has(initialStatus)
+        ? initialStatus as TicketListQuery['status']
+        : null,
+    scope:
+      initialScope === 'open' || initialScope === 'recently-resolved'
+        ? initialScope
+        : null,
+    asOf:
+      initialScope === 'recently-resolved' &&
+      initialAsOf !== null &&
+      !Number.isNaN(Date.parse(initialAsOf))
+        ? initialAsOf
+        : null,
+  }))
   const [searchDraft, setSearchDraft] = useState('')
   const [result, setResult] = useState<TicketListResult | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('loading')
@@ -169,7 +192,7 @@ function MyTicketsPage() {
 
   const activeFilterCount = useMemo(
     () =>
-      [query.search, query.categoryId, query.relatedSystemId, query.status, query.priority]
+      [query.search, query.categoryId, query.relatedSystemId, query.status, query.priority, query.scope]
         .filter((value) => value !== '' && value !== null).length,
     [query],
   )
@@ -294,10 +317,21 @@ function MyTicketsPage() {
             <select
               className={'select-field'}
               value={query.status ?? ''}
-              onChange={(event) => updateQuery({ status: event.target.value ? 'NEW' : null })}
+              onChange={(event) => updateQuery({
+                status: (event.target.value || null) as TicketListQuery['status'],
+                scope: null,
+                asOf: null,
+              })}
             >
               <option value={''}>All statuses</option>
               <option value={'NEW'}>New</option>
+              <option value={'OPEN'}>Open</option>
+              <option value={'IN_PROGRESS'}>In Progress</option>
+              <option value={'WAITING_FOR_REQUESTER'}>Waiting for Requester</option>
+              <option value={'RESOLVED'}>Resolved</option>
+              <option value={'CLOSED'}>Closed</option>
+              <option value={'REOPENED'}>Reopened</option>
+              <option value={'CANCELLED'}>Cancelled</option>
             </select>
           </label>
           <label className={'compact-field'}>
@@ -359,6 +393,11 @@ function MyTicketsPage() {
       </section>
 
       <section className={'ticket-results'} aria-label={'My ticket results'}>
+        {query.scope && (
+          <p className={'ticket-filter-context'}>
+            Showing {query.scope === 'open' ? 'open tickets' : 'tickets resolved in the selected 7-day window'}.
+          </p>
+        )}
         {loadState === 'loading' && (
           <FeedbackState
             variant={'loading'}

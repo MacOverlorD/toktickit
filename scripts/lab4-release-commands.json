@@ -1,0 +1,13 @@
+[
+  ["install-root", ["ci"]],
+  ["install-client", ["ci", "--prefix", "client"]],
+  ["install-server", ["ci", "--prefix", "server"]],
+  ["audit-documents", ["run", "audit:docs:lab4"]],
+  ["release-tool-tests", ["run", "test:release-tools:lab4"]],
+  ["prisma-generate", ["run", "prisma:generate", "--prefix", "server"]],
+  ["prisma-deploy", ["run", "prisma:deploy", "--prefix", "server"]],
+  ["prisma-status", ["run", "prisma:status", "--prefix", "server"]],
+  ["prisma-seed-first", ["run", "prisma:seed", "--prefix", "server"]],
+  ["prisma-seed-repeat", ["run", "prisma:seed", "--prefix", "server"]],
+  ["quality-all", ["test"]]
+]
